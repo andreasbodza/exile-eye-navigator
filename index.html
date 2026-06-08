@@ -191,6 +191,13 @@
     opacity: .35; pointer-events: none;
   }
   .slot.filled .slot-icon { display: none; }
+  /* Hinweis bei leeren Slots: beim Hover "Trade suchen" andeuten */
+  .slot:not(.filled) .item-name.empty::after {
+    content: " · 🔍 Trade"; font-size: 8px; color: var(--gold-soft); opacity: 0;
+    transition: opacity .2s;
+  }
+  .slot:not(.filled):hover .item-name.empty::after { opacity: .8; }
+  .slot:not(.filled):hover { border-color: var(--gold-soft); }
   /* echtes Item-Bild von der GGG-API */
   .slot .item-img {
     width: 100%; max-height: 70px; object-fit: contain;
@@ -410,24 +417,56 @@
   #buildResult.ok  { background: rgba(76,175,106,.12); border: 1px solid var(--green); color: #a8e0b8; }
   #buildResult.err { background: rgba(208,88,78,.12); border: 1px solid var(--red); color: #f0a89e; }
 
-  /* ---------- Skills / Gems ---------- */
+  /* ---------- Skills / Gems (im PoE2-Panel-Stil) ---------- */
   #skillsSection { display: none; }
   .skill-group {
-    background: linear-gradient(180deg, rgba(30,26,20,.6), rgba(12,10,7,.8));
+    background: linear-gradient(180deg, rgba(30,26,20,.7), rgba(12,10,7,.9));
     border: 1px solid var(--border); border-radius: 8px;
-    padding: 10px 12px; margin-bottom: 8px;
+    padding: 12px; margin-bottom: 10px; transition: border-color .15s;
   }
+  .skill-group:hover { border-color: var(--gold-soft); }
   .skill-main {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 14px; font-weight: 700; color: var(--gold); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 15px; font-weight: 700; color: var(--gold);
+    cursor: pointer; margin-bottom: 8px;
   }
-  .skill-main .gem-dot { width: 10px; height: 10px; border-radius: 50%; background: #4a90d0; flex: 0 0 auto; }
-  .skill-supports { display: flex; flex-wrap: wrap; gap: 5px; padding-left: 18px; }
+  /* Gem-Icon (runder Edelstein mit Typ-Farbe) */
+  .gem-icon {
+    width: 28px; height: 28px; border-radius: 50%; flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; border: 2px solid rgba(255,255,255,.2);
+    box-shadow: 0 0 8px rgba(0,0,0,.5), inset 0 0 6px rgba(255,255,255,.15);
+  }
+  .gem-icon.t-fire  { background: radial-gradient(circle at 35% 30%, #ff8a4c, #b03010); }
+  .gem-icon.t-cold  { background: radial-gradient(circle at 35% 30%, #7ad0ff, #1d6fa8); }
+  .gem-icon.t-light { background: radial-gradient(circle at 35% 30%, #ffe680, #c89a20); }
+  .gem-icon.t-chaos { background: radial-gradient(circle at 35% 30%, #c080ff, #6020a0); }
+  .gem-icon.t-phys  { background: radial-gradient(circle at 35% 30%, #d0c0a0, #6b5a3a); }
+  .gem-icon.t-skill { background: radial-gradient(circle at 35% 30%, #6ad0c0, #1d7a68); }
+  .gem-icon.t-support { background: radial-gradient(circle at 35% 30%, #9ab8d8, #2e5a80); }
+  .skill-name-wrap { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .skill-name-wrap .sn { line-height: 1.1; }
+  .skill-name-wrap .st { font-size: 9px; color: var(--text-dim); font-weight: 400; letter-spacing: .5px; }
+  /* Level-Badge rechts */
+  .gem-level-badge {
+    font-size: 11px; font-weight: 700; color: var(--gold-soft);
+    background: rgba(200,160,79,.12); border: 1px solid var(--gold-soft);
+    border-radius: 10px; padding: 2px 8px; white-space: nowrap;
+  }
+  .skill-info-i { font-size: 12px; opacity: .5; margin-left: 4px; }
+  /* Support-Gems als Reihe mit Mini-Icons */
+  .skill-supports { display: flex; flex-wrap: wrap; gap: 6px; padding-left: 38px; }
   .support-chip {
-    font-size: 11px; color: #9ab8d8; background: rgba(46,111,176,.15);
-    border: 1px solid #2e5a80; border-radius: 12px; padding: 3px 9px; cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; color: #9ab8d8; background: rgba(46,111,176,.12);
+    border: 1px solid #2e5a80; border-radius: 14px; padding: 3px 10px 3px 4px; cursor: pointer;
+    transition: background .15s;
   }
   .support-chip:hover { background: rgba(46,111,176,.3); }
+  .support-chip .mini-gem {
+    width: 16px; height: 16px; border-radius: 50%; flex: 0 0 auto;
+    border: 1px solid rgba(255,255,255,.2);
+  }
   .gem-tag {
     font-size: 10px; padding: 2px 7px; border-radius: 10px;
     background: rgba(200,160,79,.12); border: 1px solid var(--gold-soft);
@@ -626,16 +665,16 @@
     </div>
   </div>
 
+  <!-- CHARMS / FLASKS (direkt unter dem Inventar, gehört zum Equipment) -->
+  <div class="section" id="consumablesSection">
+    <h2>Flasks &amp; Charms</h2>
+    <div id="consumablesList"></div>
+  </div>
+
   <!-- SKILLS / GEMS (erscheint nach Build-Import) -->
   <div class="section" id="skillsSection">
     <h2>Skills &amp; Support-Gems</h2>
     <div id="skillsList"></div>
-  </div>
-
-  <!-- CHARMS / FLASKS (erscheint nach Build-Import) -->
-  <div class="section" id="consumablesSection">
-    <h2>Flasks &amp; Charms</h2>
-    <div id="consumablesList"></div>
   </div>
 
   <div class="section">
@@ -959,12 +998,15 @@ function renderGear(items) {
 
   // erst alle Slots leeren
   document.querySelectorAll(".slot").forEach(slot => {
-    slot.classList.remove("filled", "better", "worse");
+    slot.classList.remove("filled", "better", "worse", "rar-0","rar-1","rar-2","rar-3");
     const n = slot.querySelector(".item-name");
     n.textContent = "leer";
     n.className = "item-name empty";
     slot.querySelectorAll(".item-score, .item-meta, .item-img, .tap-hint").forEach(el => el.remove());
-    slot.onclick = null;
+    // Leerer Slot: Klick öffnet trotzdem die Trade-Suche für diesen Slot
+    const sname = slot.dataset.slot;
+    slot.onclick = () => openTrade(sname);
+    slot.style.cursor = "pointer";
   });
 
   const stored = {};
@@ -1762,6 +1804,9 @@ async function analyzeImage() {
       for (const [k, v] of Object.entries(stats)) {
         html += `<div class="stat-row"><span>${labelFor(k)}</span><span>${v}</span></div>`;
       }
+      // Preis-Check-Button (öffnet Trade mit den gescannten Stats = echte Preise)
+      html += `<a class="tt-trade" href="#" style="margin:14px 0 0" onclick="priceCheckScan();return false;">💰 Preis checken – lohnt sich der Verkauf?</a>`;
+      html += `<div style="font-size:10px;color:var(--text-dim);text-align:center;margin-top:6px">Öffnet die Trade-Suche mit diesen Stats – du siehst, was vergleichbare Items kosten</div>`;
     }
     result.innerHTML = html;
     result.style.display = "block";
@@ -1798,6 +1843,62 @@ async function analyzeImage() {
 //  SCAN-TO-SLOT VERGLEICH (Alt vs. Neu)
 // ============================================================
 let lastScan = null;
+
+// ============================================================
+//  PREIS-CHECK: gescanntes Item auf dem Trade suchen (echte Preise)
+// ============================================================
+// Wandelt Scan-Stat-Keys in Trade-Stat-Keys um (Resis -> ele_res etc.)
+function scanStatsToTradeStats(stats) {
+  const out = {};
+  for (const [k, v] of Object.entries(stats || {})) {
+    if (["fire_res","cold_res","lightning_res","all_res"].includes(k)) {
+      out["ele_res"] = (out["ele_res"] || 0) + v;   // Resis -> Gesamt-Elementar
+    } else if (k === "crit_chance") {
+      out["crit_dmg_bonus"] = v;                     // Krit -> passende Trade-ID
+    } else {
+      out[k] = v;                                    // life, mana, armour, spell_damage... 1:1
+    }
+  }
+  return out;
+}
+
+async function priceCheckScan() {
+  if (!lastScan || !lastScan.stats) { showBanner("Erst ein Item scannen"); return; }
+  // Slot (für Item-Kategorie): aus dem Dropdown oder Auto-Erkennung
+  const slot = document.getElementById("scanSlotSelect").value
+            || lastScan.guessed_slot || "";
+  const tradeStats = scanStatsToTradeStats(lastScan.stats);
+
+  // Liga aus den Trade-Einstellungen
+  const leagueSel = document.getElementById("tradeLeague").value;
+  const league = (leagueSel === "auto") ? currentLeague : leagueSel;
+
+  try {
+    const res = await fetch("/api/trade-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        slot,
+        league,
+        stats: tradeStats,
+        trade_status: document.getElementById("tradeStatus").value,
+        tolerance: parseInt(document.getElementById("tradeTolerance").value) || 0,
+      }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.open(data.url, "_blank");
+      const n = (data.applied_stats || []).length;
+      showBanner(n > 0
+        ? `💰 Preis-Check geöffnet – ${n} Stat-Filter gesetzt!`
+        : "💰 Trade geöffnet – schau dir die Preise an", "ok");
+    } else {
+      showBanner("Preis-Check konnte nicht erstellt werden");
+    }
+  } catch (e) {
+    showBanner("Preis-Check-Fehler: " + e.message);
+  }
+}
 
 function runCompare() {
   const slot = document.getElementById("scanSlotSelect").value;
@@ -1873,6 +1974,23 @@ function runCompare() {
 // ============================================================
 let allSkills = [];   // gemerkt für Klick-Detailansicht
 
+// Leitet die Icon-Farbklasse + Symbol ab.
+// Echte Gem-Farbe (aus DB) hat Vorrang, sonst Tag-Raten.
+function gemIconClass(tags, isSupport, color) {
+  // Echte Farbe aus der Gem-DB (blau=Int, grün=Dex, rot=Str)
+  if (color === "blue")  return ["t-cold", isSupport ? "+" : "✦"];  // blau-Optik
+  if (color === "green") return ["t-skill", isSupport ? "+" : "✦"]; // grün-Optik
+  if (color === "red")   return ["t-fire", isSupport ? "+" : "⚔️"]; // rot-Optik
+  // Fallback: aus Tags raten
+  const t = (tags || []).join(" ").toLowerCase();
+  if (t.includes("feuer"))  return ["t-fire", "🔥"];
+  if (t.includes("kälte"))  return ["t-cold", "❄️"];
+  if (t.includes("blitz"))  return ["t-light", "⚡"];
+  if (t.includes("chaos"))  return ["t-chaos", "☠️"];
+  if (t.includes("projektil") || t.includes("nahkampf") || t.includes("bogen")) return ["t-phys", "⚔️"];
+  return isSupport ? ["t-support", "+"] : ["t-skill", "✦"];
+}
+
 function renderSkills(skills) {
   allSkills = skills || [];
   const sec = document.getElementById("skillsSection");
@@ -1882,15 +2000,26 @@ function renderSkills(skills) {
   skills.forEach((s, idx) => {
     const g = document.createElement("div");
     g.className = "skill-group";
-    const mainTags = (s.tags || []).map(t => `<span class="gem-tag">${esc(t)}</span>`).join("");
-    const lvl = s.level ? `<span class="gem-lvl">ab Lvl ${s.level}</span>` : "";
-    let html = `<div class="skill-main" onclick="showGem(${idx},-1)" style="cursor:pointer">
-        <span class="gem-dot"></span>${esc(s.skill)} ${mainTags} ${lvl}
-        <span style="margin-left:auto;font-size:11px;opacity:.5">ℹ</span></div>`;
+    const [iconCls, sym] = gemIconClass(s.tags, false, s.color);
+    const tagStr = (s.tags || []).join(" · ") || "Skill-Gemme";
+    const lvl = s.level ? `<span class="gem-level-badge">Lvl ${s.level}+</span>` : "";
+
+    let html = `<div class="skill-main" onclick="showGem(${idx},-1)">
+        <span class="gem-icon ${iconCls}">${sym}</span>
+        <span class="skill-name-wrap">
+          <span class="sn">${esc(s.skill)}</span>
+          <span class="st">${esc(tagStr.toUpperCase())}</span>
+        </span>
+        ${lvl}
+        <span class="skill-info-i">ℹ</span>
+      </div>`;
+
     if (s.supports && s.supports.length) {
       html += `<div class="skill-supports">`;
       s.supports.forEach((sup, si) => {
-        html += `<span class="support-chip" onclick="showGem(${idx},${si})">${esc(sup.name)}</span>`;
+        const [sc] = gemIconClass(sup.tags, true, sup.color);
+        html += `<span class="support-chip" onclick="showGem(${idx},${si})">
+            <span class="mini-gem ${sc}"></span>${esc(sup.name)}</span>`;
       });
       html += `</div>`;
     }
@@ -1904,29 +2033,37 @@ function renderSkills(skills) {
 function showGem(skillIdx, supIdx) {
   const s = allSkills[skillIdx];
   if (!s) return;
-  const gem = supIdx < 0 ? { name: s.skill, tags: s.tags, level: s.level, is_support: false }
+  const gem = supIdx < 0 ? { name: s.skill, tags: s.tags, level: s.level, is_support: false, color: s.color }
                          : { ...s.supports[supIdx], is_support: true };
   const typeLabel = gem.is_support ? "Support-Gemme" : "Skill-Gemme";
   const typeColor = gem.is_support ? "#9ab8d8" : "#f0c060";
+  const [iconCls, sym] = gemIconClass(gem.tags, gem.is_support, gem.color);
 
   let html = `<div class="tt-header r0" style="border-bottom:1px solid var(--border)">
     <button class="tt-close" onclick="closeItem()">×</button>
+    <div class="gem-icon ${iconCls}" style="margin:0 auto 8px;width:42px;height:42px;font-size:20px">${sym}</div>
     <div class="tt-name" style="color:${typeColor}">${esc(gem.name)}</div>
     <div class="tt-base">${typeLabel}${gem.level ? " · ab Level " + gem.level : ""}</div>
   </div>`;
   if (gem.tags && gem.tags.length) {
-    html += `<div class="tt-section"><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    html += `<div class="tt-section"><div style="font-size:10px;color:var(--text-dim);margin-bottom:6px">TAGS</div><div style="display:flex;flex-wrap:wrap;gap:6px">`;
     gem.tags.forEach(t => html += `<span class="gem-tag">${esc(t)}</span>`);
     html += `</div></div>`;
-  } else {
-    html += `<div class="tt-section"><span style="color:var(--text-dim);font-size:12px">Keine besonderen Tags erkannt</span></div>`;
   }
   // bei Skill-Gem: zugehörige Supports anzeigen
   if (!gem.is_support && s.supports && s.supports.length) {
-    html += `<div class="tt-section"><div style="font-size:11px;color:var(--text-dim);margin-bottom:5px">UNTERSTÜTZUNGS-GEMMEN</div>`;
-    s.supports.forEach(sup => html += `<div class="tt-mod" style="color:#9ab8d8">+ ${esc(sup.name)}</div>`);
+    html += `<div class="tt-section"><div style="font-size:11px;color:var(--text-dim);margin-bottom:5px">UNTERSTÜTZUNGS-GEMMEN (${s.supports.length})</div>`;
+    s.supports.forEach(sup => {
+      const [sc] = gemIconClass(sup.tags, true, sup.color);
+      html += `<div class="tt-mod" style="color:#9ab8d8;display:flex;align-items:center;gap:6px">
+        <span class="mini-gem ${sc}"></span>${esc(sup.name)}</div>`;
+    });
     html += `</div>`;
   }
+  // ehrlicher Hinweis: volle Beschreibung gibt's nur im Spiel
+  html += `<div class="tt-section"><span style="color:var(--text-dim);font-size:11px">
+    💡 Die vollständige Skill-Beschreibung findest du im Spiel. Hier zeigen wir
+    Name, Typ &amp; Support-Gems aus deinem Build.</span></div>`;
   document.getElementById("tooltipBody").innerHTML = html;
   document.getElementById("itemModal").classList.add("show");
 }
@@ -2008,5 +2145,5 @@ function installApp() {
 // Start
 init();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a088d840eab2dcac',t:'MTc4MDkzMTY1MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a08b198c9bec4d88',t:'MTc4MDk1NTI5Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

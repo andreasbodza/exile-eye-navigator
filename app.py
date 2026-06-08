@@ -1153,6 +1153,19 @@ def normalize_slot(inv_id):
     return mapping.get(inv_id, inv_id)
 
 
+# Gem-Datenbank laden (Name -> Farbe + Typ), aus poe2db extrahiert.
+# Liefert die echte Gem-Farbe (blau/grün/rot) statt nur Raten.
+GEM_DB = {}
+try:
+    with open(os.path.join(os.path.dirname(__file__), "gems_db.json"),
+              encoding="utf-8") as _f:
+        GEM_DB = json.load(_f)
+    # auch in Kleinschreibung für robustes Nachschlagen
+    GEM_DB_LOWER = {k.lower(): v for k, v in GEM_DB.items()}
+except Exception:
+    GEM_DB_LOWER = {}
+
+
 # Stichwort in der Gem-ID -> lesbarer Tag (Element/Typ erkennen)
 GEM_TAG_HINTS = {
     "Fire": "🔥 Feuer", "Flame": "🔥 Feuer", "Burn": "🔥 Feuer", "Ember": "🔥 Feuer",
@@ -1186,10 +1199,18 @@ def gem_info_from_id(gem_id):
     for kw, tag in GEM_TAG_HINTS.items():
         if kw in raw and tag not in tags:
             tags.append(tag)
+
+    # Echte Gem-Farbe aus der DB (blau=Int, gruen=Dex, rot=Str)
+    color = None
+    db_entry = GEM_DB.get(name) or GEM_DB_LOWER.get(name.lower())
+    if db_entry:
+        color = db_entry.get("color")
+
     return {
         "name": name,
         "is_support": is_support,
         "tags": tags,
+        "color": color,   # "blue" / "green" / "red" / None
     }
 
 
@@ -1213,10 +1234,12 @@ def parse_build_skills(data):
         for s in skill.get("support_skills", []):
             si = gem_info_from_id(s.get("id", ""))
             if si:
-                supports.append({"name": si["name"], "tags": si["tags"]})
+                supports.append({"name": si["name"], "tags": si["tags"],
+                                 "color": si.get("color")})
         result.append({
             "skill": main["name"],
             "tags": main["tags"],
+            "color": main.get("color"),
             "level": lvl,
             "supports": supports,
         })
