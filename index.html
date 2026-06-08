@@ -343,6 +343,30 @@
     width: 100%; background: var(--panel-2); color: var(--text);
     border: 1px dashed var(--gold-soft); border-radius: 6px; padding: 9px; font-size: 13px;
   }
+  /* Scan-Verlauf */
+  .hist-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 7px;
+    cursor: pointer; transition: border-color .15s, transform .1s;
+  }
+  .hist-item:hover { border-color: var(--gold-soft); transform: translateY(-1px); }
+  .hist-score {
+    flex: 0 0 auto; min-width: 42px; height: 42px; border-radius: 8px;
+    background: linear-gradient(180deg, #3a2f1f, #241c12); border: 1px solid var(--gold-soft);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: var(--gold);
+  }
+  .hist-mid { flex: 1; min-width: 0; }
+  .hist-slot { font-size: 13px; font-weight: 600; color: var(--text); }
+  .hist-stats { font-size: 11px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hist-time { font-size: 10px; color: #5a513c; margin-top: 2px; }
+  .hist-del {
+    flex: 0 0 auto; width: 30px; height: 30px; border-radius: 6px;
+    background: rgba(208,88,78,.1); border: 1px solid var(--red); color: var(--red);
+    font-size: 14px; cursor: pointer; line-height: 1;
+  }
+  .hist-del:hover { background: rgba(208,88,78,.28); }
   /* ============================================================
      ITEM-DETAIL POPUP (PoE-Tooltip Stil)
      ============================================================ */
@@ -850,6 +874,18 @@
 
   <!-- Alt vs. Neu Vergleichs-Panel -->
   <div id="comparePanel"></div>
+
+  <!-- SCAN-VERLAUF: die zuletzt gescannten Items -->
+  <div id="scanHistorySection" style="display:none;margin-top:20px;text-align:left">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-soft)">📜 Scan-Verlauf</span>
+      <button class="btn danger" style="padding:4px 10px;font-size:11px" onclick="clearScanHistory()">🗑 Alle löschen</button>
+    </div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px">
+      Deine letzten Scans – tippe einen an, um ihn erneut anzusehen oder zu vergleichen.
+    </div>
+    <div id="scanHistoryList"></div>
+  </div>
 </div>
 
 <!-- ITEM-DETAIL POPUP -->
@@ -1889,6 +1925,9 @@ async function analyzeImage() {
       document.getElementById("comparePanel").style.display = "none";
     }
 
+    // Scan im Verlauf speichern (lokal im Browser)
+    saveScanToHistory();
+
     const cropMsg = data.auto_cropped ? " 🤖 (Tooltip auto-gefunden)" : "";
     showBanner("Analyse fertig – Score " + data.score + cropMsg, "ok");
   } catch (e) {
@@ -1983,6 +2022,7 @@ function updateScanStat(key, value) {
   lastScan.score = scoreFromStats(lastScan.stats);
   const big = document.querySelector("#scanResult .score-big");
   if (big) big.textContent = lastScan.score;
+  updateCurrentHistoryEntry();   // korrigierten Wert auch im Verlauf merken
   // wenn ein Slot gewählt ist, Vergleich live aktualisieren
   if (document.getElementById("scanSlotSelect").value) runCompare();
 }
@@ -1992,6 +2032,7 @@ function removeScanStat(key) {
   if (!lastScan) return;
   delete lastScan.stats[key];
   renderScanResult();
+  updateCurrentHistoryEntry();
   if (document.getElementById("scanSlotSelect").value) runCompare();
 }
 
@@ -2000,9 +2041,136 @@ function addScanStat(key) {
   if (!lastScan || !key) return;
   if (!(key in lastScan.stats)) lastScan.stats[key] = 0;
   renderScanResult();
+  updateCurrentHistoryEntry();
   // Fokus direkt ins neue Feld setzen, damit man tippen kann
   const inp = document.querySelector(`#scanResult .scan-edit-input[data-key="${key}"]`);
   if (inp) { inp.focus(); inp.select(); }
+}
+
+// ============================================================
+//  SCAN-VERLAUF (lokal im Browser – letzte 10 Scans merken)
+// ============================================================
+const HISTORY_KEY = "exileEye_scanHistory";
+const HISTORY_MAX = 10;
+let scanHistory = [];           // [{id, stats, slot, score, time}]
+let currentHistoryId = null;    // welcher Verlaufseintrag gehört zum aktuellen Scan?
+
+// Verlauf aus dem Speicher laden
+function loadScanHistory() {
+  try { scanHistory = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); }
+  catch { scanHistory = []; }
+  renderScanHistory();
+}
+
+// Den aktuellen Scan in den Verlauf legen (neuer Eintrag)
+function saveScanToHistory() {
+  if (!lastScan || !lastScan.stats) return;
+  currentHistoryId = Date.now();
+  const entry = {
+    id: currentHistoryId,
+    stats: { ...lastScan.stats },
+    slot: document.getElementById("scanSlotSelect").value || lastScan.guessed_slot || "",
+    score: scoreFromStats(lastScan.stats),
+    time: Date.now(),
+  };
+  scanHistory.unshift(entry);                 // vorne anfügen (neueste zuerst)
+  if (scanHistory.length > HISTORY_MAX) scanHistory = scanHistory.slice(0, HISTORY_MAX);
+  persistScanHistory();
+}
+
+// Den aktuell offenen Scan-Eintrag im Verlauf aktualisieren
+// (z.B. wenn man Werte korrigiert oder den Slot ändert)
+function updateCurrentHistoryEntry() {
+  if (currentHistoryId == null || !lastScan) return;
+  const e = scanHistory.find(x => x.id === currentHistoryId);
+  if (!e) return;
+  e.stats = { ...lastScan.stats };
+  e.slot = document.getElementById("scanSlotSelect").value || e.slot;
+  e.score = scoreFromStats(lastScan.stats);
+  persistScanHistory();
+}
+
+function persistScanHistory() {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(scanHistory));
+  renderScanHistory();
+}
+
+// Verlauf anzeigen
+function renderScanHistory() {
+  const sec = document.getElementById("scanHistorySection");
+  const list = document.getElementById("scanHistoryList");
+  if (!sec || !list) return;
+  if (!scanHistory.length) { sec.style.display = "none"; return; }
+
+  list.innerHTML = "";
+  scanHistory.forEach(e => {
+    const statStr = Object.entries(e.stats || {})
+      .map(([k, v]) => `${labelFor(k)} ${v}`).join(" · ") || "keine Stats";
+    const slotStr = e.slot ? slotLabel(e.slot) : "Slot offen";
+    const row = document.createElement("div");
+    row.className = "hist-item";
+    row.innerHTML = `
+      <div class="hist-score">${e.score}</div>
+      <div class="hist-mid">
+        <div class="hist-slot">${esc(slotStr)}</div>
+        <div class="hist-stats">${esc(statStr)}</div>
+        <div class="hist-time">${timeAgo(e.time)}</div>
+      </div>
+      <button class="hist-del" title="Eintrag löschen">✕</button>`;
+    // Klick auf den Eintrag -> Scan wieder laden
+    row.addEventListener("click", () => loadScanFromHistory(e.id));
+    // Klick auf Löschen-Button -> nur diesen Eintrag entfernen
+    row.querySelector(".hist-del").addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      deleteScanFromHistory(e.id);
+    });
+    list.appendChild(row);
+  });
+  sec.style.display = "block";
+}
+
+// Einen alten Scan wieder als aktuellen laden (zum erneuten Vergleichen)
+function loadScanFromHistory(id) {
+  const e = scanHistory.find(x => x.id === id);
+  if (!e) return;
+  lastScan = { stats: { ...e.stats }, guessed_slot: e.slot, score: e.score };
+  currentHistoryId = e.id;            // weitere Edits aktualisieren diesen Eintrag
+  renderScanResult();
+  // Slot setzen + Vergleich anzeigen
+  document.getElementById("scanSlotBox").style.display = "block";
+  const sel = document.getElementById("scanSlotSelect");
+  sel.value = e.slot || "";
+  const hint = document.getElementById("slotAutoHint");
+  hint.textContent = "(aus dem Verlauf geladen – Slot ggf. anpassen)";
+  hint.style.color = "var(--gold-soft)";
+  if (e.slot) runCompare();
+  // hoch zum Ergebnis scrollen
+  document.getElementById("scanResult").scrollIntoView({ behavior: "smooth", block: "center" });
+  showBanner("📜 Scan aus dem Verlauf geladen", "ok");
+}
+
+function deleteScanFromHistory(id) {
+  scanHistory = scanHistory.filter(x => x.id !== id);
+  if (currentHistoryId === id) currentHistoryId = null;
+  persistScanHistory();
+}
+
+function clearScanHistory() {
+  if (!scanHistory.length) return;
+  if (!confirm("Wirklich den ganzen Scan-Verlauf löschen?")) return;
+  scanHistory = [];
+  currentHistoryId = null;
+  persistScanHistory();
+  showBanner("Scan-Verlauf gelöscht", "ok");
+}
+
+// "vor 3 Min" / "vor 2 Std" / Datum
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60)    return "gerade eben";
+  if (s < 3600)  return "vor " + Math.floor(s / 60) + " Min";
+  if (s < 86400) return "vor " + Math.floor(s / 3600) + " Std";
+  return new Date(ts).toLocaleDateString("de-DE");
 }
 
 // ============================================================
@@ -2069,6 +2237,7 @@ async function priceCheckScan() {
 function runCompare() {
   const slot = document.getElementById("scanSlotSelect").value;
   const panel = document.getElementById("comparePanel");
+  updateCurrentHistoryEntry();   // gewählten Slot im Verlauf merken
   if (!slot || !lastScan) { panel.style.display = "none"; return; }
 
   const oldItem = equippedItems[slot];          // getragenes Item
@@ -2311,6 +2480,7 @@ function installApp() {
 
 // Start
 init();
+loadScanHistory();   // Scan-Verlauf (Scanner ist auch ohne Login sichtbar)
 </script>
 </body>
 </html>
