@@ -1,12 +1,13 @@
 // ============================================================
 //  Exile Eye - Service Worker (macht die App installierbar)
 // ============================================================
-const CACHE = "exile-eye-v1";
+// WICHTIG: Bei jeder neuen App-Version diese Zahl hochzaehlen (v1 -> v2 -> ...).
+// Das raeumt alte Caches auf und erzwingt frische Dateien.
+const CACHE = "exile-eye-v2";
 
 // Diese Dateien werden fuer schnelles Laden gecacht.
-// (Die API-Aufrufe NICHT cachen - die brauchen immer frische Daten!)
+// (HTML/Seiten NICHT vorab cachen - die holen wir immer frisch, siehe fetch)
 const ASSETS = [
-  "/",
   "/icons/icon-512.png",
   "/icons/icon-192.png",
   "/manifest.json",
@@ -16,21 +17,29 @@ self.addEventListener("install", (e) => {
   e.waitUntil(
     caches.open(CACHE).then((c) => c.addAll(ASSETS)).catch(() => {})
   );
-  self.skipWaiting();
+  self.skipWaiting();   // neue Version sofort uebernehmen
+});
+
+// Auf "Aktualisieren"-Klick aus der App reagieren (wartenden SW aktivieren)
+self.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("activate", (e) => {
-  // alte Caches aufraeumen
+  // alte Caches (andere Versionsnummer) aufraeumen
   e.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", (e) => {
-  const url = new URL(e.request.url);
+  const req = e.request;
+  const url = new URL(req.url);
+
+  // Nur GET-Anfragen behandeln (POST etc. immer durchreichen)
+  if (req.method !== "GET") return;
 
   // API-Aufrufe + Login/Callback IMMER frisch aus dem Netz (nie cachen)
   if (url.pathname.startsWith("/api/") ||
@@ -40,10 +49,33 @@ self.addEventListener("fetch", (e) => {
     return; // Standard-Netzwerk-Verhalten
   }
 
-  // Statische Assets: erst Cache, dann Netz (network falls nicht im Cache)
+  // HTML-Seiten / Navigation -> NETWORK-FIRST:
+  // immer die frische Seite holen, Cache nur als Offline-Notfall.
+  // So sieht man Updates SOFORT nach dem Hochladen (kein haengender Cache).
+  const isHTML = req.mode === "navigate" ||
+                 (req.headers.get("accept") || "").includes("text/html");
+  if (isHTML) {
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          // frische Seite zusaetzlich als Offline-Fallback ablegen
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          return res;
+        })
+        .catch(() => caches.match(req).then((c) => c || caches.match("/")))
+    );
+    return;
+  }
+
+  // Bilder/Icons/Manifest -> CACHE-FIRST (aendern sich selten, laedt schnell)
   e.respondWith(
-    caches.match(e.request).then((cached) =>
-      cached || fetch(e.request).catch(() => caches.match("/"))
+    caches.match(req).then((cached) =>
+      cached || fetch(req).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+        return res;
+      }).catch(() => cached)
     )
   );
 });

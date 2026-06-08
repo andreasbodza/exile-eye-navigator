@@ -2449,10 +2449,52 @@ function labelFor(key) {
 // ============================================================
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {
+    navigator.serviceWorker.register("/sw.js").then((reg) => {
+      // alle 60s nach einer neuen Version suchen
+      setInterval(() => reg.update().catch(() => {}), 60000);
+
+      // Neue Version gefunden? -> freundlich zum Neuladen auffordern
+      reg.addEventListener("updatefound", () => {
+        const sw = reg.installing;
+        if (!sw) return;
+        sw.addEventListener("statechange", () => {
+          // installiert + es lief schon ein alter SW -> Update verfügbar
+          if (sw.state === "installed" && navigator.serviceWorker.controller) {
+            showUpdateBanner();
+          }
+        });
+      });
+    }).catch(() => {
       /* SW braucht http(s) - bei file:// oder ohne Server ignorieren */
     });
+
+    // Wenn der neue SW die Kontrolle übernimmt -> einmal automatisch neu laden
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (reloaded) return;
+      reloaded = true;
+      location.reload();
+    });
   });
+}
+
+// Banner: "Neue Version verfügbar – Tippen zum Aktualisieren"
+function showUpdateBanner() {
+  const b = document.getElementById("banner");
+  b.className = "ok";
+  b.style.display = "block";
+  b.style.cursor = "pointer";
+  b.innerHTML = "🔄 <b>Neue Version verfügbar!</b> Hier tippen, um zu aktualisieren.";
+  b.onclick = async () => {
+    b.textContent = "Aktualisiere…";
+    const reg = await navigator.serviceWorker.getRegistration();
+    if (reg && reg.waiting) {
+      // wartenden SW aktivieren -> controllerchange -> reload (s.o.)
+      reg.waiting.postMessage({ type: "SKIP_WAITING" });
+    } else {
+      location.reload();
+    }
+  };
 }
 
 // "Zum Startbildschirm hinzufügen"-Button (Android/Chrome)
