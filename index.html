@@ -245,6 +245,48 @@
     background: linear-gradient(90deg, var(--gold-soft), var(--gold));
   }
   #buildProgress .bp-hint { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+
+  /* ---------- Resistenz-Cap-Rechner ---------- */
+  #resCapBox {
+    display: none; max-width: 560px; margin: 0 auto 12px;
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px;
+  }
+  #resCapBox .rc-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px; gap: 8px; flex-wrap: wrap;
+  }
+  #resCapBox .rc-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  #resCapBox .rc-capwrap { font-size: 11px; color: var(--text-dim); }
+  #resCapBox .rc-capwrap select {
+    background: var(--panel); color: var(--gold); border: 1px solid var(--gold-soft);
+    border-radius: 5px; padding: 3px 6px; font-size: 12px; font-weight: 600;
+  }
+  .rc-row { margin-bottom: 9px; }
+  .rc-row:last-child { margin-bottom: 0; }
+  .rc-row .rc-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 12px; margin-bottom: 4px;
+  }
+  .rc-row .rc-name { color: var(--text); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .rc-row .rc-val { font-weight: 700; font-size: 13px; }
+  .rc-row .rc-val .rc-status { font-size: 11px; font-weight: 600; margin-left: 6px; }
+  .rc-bar {
+    height: 9px; background: #14100b; border-radius: 5px; overflow: hidden;
+    border: 1px solid var(--border); position: relative;
+  }
+  .rc-fill { height: 100%; border-radius: 5px; transition: width .5s ease; }
+  .rc-fill.ok    { background: linear-gradient(90deg, #2e7d4a, var(--green)); }
+  .rc-fill.under { background: linear-gradient(90deg, #a83a32, var(--red)); }
+  .rc-fill.over  { background: linear-gradient(90deg, var(--gold-soft), var(--gold)); }
+  .rc-dot {
+    display: inline-block; width: 11px; height: 11px; border-radius: 50%; flex: 0 0 auto;
+  }
+  .rc-dot.fire  { background: radial-gradient(circle at 35% 30%, #ff8a4c, #b03010); }
+  .rc-dot.cold  { background: radial-gradient(circle at 35% 30%, #7ad0ff, #1d6fa8); }
+  .rc-dot.light { background: radial-gradient(circle at 35% 30%, #ffe680, #c89a20); }
+  .rc-dot.chaos { background: radial-gradient(circle at 35% 30%, #c080ff, #6020a0); }
+  #resCapBox .rc-note { font-size: 10px; color: var(--text-dim); margin-top: 10px; line-height: 1.4; }
   /* Trade-Button im Tooltip */
   .tt-trade {
     display: block; width: calc(100% - 28px); margin: 10px 14px;
@@ -640,6 +682,34 @@
       <div class="bp-hint" id="bpHint">Importiere einen Build, um deinen Fortschritt zu sehen</div>
     </div>
 
+    <!-- RESISTENZ-CAP-RECHNER (rechnet die Resis aus dem getragenen Gear zusammen) -->
+    <div id="resCapBox">
+      <div class="rc-top">
+        <span class="rc-title">🛡️ Resistenzen (aus deinem Gear)</span>
+        <span class="rc-capwrap">
+          Cap:
+          <select id="resCapSelect" onchange="renderResCap()" title="Max-Resistenz (Standard 75%)">
+            <option value="75">75%</option>
+            <option value="76">76%</option>
+            <option value="77">77%</option>
+            <option value="78">78%</option>
+            <option value="79">79%</option>
+            <option value="80">80%</option>
+            <option value="81">81%</option>
+            <option value="82">82%</option>
+            <option value="83">83%</option>
+            <option value="84">84%</option>
+            <option value="85">85%</option>
+            <option value="90">90%</option>
+          </select>
+        </span>
+      </div>
+      <div id="resCapRows"></div>
+      <div class="rc-note">
+        ⚠️ Nur Werte aus deinem <b>getragenen Gear</b>. Passivbaum, Ascendancy &amp; Liga-Strafe (-30%/-60% je Akt) sind <b>nicht</b> enthalten – im Spiel können die Werte also abweichen.
+      </div>
+    </div>
+
     <div class="hud-frame">
       <div class="hud" id="hud">
 
@@ -758,7 +828,9 @@
       </button>
       <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.5">
         Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus.
-        Am iPhone: Datei landet in „Downloads/Dateien“ – einfach antippen. <b>Du brauchst keinen Decoder!</b> ⭐ am genauesten
+        <b>Du brauchst nichts zu öffnen oder zu entpacken – kein Notepad++, kein Decoder!</b> ⭐ am genauesten<br>
+        <span style="opacity:.85">💻 <b>Am PC:</b> Button klicken → Datei aus deinem Download-Ordner wählen.
+        📱 <b>Am Handy:</b> Button antippen → Datei aus „Downloads/Dateien“ wählen.</span>
       </div>
 
       <!-- Weg 2: Link / Code / Text einfügen -->
@@ -895,7 +967,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · v1.0 · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.1</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px">Datenschutz</a> ·
@@ -908,6 +980,18 @@
 //  Exile Eye Frontend
 //  Endpunkte:  /api/status  /api/characters  /api/character-gear  /api/analyze
 // ============================================================
+
+// ============================================================
+//  APP-VERSION – bei jedem Update HIER hochzählen (z.B. "v1.2")
+//  Wird automatisch in den Footer geschrieben, damit man sofort
+//  erkennt, ob die neue Seite geladen ist.
+//  TIPP: Auch in sw.js die CACHE-Nummer hochzählen (exile-eye-vX)!
+// ============================================================
+const APP_VERSION = "v1.1";
+document.addEventListener("DOMContentLoaded", () => {
+  const v = document.getElementById("appVersion");
+  if (v) v.textContent = APP_VERSION;
+});
 
 const STORAGE_KEY = "exileEye_gear";
 
@@ -1141,6 +1225,68 @@ function renderGear(items) {
 
   // Build-Status (grün/rot + Fortschritt) aktualisieren
   updateBuildStatus();
+  // Resistenz-Cap-Rechner aktualisieren
+  renderResCap();
+}
+
+// ============================================================
+//  RESISTENZ-CAP-RECHNER
+//  Summiert die Resis aus allen getragenen Items und prüft
+//  gegen das Cap (Standard 75%). Grün = Cap erreicht, Rot = drunter.
+// ============================================================
+function renderResCap() {
+  const box = document.getElementById("resCapBox");
+  const rows = document.getElementById("resCapRows");
+  if (!box || !rows) return;
+
+  // kein Gear -> Box ausblenden
+  if (!equippedItems || Object.keys(equippedItems).length === 0) {
+    box.style.display = "none";
+    return;
+  }
+
+  // Resis über alle Items aufsummieren
+  const sum = { fire_res: 0, cold_res: 0, lightning_res: 0, chaos_res: 0 };
+  Object.values(equippedItems).forEach(it => {
+    const p = it.parsed_stats || {};
+    sum.fire_res      += p.fire_res      || 0;
+    sum.cold_res      += p.cold_res      || 0;
+    sum.lightning_res += p.lightning_res || 0;
+    sum.chaos_res     += p.chaos_res     || 0;
+  });
+
+  const cap = parseInt(document.getElementById("resCapSelect").value, 10) || 75;
+  const defs = [
+    { key: "fire_res",      name: "Feuer",  dot: "fire"  },
+    { key: "cold_res",      name: "Kälte",  dot: "cold"  },
+    { key: "lightning_res", name: "Blitz",  dot: "light" },
+    { key: "chaos_res",     name: "Chaos",  dot: "chaos" },
+  ];
+
+  let html = "";
+  defs.forEach(d => {
+    const val = sum[d.key];
+    const pctOfCap = Math.min(100, Math.round((val / cap) * 100));
+    let fillCls, status, statusCol;
+    if (val >= cap) {
+      // genau auf Cap = grün, drüber = "Überkappung" (Puffer gegen Liga-Strafe = gut)
+      if (val > cap) { fillCls = "over"; status = `+${val - cap}% Puffer ✓`; statusCol = "var(--gold)"; }
+      else           { fillCls = "ok";   status = "Cap erreicht ✓";          statusCol = "var(--green)"; }
+    } else {
+      fillCls = "under"; status = `noch ${cap - val}% bis Cap`; statusCol = "var(--red)";
+    }
+    html += `
+      <div class="rc-row">
+        <div class="rc-head">
+          <span class="rc-name"><span class="rc-dot ${d.dot}"></span>${d.name}-Resistenz</span>
+          <span class="rc-val">${val}% <span class="rc-status" style="color:${statusCol}">${status}</span></span>
+        </div>
+        <div class="rc-bar"><div class="rc-fill ${fillCls}" style="width:${pctOfCap}%"></div></div>
+      </div>`;
+  });
+
+  rows.innerHTML = html;
+  box.style.display = "block";
 }
 
 // ============================================================
