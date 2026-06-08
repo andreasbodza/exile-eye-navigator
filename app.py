@@ -133,6 +133,22 @@ def icons(filename):
 
 
 # ------------------------------------------------------------
+#  Rechtstexte (Impressum, Datenschutz, Nutzungsbedingungen)
+# ------------------------------------------------------------
+@app.route("/impressum")
+def impressum():
+    return send_from_directory(".", "impressum.html")
+
+@app.route("/datenschutz")
+def datenschutz():
+    return send_from_directory(".", "datenschutz.html")
+
+@app.route("/nutzungsbedingungen")
+def nutzungsbedingungen():
+    return send_from_directory(".", "nutzungsbedingungen.html")
+
+
+# ------------------------------------------------------------
 #  Routen: OAuth Login-Flow
 # ------------------------------------------------------------
 @app.route("/login")
