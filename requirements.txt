@@ -1,0 +1,9 @@
+flask
+requests
+python-dotenv
+pillow
+pytesseract
+pillow-heif
+opencv-python-headless
+numpy
+gunicorn

@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Exile Eye Navigator – PoE2 Item Scanner</title>
+
+<!-- ===== PWA (App-Feeling fürs Handy) ===== -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0d0b07">
+<!-- iPhone: Vollbild-App-Modus + Icon -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Exile Eye Navigator">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/icons/icon-192.png">
+<style>
+  :root {
+    --bg:        #0d0b07;
+    --panel:     #181410;
+    --panel-2:   #221c14;
+    --gold:      #c8a04f;
+    --gold-soft: #9a7d3e;
+    --text:      #d8c8a8;
+    --text-dim:  #8a7d63;
+    --green:     #4caf6a;
+    --red:       #d0584e;
+    --border:    #3a2f1f;
+    --stone-1:   #4a4640;
+    --stone-2:   #2e2a25;
+    --stone-3:   #1c1916;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: radial-gradient(circle at 50% 0%, #1a1510 0%, var(--bg) 70%);
+    color: var(--text);
+    font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 0 0 40px;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px;
+    background: linear-gradient(180deg, #221c14, #14100b);
+    border-bottom: 2px solid var(--gold-soft);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo svg { width: 30px; height: 30px; }
+  .logo h1 {
+    font-size: 17px; letter-spacing: 1.5px; color: var(--gold);
+    text-transform: uppercase; font-weight: 700; line-height: 1.1;
+  }
+  .logo span { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; display: block; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    background: linear-gradient(180deg, #3a2f1f, #241c12);
+    color: var(--gold);
+    border: 1px solid var(--gold-soft);
+    border-radius: 6px;
+    padding: 9px 16px;
+    font-size: 13px; font-weight: 600; letter-spacing: .5px;
+    cursor: pointer; text-decoration: none; display: inline-block;
+    transition: all .15s;
+  }
+  .btn:hover { background: linear-gradient(180deg, #4a3c28, #2e2418); }
+  .btn.primary { background: linear-gradient(180deg, var(--gold), var(--gold-soft)); color: #1a1208; }
+  .btn.danger  { border-color: var(--red); color: var(--red); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ---------- Banner / Status ---------- */
+  #banner {
+    display: none; margin: 12px 18px; padding: 11px 14px;
+    border-radius: 6px; font-size: 13px; border: 1px solid;
+  }
+  #banner.error { background: #2a1410; border-color: var(--red);   color: #f0a89e; }
+  #banner.ok    { background: #122a18; border-color: var(--green); color: #a8e0b8; }
+
+  .section { padding: 16px 18px; }
+  .section h2 {
+    font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--gold-soft); margin-bottom: 12px; border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+  }
+
+  /* ---------- Login Karte ---------- */
+  .login-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 28px 22px; text-align: center; margin: 30px 18px;
+  }
+  .login-card p { color: var(--text-dim); margin: 12px 0 22px; font-size: 14px; line-height: 1.5; }
+
+  /* ---------- Charakter-Auswahl ---------- */
+  #charSelect {
+    width: 100%; background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--gold-soft); border-radius: 6px;
+    padding: 11px; font-size: 14px;
+  }
+
+  /* ============================================================
+     EQUIPMENT-HUD im echten PoE2 Steinplatten-Look
+     ============================================================ */
+  .hud-frame {
+    max-width: 560px; margin: 8px auto 0;
+    background:
+      linear-gradient(135deg, rgba(0,0,0,.4), rgba(0,0,0,.1)),
+      repeating-linear-gradient(45deg, var(--stone-2) 0 6px, var(--stone-3) 6px 12px),
+      radial-gradient(circle at 30% 20%, var(--stone-1), var(--stone-3) 70%);
+    border: 3px solid #6b5a3a;
+    border-radius: 10px;
+    box-shadow: inset 0 0 40px rgba(0,0,0,.7), 0 4px 20px rgba(0,0,0,.6);
+    padding: 16px;
+    position: relative;
+  }
+  /* dekorative goldene Eckwinkel */
+  .hud-frame::before, .hud-frame::after {
+    content: ""; position: absolute; width: 22px; height: 22px;
+    border: 2px solid var(--gold); pointer-events: none;
+  }
+  .hud-frame::before { top: 6px; left: 6px; border-right: none; border-bottom: none; }
+  .hud-frame::after  { bottom: 6px; right: 6px; border-left: none; border-top: none; }
+
+  .hud {
+    display: grid;
+    gap: 7px;
+    /* 5 Spalten x 4 Zeilen = echtes PoE2 Layout */
+    grid-template-columns: 1.15fr 0.85fr 1.3fr 0.85fr 1.15fr;
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+      "weapon  helm    helm    helm    weapon2"
+      "weapon  amulet  body    ring2   weapon2"
+      "weapon  glove   body    ring1   weapon2"
+      "weapon  glove   belt    boots   weapon2";
+  }
+  /* Slot-Zuordnung */
+  .slot[data-area="weapon"]  { grid-area: weapon; }
+  .slot[data-area="helm"]    { grid-area: helm; }
+  .slot[data-area="weapon2"] { grid-area: weapon2; }
+  .slot[data-area="amulet"]  { grid-area: amulet; }
+  .slot[data-area="body"]    { grid-area: body; }
+  .slot[data-area="ring2"]   { grid-area: ring2; }
+  .slot[data-area="ring1"]   { grid-area: ring1; }
+  .slot[data-area="belt"]    { grid-area: belt; }
+  .slot[data-area="glove"]   { grid-area: glove; }
+  .slot[data-area="boots"]   { grid-area: boots; }
+
+  /* die "hohen" Slots (Waffen, Rüstung) */
+  .slot[data-area="weapon"], .slot[data-area="weapon2"] { min-height: 180px; }
+  .slot[data-area="body"] { min-height: 130px; }
+
+  .slot {
+    background:
+      linear-gradient(180deg, rgba(30,26,20,.85), rgba(12,10,7,.95));
+    border: 1px solid #5a4a2e;
+    border-radius: 5px;
+    padding: 7px 8px;
+    min-height: 64px;
+    display: flex; flex-direction: column; gap: 2px;
+    position: relative;
+    transition: border-color .2s, box-shadow .2s, transform .1s;
+    box-shadow: inset 0 0 12px rgba(0,0,0,.6);
+    cursor: default;
+  }
+  .slot:hover { transform: translateY(-1px); }
+  .slot.filled { cursor: pointer; }
+  .slot .slot-label {
+    font-size: 8px; letter-spacing: 1px; text-transform: uppercase;
+    color: #6b5e44; font-weight: 600;
+  }
+  /* kleines Slot-Icon (SVG inline, oben rechts) – nur wenn LEER sichtbar */
+  .slot .slot-icon {
+    position: absolute; top: 6px; right: 6px; width: 16px; height: 16px;
+    opacity: .35; pointer-events: none;
+  }
+  .slot.filled .slot-icon { display: none; }
+  /* echtes Item-Bild von der GGG-API */
+  .slot .item-img {
+    width: 100%; max-height: 70px; object-fit: contain;
+    margin: 2px auto 4px; display: block;
+    filter: drop-shadow(0 0 4px rgba(0,0,0,.8));
+  }
+  .slot[data-area="weapon"] .item-img,
+  .slot[data-area="weapon2"] .item-img { max-height: 120px; }
+  .slot[data-area="body"] .item-img { max-height: 90px; }
+  .tap-hint {
+    position: absolute; bottom: 4px; right: 6px;
+    font-size: 8px; color: var(--gold-soft); opacity: .6;
+  }
+  /* Trade-Button im Tooltip */
+  .tt-trade {
+    display: block; width: calc(100% - 28px); margin: 10px 14px;
+    text-align: center; padding: 10px;
+    background: linear-gradient(180deg, #2e6fb0, #1d4a78);
+    color: #fff; border: 1px solid #4a90d0; border-radius: 6px;
+    font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none;
+  }
+  .tt-trade:hover { background: linear-gradient(180deg, #3a82c8, #245a90); }
+  .tt-trade-hint { font-size: 10px; color: var(--text-dim); text-align: center; padding: 0 14px 8px; line-height: 1.4; }
+  .slot .item-name { font-size: 11.5px; font-weight: 700; line-height: 1.25; word-break: break-word; }
+  .slot .item-name.rarity-0 { color: #d8c8a8; } /* normal/weiß */
+  .slot .item-name.rarity-1 { color: #8888f0; } /* magic blau */
+  .slot .item-name.rarity-2 { color: #f0e060; } /* rare gelb */
+  .slot .item-name.rarity-3 { color: #d08020; } /* unique orange */
+  .slot .item-name.empty    { color: #5a513c; font-style: italic; font-weight: 400; }
+  .slot .item-meta { font-size: 9px; color: var(--text-dim); }
+  .slot .item-score {
+    font-size: 10px; color: var(--green); margin-top: auto; font-weight: 600;
+  }
+  .slot.filled { border-color: var(--gold-soft); box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 4px rgba(200,160,79,.2); }
+  .slot.better { border-color: var(--green); box-shadow: 0 0 10px rgba(76,175,106,.4); }
+  .slot.worse  { border-color: var(--red);   box-shadow: 0 0 10px rgba(208,88,78,.4); }
+
+  /* Flask-Reihe unten */
+  .flask-row {
+    display: flex; gap: 7px; margin-top: 7px; justify-content: center;
+  }
+  .flask {
+    width: 38px; height: 52px; border-radius: 4px 4px 8px 8px;
+    border: 1px solid #5a4a2e; box-shadow: inset 0 0 10px rgba(0,0,0,.6);
+    background: linear-gradient(180deg, rgba(30,26,20,.85), rgba(12,10,7,.95));
+    display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px;
+  }
+  .flask.life  svg { color: #c0392b; }
+  .flask.mana  svg { color: #2e6fb0; }
+
+  /* ---------- Scan-Bereich ---------- */
+  .trade-sel {
+    width: 100%; background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--gold-soft); border-radius: 6px; padding: 9px; font-size: 13px;
+  }
+  .scan-area { text-align: center; }
+  #fileInput { display: none; }
+  #previewImg { max-width: 100%; border-radius: 8px; margin: 12px 0; display: none; border: 1px solid var(--border); }
+
+  /* ---------- Crop-Editor (Rahmen ziehen) ---------- */
+  #cropArea { display: none; margin: 12px auto; position: relative; width: fit-content; max-width: 100%; touch-action: none; user-select: none; overflow: hidden; border-radius: 8px; }
+  #cropCanvas { display: block; max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); }
+  #cropBox {
+    position: absolute; border: 2px solid var(--gold);
+    box-shadow: 0 0 0 2000px rgba(0,0,0,.55); cursor: move;
+    box-sizing: border-box;
+  }
+  .crop-handle {
+    position: absolute; width: 30px; height: 30px; background: var(--gold);
+    border: 3px solid #1a1208; border-radius: 50%; touch-action: none;
+  }
+  .crop-handle.nw { top: -15px; left: -15px; cursor: nwse-resize; }
+  .crop-handle.ne { top: -15px; right: -15px; cursor: nesw-resize; }
+  .crop-handle.sw { bottom: -15px; left: -15px; cursor: nesw-resize; }
+  .crop-handle.se { bottom: -15px; right: -15px; cursor: nwse-resize; }
+  .crop-hint { font-size: 12px; color: var(--text-dim); margin: 8px 0; }
+  #scanResult {
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px; margin-top: 12px; text-align: left; display: none;
+  }
+  #scanResult .score-big {
+    font-size: 32px; color: var(--gold); font-weight: 700; text-align: center; margin-bottom: 8px;
+  }
+  #scanResult .stat-row {
+    display: flex; justify-content: space-between; font-size: 13px;
+    padding: 4px 0; border-bottom: 1px solid var(--border);
+  }
+  /* ============================================================
+     ITEM-DETAIL POPUP (PoE-Tooltip Stil)
+     ============================================================ */
+  #itemModal {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,.75); align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  #itemModal.show { display: flex; }
+  .tooltip {
+    max-width: 380px; width: 100%; max-height: 85vh; overflow-y: auto;
+    background: linear-gradient(180deg, #0a0806, #14100b);
+    border: 1px solid var(--gold-soft);
+    box-shadow: 0 0 30px rgba(0,0,0,.8);
+    border-radius: 4px;
+  }
+  .tt-header {
+    text-align: center; padding: 12px 10px; position: relative;
+    border-bottom: 1px solid var(--border);
+  }
+  .tt-header.r0 { background: linear-gradient(180deg, #2a2620, #1a1510); }
+  .tt-header.r1 { background: linear-gradient(180deg, #1a2440, #14100b); }
+  .tt-header.r2 { background: linear-gradient(180deg, #3a3210, #14100b); }
+  .tt-header.r3 { background: linear-gradient(180deg, #3a2410, #14100b); }
+  .tt-name { font-size: 16px; font-weight: 700; line-height: 1.3; }
+  .tt-name.r0 { color: #d8c8a8; } .tt-name.r1 { color: #8888f0; }
+  .tt-name.r2 { color: #f0e060; } .tt-name.r3 { color: #d08020; }
+  .tt-base { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+  .tt-img { width: 80px; max-height: 80px; object-fit: contain; margin: 6px auto 0; display: block; }
+  .tt-close {
+    position: absolute; top: 8px; right: 10px; font-size: 22px;
+    color: var(--text-dim); cursor: pointer; line-height: 1; background: none; border: none;
+  }
+  .tt-section { padding: 8px 14px; border-bottom: 1px solid var(--border); }
+  .tt-section:last-child { border-bottom: none; }
+  .tt-prop { display: flex; justify-content: space-between; font-size: 12.5px; padding: 2px 0; color: var(--text); }
+  .tt-prop .pn { color: var(--text-dim); }
+  .tt-prop .pv { color: #d8c8a8; font-weight: 600; }
+  .tt-mod { font-size: 12.5px; padding: 3px 0; line-height: 1.35; }
+  .tt-mod.implicit { color: #8888c0; }
+  .tt-mod.enchant  { color: #b4b4ff; }
+  .tt-mod.rune     { color: #6ad0c0; }
+  .tt-mod.explicit { color: #8888f0; }
+  .tt-mod.crafted  { color: #b4b4ff; }
+  .tt-mod.fractured{ color: #a08050; }
+  .tt-sep { height: 1px; background: var(--border); margin: 6px 0; }
+  .tt-corrupt { color: var(--red); font-size: 12px; text-align: center; padding: 4px; font-weight: 600; }
+  .tt-score {
+    text-align: center; padding: 10px; font-size: 14px; color: var(--green);
+    background: rgba(76,175,106,.08); font-weight: 600;
+  }
+  /* Build-Vergleich im Tooltip */
+  .tt-build {
+    margin: 0 14px 10px; padding: 10px;
+    background: rgba(46,111,176,.1); border: 1px solid #2e5a80; border-radius: 6px;
+  }
+  .tt-build h5 { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #9ab8d8; margin-bottom: 6px; }
+  .tt-build .bld-unique { color: #d08020; font-weight: 700; font-size: 13px; }
+  .tt-build .bld-stat { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
+  .tt-build .bld-ok  { color: var(--green); }
+  .tt-build .bld-miss { color: var(--red); }
+  .tt-build .bld-val { font-weight: 600; }
+
+  /* ---------- Gewichtung (Regler + Vorlagen + Build-Import) ---------- */
+  .weight-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .preset-btn {
+    flex: 1 1 auto; background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px;
+    font-size: 12px; cursor: pointer; transition: all .15s; min-width: 90px;
+  }
+  .preset-btn:hover { border-color: var(--gold-soft); }
+  .preset-btn.active { background: linear-gradient(180deg, var(--gold), var(--gold-soft)); color: #1a1208; border-color: var(--gold); font-weight: 600; }
+
+  .weight-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .weight-row .wlabel { flex: 0 0 110px; font-size: 12px; color: var(--text); }
+  .weight-row input[type=range] {
+    flex: 1; height: 5px; -webkit-appearance: none; appearance: none;
+    background: var(--border); border-radius: 3px; outline: none;
+  }
+  .weight-row input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
+    border-radius: 50%; background: var(--gold); cursor: pointer; border: 2px solid #1a1208;
+  }
+  .weight-row input[type=range]::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--gold); cursor: pointer; border: 2px solid #1a1208;
+  }
+  .weight-row .wval { flex: 0 0 36px; text-align: right; font-size: 12px; color: var(--gold); font-weight: 600; }
+
+  .build-import { margin-top: 14px; }
+  .build-import textarea {
+    width: 100%; background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--gold-soft); border-radius: 6px; padding: 10px;
+    font-size: 12px; font-family: monospace; resize: vertical; min-height: 60px;
+  }
+  #buildResult { margin-top: 8px; font-size: 12px; padding: 8px 10px; border-radius: 6px; display: none; }
+  #buildResult.ok  { background: rgba(76,175,106,.12); border: 1px solid var(--green); color: #a8e0b8; }
+  #buildResult.err { background: rgba(208,88,78,.12); border: 1px solid var(--red); color: #f0a89e; }
+
+  /* ---------- Skills / Gems ---------- */
+  #skillsSection { display: none; }
+  .skill-group {
+    background: linear-gradient(180deg, rgba(30,26,20,.6), rgba(12,10,7,.8));
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; margin-bottom: 8px;
+  }
+  .skill-main {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 700; color: var(--gold); margin-bottom: 6px;
+  }
+  .skill-main .gem-dot { width: 10px; height: 10px; border-radius: 50%; background: #4a90d0; flex: 0 0 auto; }
+  .skill-supports { display: flex; flex-wrap: wrap; gap: 5px; padding-left: 18px; }
+  .support-chip {
+    font-size: 11px; color: #9ab8d8; background: rgba(46,111,176,.15);
+    border: 1px solid #2e5a80; border-radius: 12px; padding: 3px 9px; cursor: pointer;
+  }
+  .support-chip:hover { background: rgba(46,111,176,.3); }
+  .gem-tag {
+    font-size: 10px; padding: 2px 7px; border-radius: 10px;
+    background: rgba(200,160,79,.12); border: 1px solid var(--gold-soft);
+    color: var(--text); white-space: nowrap;
+  }
+  .gem-lvl { font-size: 10px; color: var(--text-dim); font-weight: 400; }
+  /* ---------- Charms / Flasks ---------- */
+  #consumablesSection { display: none; }
+  .consum-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
+  .consum-chip {
+    font-size: 12px; padding: 6px 11px; border-radius: 6px;
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .consum-chip.flask { border-color: #c0392b; }
+  .consum-chip.charm { border-color: #2e6fb0; }
+  .consum-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+
+  /* ---------- Scan: Slot-Wahl + Vergleich ---------- */
+  #scanSlotBox { display: none; margin-top: 12px; text-align: left; }
+  #scanSlotBox label { font-size: 12px; color: var(--text-dim); display: block; margin-bottom: 5px; }
+  #scanSlotSelect {
+    width: 100%; background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--gold-soft); border-radius: 6px; padding: 10px; font-size: 14px;
+  }
+  /* Alt/Neu Vergleichs-Panel */
+  #comparePanel { display: none; margin-top: 14px; text-align: left; }
+  .cmp-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: stretch; }
+  .cmp-col {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px;
+  }
+  .cmp-col.old { border-color: #5a4a2e; }
+  .cmp-col.new { border-color: var(--gold-soft); }
+  .cmp-col h4 {
+    font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 8px; text-align: center;
+  }
+  .cmp-col .cmp-name { font-size: 12px; font-weight: 600; margin-bottom: 8px; min-height: 30px; }
+  .cmp-col .cmp-score { font-size: 26px; font-weight: 700; text-align: center; color: var(--gold); margin-bottom: 8px; }
+  .cmp-stat { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; border-bottom: 1px solid var(--border); }
+  .cmp-stat .v { font-weight: 600; }
+  .cmp-arrow { display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--text-dim); }
+  .cmp-verdict {
+    text-align: center; margin-top: 12px; padding: 12px; border-radius: 8px;
+    font-size: 16px; font-weight: 700;
+  }
+  .cmp-verdict.better { background: rgba(76,175,106,.15); border: 1px solid var(--green); color: var(--green); }
+  .cmp-verdict.worse  { background: rgba(208,88,78,.15); border: 1px solid var(--red);   color: var(--red); }
+  .cmp-verdict.equal  { background: rgba(200,160,79,.12); border: 1px solid var(--gold-soft); color: var(--gold); }
+  .cmp-diff-pos { color: var(--green); }
+  .cmp-diff-neg { color: var(--red); }
+  .cmp-empty-old { color: var(--text-dim); font-style: italic; font-size: 12px; text-align: center; padding: 20px 0; }
+
+  .hidden { display: none !important; }
+  .loader {
+    width: 22px; height: 22px; border: 3px solid var(--border);
+    border-top-color: var(--gold); border-radius: 50%;
+    animation: spin .8s linear infinite; display: inline-block; vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .disclaimer { text-align: center; color: #5a513c; font-size: 10px; margin: 18px 18px 0; line-height: 1.4; }
+  footer { text-align: center; color: var(--text-dim); font-size: 11px; margin-top: 14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#c8a04f" stroke-width="1.8">
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+      <circle cx="12" cy="12" r="3" fill="#c8a04f"/>
+    </svg>
+    <div>
+      <h1>Exile Eye Navigator</h1>
+      <span>PoE2 Companion · Item Scanner</span>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button id="installBtn" class="btn" style="display:none" onclick="installApp()">📲 App installieren</button>
+    <button id="logoutBtn" class="btn danger hidden" onclick="location.href='/logout'">Logout</button>
+  </div>
+</header>
+
+<div id="banner"></div>
+
+<!-- LOGIN-ANSICHT -->
+<div id="loginView" class="login-card">
+  <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#9a7d3e" stroke-width="1.5" style="margin-bottom:10px">
+    <path d="M12 2L2 7v6c0 5 4 8 10 9 6-1 10-4 10-9V7L12 2z"/>
+  </svg>
+  <h2 style="color:var(--gold);letter-spacing:1px">Willkommen, Exile</h2>
+  <p>Melde dich mit deinem Path&nbsp;of&nbsp;Exile&nbsp;Account an,<br>um deine Charaktere und Ausrüstung zu laden.</p>
+  <a href="/login" class="btn primary">🔐 Mit GGG anmelden</a>
+</div>
+
+<!-- HAUPT-ANSICHT (nach Login) -->
+<div id="mainView" class="hidden">
+
+  <div class="section">
+    <h2>Charakter</h2>
+    <select id="charSelect">
+      <option value="">– Charakter wählen –</option>
+    </select>
+  </div>
+
+  <div class="section">
+    <h2>Aktuelle Ausrüstung</h2>
+    <div class="hud-frame">
+      <div class="hud" id="hud">
+
+        <!-- Waffe links (hoch) -->
+        <div class="slot" data-area="weapon" data-slot="Weapon">
+          <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M6.92 5L5 6.92l9.06 9.06-1.06 1.06-2.83-2.83-1.41 1.41 2.12 2.12-2.12 2.13 1.41 1.41 2.13-2.12 2.12 2.12 1.41-1.41-2.83-2.83 1.06-1.06L17.08 19 19 17.08 6.92 5z"/></svg>
+          <span class="slot-label">Waffe</span><span class="item-name empty">leer</span>
+        </div>
+
+        <!-- Helm oben mitte -->
+        <div class="slot" data-area="helm" data-slot="Helm">
+          <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 2a7 7 0 00-7 7v6h2v-3h10v3h2V9a7 7 0 00-7-7zm-3 8a1 1 0 110-2 1 1 0 010 2zm6 0a1 1 0 110-2 1 1 0 010 2z"/></svg>
+          <span class="slot-label">Helm</span><span class="item-name empty">leer</span>
+        </div>
+
+        <!-- Nebenhand rechts (hoch) -->
+        <div class="slot" data-area="weapon2" data-slot="Offhand">
+          <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 2L4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5l-8-3z"/></svg>
+          <span class="slot-label">Nebenhand</span><span class="item-name empty">leer</span>
+        </div>
+
+        <!-- Amulett -->
+        <div class="slot" data-area="amulet" data-slot="Amulet">
+          <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 3a5 5 0 00-5 5h2a3 3 0 116 0h2a5 5 0 00-5-5zm0 8a3 3 0 100 6 3 3 0 000-6z"/></svg>
+          <span class="slot-label">Amulett</span><span class="item-name empty">leer</span>
+        </div>
+
+        <!-- Rüstung mitte (groß) -->
+        <div class="slot" data-area="body" data-slot="BodyArmour">
+          <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 2l7 3v6c0 5-3 8-7 11-4-3-7-6-7-11V5l7-3z"/></svg>
+          <span class="slot-label">Rüstung</span><span class="item-name empty">leer</span>
+        </div>
+
+        <!-- Ring oben rechts (Ring2) -->
+        <div class="slot" data-area="ring2" data-slot="Ring2">
+          <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 8a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm0-7l2 3h-4l2-3z"/></svg>
+          <span class="slot-label">Ring R</span><span class="item-name empty">leer</span>
+        </div>
+
+        <!-- Ring darunter (Ring1) -->
+        <div class="slot" data-area="ring1" data-slot="Ring">
+          <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 8a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm0-7l2 3h-4l2-3z"/></svg>
+          <span class="slot-label">Ring L</span><span class="item-name empty">leer</span>
+        </div>
+
+        <!-- Handschuhe -->
+        <div class="slot" data-area="glove" data-slot="Gloves">
+          <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M6 11V6a1 1 0 012 0v4h1V5a1 1 0 012 0v5h1V6a1 1 0 012 0v6l3 2v5a2 2 0 01-2 2H8a2 2 0 01-2-2v-3l-2-2a1 1 0 011-2l1 1z"/></svg>
+          <span class="slot-label">Handschuhe</span><span class="item-name empty">leer</span>
+        </div>
+
+        <!-- Gürtel -->
+        <div class="slot" data-area="belt" data-slot="Belt">
+          <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M3 9h18v6H3V9zm8 1v4h2v-4h-2z"/></svg>
+          <span class="slot-label">Gürtel</span><span class="item-name empty">leer</span>
+        </div>
+
+        <!-- Stiefel -->
+        <div class="slot" data-area="boots" data-slot="Boots">
+          <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M7 3v9l-2 2v5a1 1 0 001 1h12a1 1 0 001-1v-1c0-2-1-3-4-4l-4-2V3H7z"/></svg>
+          <span class="slot-label">Stiefel</span><span class="item-name empty">leer</span>
+        </div>
+
+      </div>
+
+      <!-- Flask-Reihe (Deko, wie im echten Spiel) -->
+      <div class="flask-row">
+        <div class="flask life"><svg width="14" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 2h6v3l3 6v9a2 2 0 01-2 2H8a2 2 0 01-2-2v-9l3-6V2z"/></svg></div>
+        <div class="flask mana"><svg width="14" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 2h6v3l3 6v9a2 2 0 01-2 2H8a2 2 0 01-2-2v-9l3-6V2z"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SKILLS / GEMS (erscheint nach Build-Import) -->
+  <div class="section" id="skillsSection">
+    <h2>Skills &amp; Support-Gems</h2>
+    <div id="skillsList"></div>
+  </div>
+
+  <!-- CHARMS / FLASKS (erscheint nach Build-Import) -->
+  <div class="section" id="consumablesSection">
+    <h2>Flasks &amp; Charms</h2>
+    <div id="consumablesList"></div>
+  </div>
+
+  <div class="section">
+    <h2>Gewichtung · was ist dir wichtig?</h2>
+
+    <!-- Vorlagen -->
+    <div class="weight-presets" id="presets">
+      <button class="preset-btn" data-preset="balanced">Ausgewogen</button>
+      <button class="preset-btn" data-preset="life">Life-Build</button>
+      <button class="preset-btn" data-preset="es">ES-Build</button>
+      <button class="preset-btn" data-preset="resi">Resi-Cap zuerst</button>
+    </div>
+
+    <!-- Regler -->
+    <div id="weightSliders"></div>
+
+    <!-- Aktiver Build (zeigt an, ob ein Build geladen ist) -->
+    <div id="activeBuildBar" style="display:none; background:rgba(46,111,176,.12); border:1px solid #2e5a80; border-radius:6px; padding:9px 12px; margin-bottom:12px; font-size:12px; display:flex; align-items:center; justify-content:space-between; gap:10px">
+      <span id="activeBuildName" style="color:#9ab8d8"></span>
+      <button class="btn danger" style="padding:5px 10px;font-size:11px;white-space:nowrap" onclick="clearBuild()">✕ Build entfernen</button>
+    </div>
+
+    <!-- Build-Import -->
+    <div class="build-import">
+      <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:5px">
+        🧠 Build importieren – funktioniert mit (optional):
+      </label>
+      <ul style="font-size:11px;color:var(--text-dim);margin:0 0 6px 16px;line-height:1.5">
+        <li><b>.build-Datei-Inhalt</b> (von Mobalytics herunterladen, entpacken, Inhalt reinkopieren) ⭐ am genauesten</li>
+        <li>pobb.in-Link oder PoB-Export-Code</li>
+        <li>maxroll.gg Build-Link</li>
+        <li>oder einfach den <b>kopierten Gear-Text</b></li>
+      </ul>
+      <textarea id="buildCode" placeholder='{"author":...} .build-Inhalt  •  https://pobb.in/xxxxx  •  https://maxroll.gg/...  •  oder Item-Text'></textarea>
+      <button class="btn primary" style="margin-top:8px" onclick="importBuild()">📥 Build importieren &amp; Gewichtung übernehmen</button>
+      <div id="buildResult"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TRADE-EINSTELLUNGEN -->
+<div class="section">
+  <h2>🛒 Trade-Einstellungen</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div>
+      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px">Liga</label>
+      <select id="tradeLeague" class="trade-sel">
+        <option value="auto">Vom Charakter</option>
+        <option value="Standard">Standard</option>
+        <option value="Hardcore">Hardcore</option>
+        <option value="Fate of the Vaal">Aktuelle Liga</option>
+        <option value="HC Fate of the Vaal">Aktuelle (HC)</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px">Handelsstatus</label>
+      <select id="tradeStatus" class="trade-sel">
+        <option value="any">Beliebig</option>
+        <option value="buyout">Sofort kaufbar</option>
+        <option value="online">Online-Spieler</option>
+      </select>
+    </div>
+  </div>
+  <div style="margin-top:12px">
+    <label style="font-size:11px;color:var(--text-dim);display:flex;justify-content:space-between">
+      <span>Attribut-Toleranz (mehr Treffer)</span>
+      <span id="tolVal" style="color:var(--gold);font-weight:600">0%</span>
+    </label>
+    <input type="range" id="tradeTolerance" min="0" max="30" step="5" value="0"
+           style="width:100%;accent-color:var(--gold);margin-top:4px"
+           oninput="document.getElementById('tolVal').textContent='-'+this.value+'%'">
+    <div style="font-size:10px;color:var(--text-dim);margin-top:4px">
+      z.B. -15%: sucht auch Items mit etwas niedrigeren Werten als der Build
+    </div>
+  </div>
+</div>
+
+<!-- ITEM-SCANNER (immer sichtbar, auch ohne Login!) -->
+<div class="section scan-area">
+  <h2>📷 Item scannen (kein Login nötig)</h2>
+  <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px">
+    <label style="font-size:12px;color:var(--text-dim)">Spiel-Sprache:</label>
+    <select id="gameLang" class="trade-sel" style="width:auto;padding:6px 10px">
+      <option value="auto">Automatisch (DE+EN)</option>
+      <option value="de">Deutsch</option>
+      <option value="en">English</option>
+    </select>
+  </div>
+  <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px">
+    Mach ein Foto vom Item-Tooltip oder wähle ein Bild – Exile Eye liest die Stats aus.
+  </p>
+  <input type="file" id="fileInput" accept="image/*" capture="environment">
+  <button class="btn primary" onclick="document.getElementById('fileInput').click()">📷 Foto aufnehmen / Bild wählen</button>
+
+  <!-- Auto-Crop Schalter -->
+  <label style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-size:13px;color:var(--text);cursor:pointer">
+    <input type="checkbox" id="autoCropToggle" checked style="width:18px;height:18px;accent-color:var(--gold)">
+    🤖 Auto-Zuschnitt (findet das Item-Tooltip von selbst)
+  </label>
+
+  <!-- Crop-Editor: Rahmen ums Item-Tooltip ziehen -->
+  <div id="cropArea">
+    <canvas id="cropCanvas"></canvas>
+    <div id="cropBox">
+      <div class="crop-handle nw"></div><div class="crop-handle ne"></div>
+      <div class="crop-handle sw"></div><div class="crop-handle se"></div>
+    </div>
+  </div>
+  <div class="crop-hint" id="cropHint" style="display:none">
+    🟨 Ziehe den goldenen Rahmen genau um den <b>Item-Text</b> (der Rahmen wurde automatisch vorgeschlagen)
+  </div>
+
+  <img id="previewImg" alt="Vorschau">
+  <button id="analyzeBtn" class="btn hidden" onclick="analyzeImage()">🔍 Zugeschnittenes Item analysieren</button>
+  <div id="scanResult"></div>
+
+  <!-- Slot-Wahl (mit Auto-Vorschlag) + Vergleich -->
+  <div id="scanSlotBox">
+    <label>Mit welchem Slot vergleichen? <span id="slotAutoHint"></span></label>
+    <select id="scanSlotSelect" onchange="runCompare()">
+      <option value="">– Slot wählen –</option>
+      <option value="Weapon">Waffe</option>
+      <option value="Offhand">Nebenhand</option>
+      <option value="Helm">Helm</option>
+      <option value="BodyArmour">Rüstung</option>
+      <option value="Gloves">Handschuhe</option>
+      <option value="Boots">Stiefel</option>
+      <option value="Belt">Gürtel</option>
+      <option value="Amulet">Amulett</option>
+      <option value="Ring">Ring L</option>
+      <option value="Ring2">Ring R</option>
+    </select>
+  </div>
+
+  <!-- Alt vs. Neu Vergleichs-Panel -->
+  <div id="comparePanel"></div>
+</div>
+
+<!-- ITEM-DETAIL POPUP -->
+<div id="itemModal" onclick="if(event.target===this)closeItem()">
+  <div class="tooltip" id="tooltipBody"></div>
+</div>
+
+<p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
+<footer>Exile Eye Navigator · v1.0 · Made with Flatcap 🧢</footer>
+
+<script>
+// ============================================================
+//  Exile Eye Frontend
+//  Endpunkte:  /api/status  /api/characters  /api/character-gear  /api/analyze
+// ============================================================
+
+const STORAGE_KEY = "exileEye_gear";
+
+function showBanner(msg, type = "error") {
+  const b = document.getElementById("banner");
+  b.textContent = msg;
+  b.className = type;
+  b.style.display = "block";
+  if (type === "ok") setTimeout(() => { b.style.display = "none"; }, 4000);
+}
+
+// Fehler aus der URL (?error=...) anzeigen, z.B. nach OAuth-Redirect
+(function checkUrlError() {
+  const p = new URLSearchParams(location.search);
+  if (p.has("error")) {
+    showBanner("Login-Fehler: " + p.get("error") + (p.get("detail") ? " (" + p.get("detail") + ")" : ""));
+    history.replaceState({}, "", location.pathname); // URL säubern
+  }
+})();
+
+// ---------- Beim Laden: Status prüfen ----------
+async function init() {
+  try {
+    const res = await fetch("/api/status");
+    const data = await res.json();
+
+    if (data.logged_in) {
+      document.getElementById("loginView").classList.add("hidden");
+      document.getElementById("mainView").classList.remove("hidden");
+      document.getElementById("logoutBtn").classList.remove("hidden");
+      showBanner("Eingeloggt als " + (data.account || "?"), "ok");
+      loadWeights();      // gespeicherte/Standard-Gewichtung laden
+      updateActiveBuildBar();  // zeigt an, falls noch ein Build aktiv ist
+      loadCharacters();
+    } else {
+      if (data.error) showBanner("Status-Fehler (" + data.code + "): " + data.error);
+    }
+  } catch (e) {
+    showBanner("Server nicht erreichbar. Läuft app.py?");
+  }
+}
+
+// ---------- Charakterliste laden ----------
+async function loadCharacters() {
+  const sel = document.getElementById("charSelect");
+  try {
+    const res = await fetch("/api/characters");
+    const data = await res.json();
+
+    if (data.error) {
+      showBanner("Charaktere konnten nicht geladen werden (" + data.code + "): " + data.error);
+      return;
+    }
+    const chars = data.characters || [];
+    if (chars.length === 0) {
+      showBanner("Keine Charaktere gefunden. Spielst du PoE2? (Realm-Einstellung prüfen)");
+      return;
+    }
+
+    sel.innerHTML = '<option value="">– Charakter wählen –</option>';
+    chars.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.name;
+      opt.dataset.league = c.league || "Standard";
+      opt.textContent = `${c.name}  (Lvl ${c.level} ${c.class})`;
+      sel.appendChild(opt);
+    });
+    showBanner(chars.length + " Charakter(e) geladen", "ok");
+  } catch (e) {
+    showBanner("Fehler beim Laden der Charaktere: " + e.message);
+  }
+}
+
+// ---------- Charakterwechsel -> Gear laden ----------
+document.getElementById("charSelect").addEventListener("change", async (e) => {
+  const name = e.target.value;
+  if (!name) return;
+  // Liga des gewählten Charakters merken (für Trade-Links)
+  const opt = e.target.options[e.target.selectedIndex];
+  currentLeague = opt?.dataset?.league || "Standard";
+  await loadGear(name);
+});
+
+async function loadGear(name) {
+  try {
+    const res = await fetch("/api/character-gear?name=" + encodeURIComponent(name));
+    const data = await res.json();
+
+    if (data.error) {
+      showBanner("Ausrüstung-Fehler (" + data.code + "): " + data.error);
+      return;
+    }
+    renderGear(data.items || []);
+    showBanner("Ausrüstung von " + name + " geladen", "ok");
+  } catch (e) {
+    showBanner("Fehler beim Laden der Ausrüstung: " + e.message);
+  }
+}
+
+// hält die vollen Item-Daten pro Slot (für Klick-Detailansicht + Vergleich)
+let equippedItems = {};
+
+// ---------- Gear ins HUD rendern ----------
+function renderGear(items) {
+  equippedItems = {};
+
+  // erst alle Slots leeren
+  document.querySelectorAll(".slot").forEach(slot => {
+    slot.classList.remove("filled", "better", "worse");
+    const n = slot.querySelector(".item-name");
+    n.textContent = "leer";
+    n.className = "item-name empty";
+    slot.querySelectorAll(".item-score, .item-meta, .item-img, .tap-hint").forEach(el => el.remove());
+    slot.onclick = null;
+  });
+
+  const stored = {};
+  items.forEach(it => {
+    const slotEl = document.querySelector(`.slot[data-slot="${it.slot}"]`);
+    if (!slotEl) return; // unbekannter Slot (Flask, Gem) ignorieren
+
+    equippedItems[it.slot] = it;
+
+    // echtes Item-Bild von der GGG-API einfügen (ganz oben)
+    if (it.icon) {
+      const img = document.createElement("img");
+      img.className = "item-img";
+      img.src = it.icon;
+      img.alt = it.name || it.typeLine || "";
+      img.loading = "lazy";
+      img.onerror = () => img.remove(); // falls Bild blockiert -> stillschweigend weg
+      slotEl.querySelector(".slot-label").after(img);
+    }
+
+    const nameEl = slotEl.querySelector(".item-name");
+    nameEl.textContent = it.name || it.typeLine || "(unbenannt)";
+    nameEl.className = "item-name rarity-" + (it.rarity ?? 0);
+    slotEl.classList.add("filled");
+
+    // Typ-Zeile (z.B. "Ashen Staff") als Meta
+    if (it.name && it.typeLine && it.name !== it.typeLine) {
+      const meta = document.createElement("span");
+      meta.className = "item-meta";
+      meta.textContent = it.typeLine;
+      nameEl.after(meta);
+    }
+
+    // Score aus den Mods schätzen (Life/Res)
+    const sc = scoreFromMods(it.all_mods || []);
+    it._score = sc;
+    if (sc > 0) {
+      const s = document.createElement("span");
+      s.className = "item-score";
+      s.textContent = "Score " + sc;
+      slotEl.appendChild(s);
+    }
+
+    // "Tippen für Details"-Hinweis + Klick-Handler
+    const hint = document.createElement("span");
+    hint.className = "tap-hint";
+    hint.textContent = "ℹ";
+    slotEl.appendChild(hint);
+    slotEl.onclick = () => showItem(it.slot);
+
+    stored[it.slot] = { name: nameEl.textContent, score: sc };
+  });
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+}
+
+// ============================================================
+//  ITEM-DETAIL POPUP (zeigt ALLE Stats)
+// ============================================================
+function showItem(slot) {
+  const it = equippedItems[slot];
+  if (!it) return;
+  const r = it.rarity ?? 0;
+
+  let html = `<div class="tt-header r${r}">
+    <button class="tt-close" onclick="closeItem()">×</button>
+    <div class="tt-name r${r}">${esc(it.name || it.typeLine || "(unbenannt)")}</div>`;
+  if (it.name && it.typeLine && it.name !== it.typeLine)
+    html += `<div class="tt-base">${esc(it.typeLine)}</div>`;
+  else if (it.baseType && it.baseType !== it.typeLine)
+    html += `<div class="tt-base">${esc(it.baseType)}</div>`;
+  if (it.icon) html += `<img class="tt-img" src="${esc(it.icon)}" onerror="this.remove()">`;
+  html += `</div>`;
+
+  // Eigenschaften (Schaden, Rüstung, Krit...)
+  if (it.properties && it.properties.length) {
+    html += `<div class="tt-section">`;
+    it.properties.forEach(p => {
+      html += `<div class="tt-prop"><span class="pn">${esc(p.name)}</span><span class="pv">${esc(p.value)}</span></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Anforderungen
+  if (it.requirements && it.requirements.length) {
+    html += `<div class="tt-section">`;
+    const reqStr = it.requirements.map(r => `${esc(r.name)} ${esc(r.value)}`).join(", ");
+    html += `<div class="tt-prop"><span class="pn">Benötigt</span><span class="pv">${reqStr}</span></div>`;
+    html += `</div>`;
+  }
+
+  // Mods (nach Typ getrennt + gefärbt)
+  const m = it.mods || {};
+  const modBlocks = [];
+  if (m.implicit && m.implicit.length) modBlocks.push(["implicit", m.implicit]);
+  const exp = [];
+  ["enchant","rune","explicit","crafted","fractured"].forEach(k => {
+    if (m[k] && m[k].length) m[k].forEach(x => exp.push([k, x]));
+  });
+
+  if (modBlocks.length || exp.length) {
+    html += `<div class="tt-section">`;
+    modBlocks.forEach(([cls, arr]) => {
+      arr.forEach(mod => html += `<div class="tt-mod ${cls}">${esc(mod)}</div>`);
+    });
+    if (modBlocks.length && exp.length) html += `<div class="tt-sep"></div>`;
+    exp.forEach(([cls, mod]) => html += `<div class="tt-mod ${cls}">${esc(mod)}</div>`);
+    html += `</div>`;
+  }
+
+  if (it.corrupted) html += `<div class="tt-corrupt">Korrumpiert</div>`;
+  if (it._score > 0) html += `<div class="tt-score">Exile-Eye Score: ${it._score}</div>`;
+
+  // BUILD-VERGLEICH: was fordert der Build für diesen Slot?
+  html += buildCompareBlock(slot, it);
+
+  // Trade-Button: sucht ein besseres Item für diesen Slot
+  const topStats = topWeightedStats(3);
+  html += `<a class="tt-trade" href="#" onclick="openTrade('${esc(slot)}');return false;">🔍 Besseres Item auf dem Trade suchen</a>`;
+  if (topStats.length) {
+    html += `<div class="tt-trade-hint">Wichtig für deinen Build: <b>${topStats.map(esc).join(", ")}</b><br>(auf der Trade-Seite als Stat-Filter eintragen)</div>`;
+  }
+
+  document.getElementById("tooltipBody").innerHTML = html;
+  document.getElementById("itemModal").classList.add("show");
+}
+
+function closeItem() {
+  document.getElementById("itemModal").classList.remove("show");
+}
+
+// Zeigt im Tooltip: was der importierte Build für DIESEN Slot fordert
+// vs. was das getragene Item liefert (grün = erfüllt, rot = fehlt/zu wenig)
+function buildCompareBlock(slot, item) {
+  // Unique-Anforderung?
+  if (buildSlotUniques[slot]) {
+    const want = buildSlotUniques[slot];
+    const have = (item.name || item.typeLine || "");
+    const ok = have.toLowerCase().includes(want.toLowerCase());
+    return `<div class="tt-build">
+      <h5>Build verlangt (Unique)</h5>
+      <div class="bld-unique">${esc(want)}</div>
+      <div class="bld-stat ${ok ? "bld-ok" : "bld-miss"}">
+        <span>${ok ? "✓ Du trägst dieses Unique" : "✗ Du trägst es noch nicht"}</span>
+      </div>
+    </div>`;
+  }
+
+  // Stat-Anforderungen?
+  const want = buildSlotStats[slot];
+  if (!want || Object.keys(want).length === 0) return "";
+
+  const have = item.parsed_stats || {};
+  // ele_res im Build vergleichen wir mit der Summe der getragenen Resis
+  const haveEle = (have.fire_res || 0) + (have.cold_res || 0) + (have.lightning_res || 0);
+
+  let rows = "";
+  for (const [key, need] of Object.entries(want)) {
+    let haveVal;
+    if (key === "ele_res") haveVal = haveEle;
+    else haveVal = have[key] || 0;
+    const ok = haveVal >= need;
+    rows += `<div class="bld-stat ${ok ? "bld-ok" : "bld-miss"}">
+      <span>${ok ? "✓" : "✗"} ${labelFor(key === "ele_res" ? "ele_res" : key)}</span>
+      <span class="bld-val">${haveVal} / ${need}</span>
+    </div>`;
+  }
+  return `<div class="tt-build"><h5>Build verlangt für diesen Slot</h5>${rows}</div>`;
+}
+
+// ============================================================
+//  TRADE-Integration (Weg A: vorausgefüllter Trade-Link)
+// ============================================================
+let currentLeague = "Standard";
+// pro Slot die Stats + Uniques aus dem importierten Build (wie Mobalytics)
+let buildSlotStats = {};
+let buildSlotUniques = {};
+(function loadSlotStats() {
+  try { buildSlotStats = JSON.parse(localStorage.getItem("exileEye_slotStats") || "{}"); }
+  catch { buildSlotStats = {}; }
+  try { buildSlotUniques = JSON.parse(localStorage.getItem("exileEye_slotUniques") || "{}"); }
+  catch { buildSlotUniques = {}; }
+})();
+
+// Zeigt oben an, welcher Build gerade aktiv ist (oder blendet die Leiste aus)
+function updateActiveBuildBar() {
+  const bar = document.getElementById("activeBuildBar");
+  const nameEl = document.getElementById("activeBuildName");
+  if (!bar) return;
+  const name = localStorage.getItem("exileEye_buildName");
+  const hasBuild = name && (Object.keys(buildSlotStats).length > 0 || Object.keys(buildSlotUniques).length > 0);
+  if (hasBuild) {
+    nameEl.textContent = "🧠 Aktiver Build: " + name;
+    bar.style.display = "flex";
+  } else {
+    bar.style.display = "none";
+  }
+}
+
+// Entfernt den importierten Build komplett (Gewichtung + Slot-Daten + Skills)
+function clearBuild() {
+  buildSlotStats = {};
+  buildSlotUniques = {};
+  localStorage.removeItem("exileEye_slotStats");
+  localStorage.removeItem("exileEye_slotUniques");
+  localStorage.removeItem("exileEye_buildName");
+  // Gewichtung auf "Ausgewogen" zurücksetzen
+  applyPreset("balanced");
+  // Skills/Charms-Sektionen ausblenden
+  document.getElementById("skillsSection").style.display = "none";
+  document.getElementById("consumablesSection").style.display = "none";
+  document.getElementById("buildResult").style.display = "none";
+  document.getElementById("buildCode").value = "";
+  // betroffene Slot-Markierungen im HUD entfernen
+  document.querySelectorAll(".slot").forEach(s => s.classList.remove("better","worse"));
+  updateActiveBuildBar();
+  showBanner("Build entfernt – Gewichtung zurückgesetzt", "ok");
+}
+
+async function openTrade(slot) {
+  try {
+    // Liga aus Trade-Einstellungen (oder vom Charakter, wenn "auto")
+    const leagueSel = document.getElementById("tradeLeague").value;
+    const league = (leagueSel === "auto") ? currentLeague : leagueSel;
+    const payload = {
+      slot,
+      league,
+      trade_status: document.getElementById("tradeStatus").value,
+      tolerance: parseInt(document.getElementById("tradeTolerance").value) || 0,
+    };
+
+    // 1. Unique-Item im Build für diesen Slot? -> nach Namen suchen
+    if (buildSlotUniques[slot]) {
+      payload.unique_name = buildSlotUniques[slot];
+    } else {
+      // 2. slot-genaue Stats aus dem Build (Mobalytics-Logik)
+      // 3. Fallback: globale Top-Gewichtung
+      let statsObj = buildSlotStats[slot];
+      if (!statsObj || Object.keys(statsObj).length === 0) {
+        statsObj = {};
+        topWeightedKeys(3).forEach(k => statsObj[k] = null);
+      }
+      payload.stats = statsObj;
+    }
+
+    const res = await fetch("/api/trade-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.open(data.url, "_blank");
+      if (data.is_unique) {
+        showBanner(`Trade-Suche geöffnet – Unique "${buildSlotUniques[slot]}"`, "ok");
+      } else {
+        const n = (data.applied_stats || []).length;
+        const fromBuild = buildSlotStats[slot] ? " (aus deinem Build)" : "";
+        showBanner(n > 0
+          ? `Trade-Suche geöffnet – ${n} Stat-Filter gesetzt${fromBuild}!`
+          : "Trade-Suche geöffnet – Stats als Filter eintragen & suchen", "ok");
+      }
+    } else {
+      showBanner("Trade-Link konnte nicht erstellt werden");
+    }
+  } catch (e) {
+    showBanner("Trade-Fehler: " + e.message);
+  }
+}
+
+// liefert die N höchstgewichteten Stat-KEYS (z.B. "life","cold_res")
+function topWeightedKeys(n) {
+  return Object.entries(currentWeights || {})
+    .filter(([k, v]) => v > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n)
+    .map(([k]) => k);
+}
+
+// dieselben als lesbare Labels (für die Hinweis-Anzeige)
+function topWeightedStats(n) {
+  return topWeightedKeys(n).map(labelFor);
+}
+
+// kleine HTML-Escape-Hilfe (Sicherheit + saubere Anzeige)
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c =>
+    ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+}
+
+// entfernt GGG-Tags [Tag|Anzeige] -> Anzeige
+function cleanMod(m) {
+  return String(m).replace(/\[([^\|\]]+)\|([^\]]+)\]/g, "$2");
+}
+
+// Score-Schätzung aus Mod-Texten, nutzt die AKTUELLE Gewichtung.
+// Summiert ALLE Vorkommen (z.B. zwei Life-Mods) korrekt.
+function scoreFromMods(mods) {
+  const w = currentWeights || {};
+  let score = 0;
+  const add = (text, regex, weight) => {
+    let mm;
+    const re = new RegExp(regex.source, regex.flags.includes("g") ? regex.flags : regex.flags + "g");
+    while ((mm = re.exec(text)) !== null) score += parseInt(mm[1]) * (weight ?? 0);
+  };
+  mods.forEach(raw => {
+    const m = cleanMod(raw);
+    add(m, /\+(\d+)\s+to\s+(?:maximum\s+)?Life/i,                       w.life ?? 1.0);
+    add(m, /\+(\d+)%?\s+to\s+Fire\s+Resistance/i,                       w.fire_res ?? 0.8);
+    add(m, /\+(\d+)%?\s+to\s+Cold\s+Resistance/i,                       w.cold_res ?? 0.8);
+    add(m, /\+(\d+)%?\s+to\s+Lightning\s+Resistance/i,                  w.lightning_res ?? 0.8);
+    add(m, /\+(\d+)%?\s+to\s+Chaos\s+Resistance/i,                      w.chaos_res ?? 1.0);
+    add(m, /(\d+)%?\s+(?:to\s+(?:maximum\s+)?|increased\s+)Energy\s+Shield(?!\s+Recharge)/i, w.energy_shield ?? 0.6);
+    add(m, /(\d+)%\s+increased\s+Spell\s+Damage/i,                      w.spell_damage ?? 0);
+    add(m, /(\d+)%\s+increased\s+Movement\s+Speed/i,                    w.movement_speed ?? 0);
+    add(m, /(\d+)%\s+increased\s+Armour/i,                              w.armour ?? 0);
+  });
+  return Math.round(score);
+}
+
+// ============================================================
+//  GEWICHTUNG (Regler + Vorlagen + Build-Import)
+// ============================================================
+const STAT_KEYS = ["life","fire_res","cold_res","lightning_res","chaos_res","energy_shield","crit_chance","spell_damage","movement_speed","armour"];
+const WEIGHT_STORAGE = "exileEye_weights";
+
+// Vorlagen
+const PRESETS = {
+  balanced: { life:1.0, fire_res:0.8, cold_res:0.8, lightning_res:0.8, chaos_res:1.0, energy_shield:0.6, crit_chance:0.5, spell_damage:0.5, movement_speed:0.4, armour:0.4 },
+  life:     { life:1.0, fire_res:0.6, cold_res:0.6, lightning_res:0.6, chaos_res:0.7, energy_shield:0.1, crit_chance:0.3, spell_damage:0.3, movement_speed:0.4, armour:0.5 },
+  es:       { life:0.2, fire_res:0.7, cold_res:0.7, lightning_res:0.7, chaos_res:0.8, energy_shield:1.0, crit_chance:0.4, spell_damage:0.5, movement_speed:0.4, armour:0.2 },
+  resi:     { life:0.7, fire_res:1.0, cold_res:1.0, lightning_res:1.0, chaos_res:1.0, energy_shield:0.4, crit_chance:0.2, spell_damage:0.3, movement_speed:0.3, armour:0.5 },
+};
+
+let currentWeights = {};
+
+// Regler aufbauen
+function buildSliders() {
+  const c = document.getElementById("weightSliders");
+  c.innerHTML = "";
+  STAT_KEYS.forEach(k => {
+    const row = document.createElement("div");
+    row.className = "weight-row";
+    row.innerHTML = `
+      <span class="wlabel">${labelFor(k)}</span>
+      <input type="range" min="0" max="1" step="0.05" value="${currentWeights[k] ?? 0}" data-key="${k}">
+      <span class="wval" id="wv_${k}">${(currentWeights[k] ?? 0).toFixed(2)}</span>`;
+    c.appendChild(row);
+    row.querySelector("input").addEventListener("input", (e) => {
+      const key = e.target.dataset.key;
+      currentWeights[key] = parseFloat(e.target.value);
+      document.getElementById("wv_" + key).textContent = currentWeights[key].toFixed(2);
+      saveWeights();
+      clearActivePreset();
+      // wenn gerade ein Vergleich offen ist, neu rechnen wäre möglich
+    });
+  });
+}
+
+function applyPreset(name) {
+  currentWeights = { ...PRESETS[name] };
+  buildSliders();
+  saveWeights();
+  document.querySelectorAll(".preset-btn").forEach(b =>
+    b.classList.toggle("active", b.dataset.preset === name));
+}
+
+function clearActivePreset() {
+  document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
+}
+
+function saveWeights() { localStorage.setItem(WEIGHT_STORAGE, JSON.stringify(currentWeights)); }
+
+function loadWeights() {
+  const saved = localStorage.getItem(WEIGHT_STORAGE);
+  if (saved) {
+    try { currentWeights = JSON.parse(saved); } catch { currentWeights = { ...PRESETS.balanced }; }
+  } else {
+    currentWeights = { ...PRESETS.balanced };
+    document.querySelector('.preset-btn[data-preset="balanced"]')?.classList.add("active");
+  }
+  buildSliders();
+}
+
+// Vorlagen-Buttons verdrahten
+document.querySelectorAll(".preset-btn").forEach(b => {
+  b.addEventListener("click", () => applyPreset(b.dataset.preset));
+});
+
+// Build importieren
+async function importBuild() {
+  const code = document.getElementById("buildCode").value.trim();
+  const out = document.getElementById("buildResult");
+  if (!code) { showBanner("Bitte erst einen Link, PoB-Code oder Gear-Text einfügen"); return; }
+
+  // freundlicher Hinweis bei Mobalytics (geht nicht direkt wegen Cloudflare)
+  if (code.includes("mobalytics.gg")) {
+    out.style.display = "block";
+    out.className = "err";
+    out.innerHTML = "Mobalytics blockiert direkten Zugriff (Cloudflare). 💡 <b>Lösung:</b> "
+      + "Öffne den Build, markiere &amp; kopiere den Gear-/Item-Text und füge ihn hier ein – "
+      + "das funktioniert garantiert!";
+    return;
+  }
+
+  out.style.display = "block";
+  out.className = "";
+  out.textContent = "Importiere…";
+
+  try {
+    const res = await fetch("/api/import-build", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      out.className = "err";
+      let msg = "Fehler: " + (data.detail || data.error);
+      out.innerHTML = esc(msg);
+      return;
+    }
+
+    // abgeleitete Gewichte übernehmen
+    currentWeights = { ...currentWeights, ...data.weights };
+    buildSliders();
+    saveWeights();
+    clearActivePreset();
+
+    // SLOT-genaue Stats + Uniques merken (für die Mobalytics-artige Trade-Suche)
+    buildSlotStats = data.slot_stats || {};
+    buildSlotUniques = data.slot_uniques || {};
+    localStorage.setItem("exileEye_slotStats", JSON.stringify(buildSlotStats));
+    localStorage.setItem("exileEye_slotUniques", JSON.stringify(buildSlotUniques));
+
+    // Build-Name merken + Anzeige aktualisieren
+    const bInfo = data.build_info || {};
+    const bName = bInfo.name || [bInfo.class, bInfo.ascendancy].filter(Boolean).join(" ") || "Importierter Build";
+    localStorage.setItem("exileEye_buildName", bName);
+    updateActiveBuildBar();
+
+    // Skills/Gems + Charms/Flasks anzeigen
+    renderSkills(data.skills || []);
+    renderConsumables(data.flasks || [], data.charms || []);
+
+    const info = data.build_info || {};
+    const infoStr = [info.class, info.ascendancy, info.level ? "Lvl " + info.level : ""]
+      .filter(Boolean).join(" · ");
+    const srcLabel = {
+      "build-datei":".build-Datei", "pobb.in":"pobb.in", "pob-code":"PoB-Code",
+      "maxroll":"Maxroll", "text":"Gear-Text"
+    }[data.source] || data.source;
+
+    // welche Stats wurden erkannt?
+    const found = Object.entries(data.stat_counts || {})
+      .filter(([k,v]) => v > 0)
+      .map(([k,v]) => labelFor(k))
+      .join(", ");
+
+    const buildName = info.name ? esc(info.name) : "";
+    const hasPassives = data.passive_hints && Object.keys(data.passive_hints).length > 0;
+    out.className = "ok";
+    out.innerHTML = `✓ Import erfolgreich <span style="opacity:.7">(Quelle: ${esc(srcLabel)})</span>`
+      + (buildName ? `<br>Build: ${buildName}` : "")
+      + (infoStr ? `<br>${esc(infoStr)}` : "")
+      + (found ? `<br>Erkannte Stats: ${esc(found)}` : "")
+      + (hasPassives ? `<br><span style="opacity:.8">🌳 Passiv-Baum mit einbezogen</span>` : "")
+      + `<br><b>Gewichtung automatisch angepasst!</b>`;
+    showBanner("Build-Gewichtung übernommen", "ok");
+  } catch (e) {
+    out.className = "err";
+    out.textContent = "Import fehlgeschlagen: " + e.message;
+  }
+}
+
+// ============================================================
+//  Item-Scan mit Crop-Editor (Foto -> Rahmen -> OCR -> Score)
+// ============================================================
+let cropImg = null;          // geladenes Bild (Image-Objekt)
+let cropRect = null;         // {x,y,w,h} im Canvas-Koordinaten
+
+document.getElementById("fileInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = () => {
+    cropImg = img;
+    setupCropper(img);
+  };
+  img.onerror = () => showBanner("Bild konnte nicht geladen werden");
+  img.src = URL.createObjectURL(file);
+  document.getElementById("scanResult").style.display = "none";
+  document.getElementById("previewImg").style.display = "none";
+});
+
+// Umschalten Auto/Manuell nach Foto-Wahl -> Ansicht neu aufbauen
+document.getElementById("autoCropToggle").addEventListener("change", () => {
+  if (cropImg) setupCropper(cropImg);
+});
+
+// Canvas vorbereiten + Auto-Rahmen vorschlagen
+function setupCropper(img) {
+  const area = document.getElementById("cropArea");
+  const canvas = document.getElementById("cropCanvas");
+  const ctx = canvas.getContext("2d");
+  const btn = document.getElementById("analyzeBtn");
+  btn.classList.remove("hidden");
+
+  // Auto-Crop aktiv? -> manuellen Rahmen ausblenden, Backend macht den Zuschnitt
+  const autoOn = document.getElementById("autoCropToggle").checked;
+  if (autoOn) {
+    area.style.display = "none";
+    document.getElementById("cropHint").style.display = "none";
+    // kleine Vorschau zeigen
+    const prev = document.getElementById("previewImg");
+    prev.src = img.src; prev.style.display = "block";
+    btn.textContent = "🔍 Item analysieren (Auto-Zuschnitt)";
+    return;   // kein manueller Cropper nötig
+  }
+
+  document.getElementById("previewImg").style.display = "none";
+  area.style.display = "block";
+  document.getElementById("cropHint").style.display = "block";
+  btn.textContent = "🔍 Zugeschnittenes Item analysieren";
+
+  // Verfügbare Anzeigebreite ermitteln (Section-Breite, max 600)
+  const avail = Math.min(600, area.parentElement.clientWidth - 36 || 360);
+  const scale = Math.min(1, avail / img.width);
+  // Canvas-Pixel = Anzeige-Pixel (1:1), damit cropBox-Koordinaten exakt passen
+  canvas.width = Math.round(img.width * scale);
+  canvas.height = Math.round(img.height * scale);
+  // feste CSS-Größe = Canvas-Größe (kein zusätzliches Skalieren durch max-width)
+  canvas.style.width = canvas.width + "px";
+  canvas.style.height = canvas.height + "px";
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  // Auto-Vorschlag: dunkelste rechteckige Region finden (PoE-Tooltip ist dunkel)
+  cropRect = autoDetectTooltip(ctx, canvas.width, canvas.height);
+  drawCropBox();
+}
+
+// Sucht den dunkelsten zusammenhängenden Bereich (= wahrscheinl. Tooltip)
+function autoDetectTooltip(ctx, W, H) {
+  try {
+    const data = ctx.getImageData(0, 0, W, H).data;
+    const cols = 24, rows = 24;
+    const cw = W / cols, ch = H / rows;
+    const dark = []; // Helligkeit pro Zelle
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        let sum = 0, n = 0;
+        for (let y = Math.floor(r*ch); y < (r+1)*ch; y += 4) {
+          for (let x = Math.floor(c*cw); x < (c+1)*cw; x += 4) {
+            const i = (y*W + x) * 4;
+            sum += (data[i]+data[i+1]+data[i+2]) / 3; n++;
+          }
+        }
+        dark.push(sum/(n||1));
+      }
+    }
+    // dunkle Zellen finden, Bounding-Box drumrum
+    const thresh = 90;
+    let minC=cols, maxC=0, minR=rows, maxR=0, found=false;
+    for (let r=0;r<rows;r++) for (let c=0;c<cols;c++) {
+      if (dark[r*cols+c] < thresh) {
+        found=true;
+        minC=Math.min(minC,c); maxC=Math.max(maxC,c);
+        minR=Math.min(minR,r); maxR=Math.max(maxR,r);
+      }
+    }
+    // Auto-Erkennung nur nutzen, wenn der dunkle Bereich NICHT fast das
+    // ganze Bild ist (sonst lieber den handlichen mittigen Rahmen)
+    const coversW = (maxC-minC+1)/cols, coversH = (maxR-minR+1)/rows;
+    if (found && (maxC-minC)>=2 && (maxR-minR)>=2 &&
+        coversW < 0.92 && coversH < 0.92) {
+      let x = minC*cw, y = minR*ch;
+      let w = (maxC-minC+1)*cw, h = (maxR-minR+1)*ch;
+      x = Math.max(0, x); y = Math.max(0, y);
+      w = Math.min(w, W - x); h = Math.min(h, H - y);
+      return { x, y, w, h };
+    }
+  } catch(e) { /* CORS o.ä. -> Fallback */ }
+  // Fallback: handlicher mittiger Rahmen (60% breit, 45% hoch - gut greifbar)
+  return { x: W*0.20, y: H*0.27, w: W*0.60, h: H*0.45 };
+}
+
+function drawCropBox() {
+  const canvas = document.getElementById("cropCanvas");
+  const box = document.getElementById("cropBox");
+  const r = cropRect;
+  box.style.left = r.x + "px";
+  box.style.top = r.y + "px";
+  box.style.width = r.w + "px";
+  box.style.height = r.h + "px";
+}
+
+// --- Drag & Resize des Rahmens (Maus + Touch) ---
+(function enableCropInteraction() {
+  const box = document.getElementById("cropBox");
+  let mode = null, startX, startY, startRect;
+
+  function pos(e) {
+    const t = e.touches ? e.touches[0] : e;
+    const canvas = document.getElementById("cropCanvas");
+    const rect = canvas.getBoundingClientRect();
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+  }
+  function down(e) {
+    if (!cropRect) return;
+    const target = e.target;
+    if (target.classList.contains("crop-handle")) {
+      mode = "resize-" + target.classList[1];
+    } else { mode = "move"; }
+    const p = pos(e);
+    startX = p.x; startY = p.y; startRect = {...cropRect};
+    e.preventDefault();
+  }
+  function move(e) {
+    if (!mode) return;
+    const p = pos(e);
+    const dx = p.x - startX, dy = p.y - startY;
+    const canvas = document.getElementById("cropCanvas");
+    let r = {...startRect};
+    if (mode === "move") { r.x += dx; r.y += dy; }
+    else if (mode === "resize-se") { r.w += dx; r.h += dy; }
+    else if (mode === "resize-ne") { r.y += dy; r.w += dx; r.h -= dy; }
+    else if (mode === "resize-sw") { r.x += dx; r.w -= dx; r.h += dy; }
+    else if (mode === "resize-nw") { r.x += dx; r.y += dy; r.w -= dx; r.h -= dy; }
+    // Grenzen + Mindestgröße
+    r.w = Math.max(30, r.w); r.h = Math.max(30, r.h);
+    r.x = Math.max(0, Math.min(r.x, canvas.width - r.w));
+    r.y = Math.max(0, Math.min(r.y, canvas.height - r.h));
+    cropRect = r; drawCropBox();
+    e.preventDefault();
+  }
+  function up() { mode = null; }
+
+  box.addEventListener("mousedown", down);
+  box.addEventListener("touchstart", down, {passive:false});
+  window.addEventListener("mousemove", move);
+  window.addEventListener("touchmove", move, {passive:false});
+  window.addEventListener("mouseup", up);
+  window.addEventListener("touchend", up);
+})();
+
+async function analyzeImage() {
+  if (!cropImg) { showBanner("Bitte erst ein Foto wählen"); return; }
+  const btn = document.getElementById("analyzeBtn");
+  const result = document.getElementById("scanResult");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span> Analysiere…';
+
+  const autoOn = document.getElementById("autoCropToggle").checked;
+  let blob, autocropFlag;
+
+  if (autoOn) {
+    // Auto-Crop: ganzes Bild senden, Backend findet den Tooltip selbst
+    const full = document.createElement("canvas");
+    full.width = cropImg.width; full.height = cropImg.height;
+    full.getContext("2d").drawImage(cropImg, 0, 0);
+    blob = await new Promise(res => full.toBlob(res, "image/png"));
+    autocropFlag = "1";
+  } else {
+    // Manueller Rahmen: nur den zugeschnittenen Bereich senden
+    if (!cropRect) { showBanner("Bitte Rahmen ziehen"); btn.disabled=false; return; }
+    const canvas = document.getElementById("cropCanvas");
+    const sx = cropImg.width / canvas.width;
+    const sy = cropImg.height / canvas.height;
+    const out = document.createElement("canvas");
+    out.width = Math.round(cropRect.w * sx);
+    out.height = Math.round(cropRect.h * sy);
+    out.getContext("2d").drawImage(
+      cropImg,
+      cropRect.x * sx, cropRect.y * sy, cropRect.w * sx, cropRect.h * sy,
+      0, 0, out.width, out.height
+    );
+    blob = await new Promise(res => out.toBlob(res, "image/png"));
+    autocropFlag = "0";
+  }
+
+  const fd = new FormData();
+  fd.append("image", blob, "scan.png");
+  fd.append("weights", JSON.stringify(currentWeights)); // aktuelle Gewichtung mitschicken
+  fd.append("autocrop", autocropFlag);
+  fd.append("game_lang", document.getElementById("gameLang").value);
+
+  try {
+    const res = await fetch("/api/analyze", { method: "POST", body: fd });
+    const data = await res.json();
+
+    if (data.error) {
+      showBanner("OCR-Fehler: " + data.error + (data.detail ? " – " + data.detail : ""));
+      result.style.display = "none";
+      return;
+    }
+
+    // Scan-Ergebnis merken (für den Vergleich)
+    lastScan = data;
+
+    let html = `<div class="score-big">${data.score}</div>`;
+    const stats = data.stats || {};
+    if (Object.keys(stats).length === 0) {
+      html += `<p style="color:var(--text-dim);text-align:center">Keine Stats erkannt – Foto schärfer/näher versuchen.</p>`;
+    } else {
+      for (const [k, v] of Object.entries(stats)) {
+        html += `<div class="stat-row"><span>${labelFor(k)}</span><span>${v}</span></div>`;
+      }
+    }
+    result.innerHTML = html;
+    result.style.display = "block";
+
+    // Slot-Dropdown zeigen + Auto-Vorschlag setzen
+    const box = document.getElementById("scanSlotBox");
+    const sel = document.getElementById("scanSlotSelect");
+    const hint = document.getElementById("slotAutoHint");
+    box.style.display = "block";
+
+    if (data.guessed_slot) {
+      sel.value = data.guessed_slot;
+      hint.textContent = "(automatisch erkannt: " + slotLabel(data.guessed_slot) + " – ggf. korrigieren)";
+      hint.style.color = "var(--green)";
+      runCompare(); // direkt vergleichen
+    } else {
+      sel.value = "";
+      hint.textContent = "(nicht erkannt – bitte manuell wählen)";
+      hint.style.color = "var(--text-dim)";
+      document.getElementById("comparePanel").style.display = "none";
+    }
+
+    const cropMsg = data.auto_cropped ? " 🤖 (Tooltip auto-gefunden)" : "";
+    showBanner("Analyse fertig – Score " + data.score + cropMsg, "ok");
+  } catch (e) {
+    showBanner("Analyse fehlgeschlagen: " + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "🔍 Analysieren";
+  }
+}
+
+// ============================================================
+//  SCAN-TO-SLOT VERGLEICH (Alt vs. Neu)
+// ============================================================
+let lastScan = null;
+
+function runCompare() {
+  const slot = document.getElementById("scanSlotSelect").value;
+  const panel = document.getElementById("comparePanel");
+  if (!slot || !lastScan) { panel.style.display = "none"; return; }
+
+  const oldItem = equippedItems[slot];          // getragenes Item
+  const newStats = lastScan.stats || {};        // gescannte Stats
+  const newScore = lastScan.score || 0;
+  const oldStats = oldItem ? (oldItem.parsed_stats || {}) : {};
+  const oldScore = oldItem ? (oldItem._score || 0) : 0;
+
+  // alle vorkommenden Stat-Keys sammeln
+  const keys = [...new Set([...Object.keys(oldStats), ...Object.keys(newStats)])];
+
+  // --- ALT-Spalte ---
+  let oldHtml = `<h4>Aktuell getragen</h4>`;
+  if (oldItem) {
+    oldHtml += `<div class="cmp-name rarity-${oldItem.rarity ?? 0}">${esc(oldItem.name || oldItem.typeLine || "(unbenannt)")}</div>`;
+    oldHtml += `<div class="cmp-score">${oldScore}</div>`;
+    keys.forEach(k => {
+      const v = oldStats[k] ?? 0;
+      oldHtml += `<div class="cmp-stat"><span>${labelFor(k)}</span><span class="v">${v || "–"}</span></div>`;
+    });
+  } else {
+    oldHtml += `<div class="cmp-empty-old">Slot ist leer</div>`;
+  }
+
+  // --- NEU-Spalte (mit Differenz-Pfeilen) ---
+  let newHtml = `<h4>Gescanntes Item</h4>`;
+  newHtml += `<div class="cmp-name" style="color:var(--gold)">Neuer Fund</div>`;
+  newHtml += `<div class="cmp-score">${newScore}</div>`;
+  keys.forEach(k => {
+    const nv = newStats[k] ?? 0;
+    const ov = oldStats[k] ?? 0;
+    const diff = nv - ov;
+    let diffStr = "";
+    if (diff > 0) diffStr = ` <span class="cmp-diff-pos">(+${diff})</span>`;
+    else if (diff < 0) diffStr = ` <span class="cmp-diff-neg">(${diff})</span>`;
+    newHtml += `<div class="cmp-stat"><span>${labelFor(k)}</span><span class="v">${nv || "–"}${diffStr}</span></div>`;
+  });
+
+  // --- Urteil ---
+  const scoreDiff = newScore - oldScore;
+  let verdict, vclass;
+  if (!oldItem) { verdict = `✓ Slot ist leer – ausrüsten! (Score ${newScore})`; vclass = "better"; }
+  else if (scoreDiff > 0)  { verdict = `▲ BESSER  (+${scoreDiff} Score)`; vclass = "better"; }
+  else if (scoreDiff < 0)  { verdict = `▼ SCHLECHTER  (${scoreDiff} Score)`; vclass = "worse"; }
+  else                     { verdict = `= Gleichwertig`; vclass = "equal"; }
+
+  panel.innerHTML = `
+    <div class="cmp-grid">
+      <div class="cmp-col old">${oldHtml}</div>
+      <div class="cmp-arrow">→</div>
+      <div class="cmp-col new">${newHtml}</div>
+    </div>
+    <div class="cmp-verdict ${vclass}">${verdict}</div>`;
+  panel.style.display = "block";
+
+  // betroffenen Slot im HUD aufleuchten lassen
+  document.querySelectorAll(".slot").forEach(s => s.classList.remove("better", "worse"));
+  const slotEl = document.querySelector(`.slot[data-slot="${slot}"]`);
+  if (slotEl) {
+    slotEl.classList.add(scoreDiff > 0 || !oldItem ? "better" : (scoreDiff < 0 ? "worse" : ""));
+    slotEl.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+// ============================================================
+//  SKILLS / GEMS + CHARMS / FLASKS anzeigen
+// ============================================================
+let allSkills = [];   // gemerkt für Klick-Detailansicht
+
+function renderSkills(skills) {
+  allSkills = skills || [];
+  const sec = document.getElementById("skillsSection");
+  const list = document.getElementById("skillsList");
+  if (!skills.length) { sec.style.display = "none"; return; }
+  list.innerHTML = "";
+  skills.forEach((s, idx) => {
+    const g = document.createElement("div");
+    g.className = "skill-group";
+    const mainTags = (s.tags || []).map(t => `<span class="gem-tag">${esc(t)}</span>`).join("");
+    const lvl = s.level ? `<span class="gem-lvl">ab Lvl ${s.level}</span>` : "";
+    let html = `<div class="skill-main" onclick="showGem(${idx},-1)" style="cursor:pointer">
+        <span class="gem-dot"></span>${esc(s.skill)} ${mainTags} ${lvl}
+        <span style="margin-left:auto;font-size:11px;opacity:.5">ℹ</span></div>`;
+    if (s.supports && s.supports.length) {
+      html += `<div class="skill-supports">`;
+      s.supports.forEach((sup, si) => {
+        html += `<span class="support-chip" onclick="showGem(${idx},${si})">${esc(sup.name)}</span>`;
+      });
+      html += `</div>`;
+    }
+    g.innerHTML = html;
+    list.appendChild(g);
+  });
+  sec.style.display = "block";
+}
+
+// Gem-Detail-Popup (nutzt das vorhandene itemModal)
+function showGem(skillIdx, supIdx) {
+  const s = allSkills[skillIdx];
+  if (!s) return;
+  const gem = supIdx < 0 ? { name: s.skill, tags: s.tags, level: s.level, is_support: false }
+                         : { ...s.supports[supIdx], is_support: true };
+  const typeLabel = gem.is_support ? "Support-Gemme" : "Skill-Gemme";
+  const typeColor = gem.is_support ? "#9ab8d8" : "#f0c060";
+
+  let html = `<div class="tt-header r0" style="border-bottom:1px solid var(--border)">
+    <button class="tt-close" onclick="closeItem()">×</button>
+    <div class="tt-name" style="color:${typeColor}">${esc(gem.name)}</div>
+    <div class="tt-base">${typeLabel}${gem.level ? " · ab Level " + gem.level : ""}</div>
+  </div>`;
+  if (gem.tags && gem.tags.length) {
+    html += `<div class="tt-section"><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    gem.tags.forEach(t => html += `<span class="gem-tag">${esc(t)}</span>`);
+    html += `</div></div>`;
+  } else {
+    html += `<div class="tt-section"><span style="color:var(--text-dim);font-size:12px">Keine besonderen Tags erkannt</span></div>`;
+  }
+  // bei Skill-Gem: zugehörige Supports anzeigen
+  if (!gem.is_support && s.supports && s.supports.length) {
+    html += `<div class="tt-section"><div style="font-size:11px;color:var(--text-dim);margin-bottom:5px">UNTERSTÜTZUNGS-GEMMEN</div>`;
+    s.supports.forEach(sup => html += `<div class="tt-mod" style="color:#9ab8d8">+ ${esc(sup.name)}</div>`);
+    html += `</div>`;
+  }
+  document.getElementById("tooltipBody").innerHTML = html;
+  document.getElementById("itemModal").classList.add("show");
+}
+
+function renderConsumables(flasks, charms) {
+  const sec = document.getElementById("consumablesSection");
+  const list = document.getElementById("consumablesList");
+  if (!flasks.length && !charms.length) { sec.style.display = "none"; return; }
+  let html = "";
+  if (flasks.length) {
+    html += `<div class="consum-label">Flasks</div><div class="consum-row">`;
+    flasks.forEach(f => html += `<span class="consum-chip flask">🧪 ${esc(f)}</span>`);
+    html += `</div>`;
+  }
+  if (charms.length) {
+    html += `<div class="consum-label">Charms</div><div class="consum-row">`;
+    charms.forEach(c => html += `<span class="consum-chip charm">🔮 ${esc(c)}</span>`);
+    html += `</div>`;
+  }
+  list.innerHTML = html;
+  sec.style.display = "block";
+}
+
+function slotLabel(slot) {
+  const m = {
+    Weapon:"Waffe", Offhand:"Nebenhand", Helm:"Helm", BodyArmour:"Rüstung",
+    Gloves:"Handschuhe", Boots:"Stiefel", Belt:"Gürtel", Amulet:"Amulett",
+    Ring:"Ring L", Ring2:"Ring R",
+  };
+  return m[slot] || slot;
+}
+
+function labelFor(key) {
+  const map = {
+    life: "Leben", mana: "Mana", fire_res: "Feuer-Res", cold_res: "Kälte-Res",
+    lightning_res: "Blitz-Res", chaos_res: "Chaos-Res",
+    energy_shield: "Energieschild", crit_chance: "Krit-Chance",
+    spell_damage: "Zauberschaden", movement_speed: "Lauftempo", armour: "Rüstung",
+    ele_res: "Elem-Res (gesamt)", spell_skills: "+Skill-Level", spirit: "Spirit",
+    eva_es: "Eva+ES %", crit_dmg_bonus: "Krit-Schaden",
+  };
+  return map[key] || key;
+}
+
+// ============================================================
+//  PWA: Service Worker registrieren + Installations-Hinweis
+// ============================================================
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {
+      /* SW braucht http(s) - bei file:// oder ohne Server ignorieren */
+    });
+  });
+}
+
+// "Zum Startbildschirm hinzufügen"-Button (Android/Chrome)
+let deferredInstall = null;
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredInstall = e;
+  const btn = document.getElementById("installBtn");
+  if (btn) btn.style.display = "inline-block";
+});
+
+function installApp() {
+  if (!deferredInstall) {
+    // iPhone (Safari) unterstützt beforeinstallprompt nicht -> Anleitung zeigen
+    showBanner("Am iPhone: Teilen-Symbol ▱ → „Zum Home-Bildschirm“", "ok");
+    return;
+  }
+  deferredInstall.prompt();
+  deferredInstall.userChoice.finally(() => {
+    deferredInstall = null;
+    const btn = document.getElementById("installBtn");
+    if (btn) btn.style.display = "none";
+  });
+}
+
+// Start
+init();
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0875da5bdd08f33',t:'MTc4MDkxNjE0Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
