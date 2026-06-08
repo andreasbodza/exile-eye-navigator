@@ -522,6 +522,12 @@
   <h2 style="color:var(--gold);letter-spacing:1px">Willkommen, Exile</h2>
   <p>Melde dich mit deinem Path&nbsp;of&nbsp;Exile&nbsp;Account an,<br>um deine Charaktere und Ausrüstung zu laden.</p>
   <a href="/login" class="btn primary">🔐 Mit GGG anmelden</a>
+  <div style="margin-top:14px">
+    <button class="btn" onclick="loadDemo()" style="font-size:12px">🎮 Demo ausprobieren (ohne Login)</button>
+    <p style="font-size:11px;color:var(--text-dim);margin-top:8px">
+      Probier die App mit Beispiel-Charakter aus – Scanner, Build-Vergleich &amp; HUD live testen!
+    </p>
+  </div>
 </div>
 
 <!-- HAUPT-ANSICHT (nach Login) -->
@@ -829,6 +835,62 @@ async function init() {
   } catch (e) {
     showBanner("Server nicht erreichbar. Läuft app.py?");
   }
+}
+
+// ============================================================
+//  DEMO-MODUS (zum Ausprobieren ohne GGG-Login)
+// ============================================================
+function loadDemo() {
+  // Ansicht auf "eingeloggt" umschalten
+  document.getElementById("loginView").classList.add("hidden");
+  document.getElementById("mainView").classList.remove("hidden");
+  document.getElementById("logoutBtn").classList.remove("hidden");
+  loadWeights();
+
+  // Demo-Charakter ins Dropdown
+  const sel = document.getElementById("charSelect");
+  sel.innerHTML = '<option value="demo">🎮 Demo-Charakter (Lvl 90 Sorceress)</option>';
+  currentLeague = "Standard";
+
+  // Beispiel-Ausrüstung (deutsche Items, gemischte Qualität)
+  const demoItems = [
+    { slot:"Weapon", name:"Klingender Stab", typeLine:"Klingender Stab", baseType:"Klingender Stab",
+      icon:"", rarity:2, corrupted:false,
+      properties:[{name:"Zauberschaden",value:"120%"}], requirements:[{name:"Level",value:"60"}],
+      mods:{implicit:[],enchant:[],rune:[],explicit:["34% erhöhter Zauberschaden","+6 zu Stufen aller Zauberfertigkeiten"],crafted:[],fractured:[]},
+      all_mods:["34% erhöhter Zauberschaden","+6 zu Stufen aller Zauberfertigkeiten"],
+      parsed_stats:{spell_damage:34, spell_skills:6} },
+    { slot:"Helm", name:"Alte Sturmhaube", typeLine:"Sturmhaube", baseType:"Sturmhaube",
+      icon:"", rarity:2, corrupted:false, properties:[{name:"Rüstung",value:"180"}], requirements:[{name:"Level",value:"45"}],
+      mods:{implicit:[],enchant:[],rune:[],explicit:["+45 zu maximalem Leben","+25% zu Feuerwiderstand"],crafted:[],fractured:[]},
+      all_mods:["+45 zu maximalem Leben","+25% zu Feuerwiderstand"],
+      parsed_stats:{life:45, fire_res:25} },
+    { slot:"BodyArmour", name:"Robe des Lehrlings", typeLine:"Seidenrobe", baseType:"Seidenrobe",
+      icon:"", rarity:1, corrupted:false, properties:[{name:"Energieschild",value:"95"}], requirements:[{name:"Level",value:"55"}],
+      mods:{implicit:[],enchant:[],rune:[],explicit:["+96 zu maximalem Energieschild","+30% zu Kältewiderstand"],crafted:[],fractured:[]},
+      all_mods:["+96 zu maximalem Energieschild","+30% zu Kältewiderstand"],
+      parsed_stats:{energy_shield:96, cold_res:30} },
+    { slot:"Gloves", name:"Schäbige Handschuhe", typeLine:"Stoffhandschuhe", baseType:"Stoffhandschuhe",
+      icon:"", rarity:0, corrupted:false, properties:[], requirements:[{name:"Level",value:"30"}],
+      mods:{implicit:[],enchant:[],rune:[],explicit:["+12 zu maximalem Mana"],crafted:[],fractured:[]},
+      all_mods:["+12 zu maximalem Mana"], parsed_stats:{mana:12} },
+    { slot:"Boots", name:"Sekhema-Sandalen", typeLine:"Sandalen", baseType:"Sandalen",
+      icon:"", rarity:2, corrupted:false, properties:[], requirements:[{name:"Level",value:"50"}],
+      mods:{implicit:[],enchant:[],rune:[],explicit:["+80 zu maximalem Leben","35% erhöhte Bewegungsgeschwindigkeit","+40% zu Blitzwiderstand"],crafted:[],fractured:[]},
+      all_mods:["+80 zu maximalem Leben","35% erhöhte Bewegungsgeschwindigkeit","+40% zu Blitzwiderstand"],
+      parsed_stats:{life:80, movement_speed:35, lightning_res:40} },
+    { slot:"Amulet", name:"Solar-Amulett", typeLine:"Solar-Amulett", baseType:"Solar-Amulett",
+      icon:"", rarity:2, corrupted:false, properties:[], requirements:[{name:"Level",value:"40"}],
+      mods:{implicit:[],enchant:[],rune:[],explicit:["+3 zu Stufen aller Zauberfertigkeiten","+150 zu maximalem Mana"],crafted:[],fractured:[]},
+      all_mods:["+3 zu Stufen aller Zauberfertigkeiten","+150 zu maximalem Mana"],
+      parsed_stats:{spell_skills:3, mana:150} },
+    { slot:"Ring", name:"Saphirring", typeLine:"Saphirring", baseType:"Saphirring",
+      icon:"", rarity:1, corrupted:false, properties:[], requirements:[{name:"Level",value:"20"}],
+      mods:{implicit:[],enchant:[],rune:[],explicit:["+20% zu Kältewiderstand"],crafted:[],fractured:[]},
+      all_mods:["+20% zu Kältewiderstand"], parsed_stats:{cold_res:20} },
+  ];
+  renderGear(demoItems);
+  showBanner("🎮 Demo-Modus aktiv – probier alles aus! (Beispiel-Daten)", "ok");
 }
 
 // ---------- Charakterliste laden ----------
@@ -1946,5 +2008,5 @@ function installApp() {
 // Start
 init();
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a088d840eab2dcac',t:'MTc4MDkzMTY1MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
