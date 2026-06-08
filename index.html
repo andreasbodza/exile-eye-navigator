@@ -248,7 +248,7 @@
 
   /* ---------- Resistenz-Cap-Rechner ---------- */
   #resCapBox {
-    display: none; max-width: 560px; margin: 0 auto 12px;
+    display: none; margin: 0 0 16px;
     background: var(--panel-2); border: 1px solid var(--border);
     border-radius: 8px; padding: 12px 14px;
   }
@@ -311,18 +311,11 @@
   .slot.better { border-color: var(--green); box-shadow: 0 0 10px rgba(76,175,106,.4); }
   .slot.worse  { border-color: var(--red);   box-shadow: 0 0 10px rgba(208,88,78,.4); }
 
-  /* Flask-Reihe unten */
-  .flask-row {
-    display: flex; gap: 7px; margin-top: 7px; justify-content: center;
+  /* Flasks & Charms direkt im Inventar (unter den Slots, mit Trennlinie) */
+  .hud-consumables {
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid #5a4a2e;
   }
-  .flask {
-    width: 38px; height: 52px; border-radius: 4px 4px 8px 8px;
-    border: 1px solid #5a4a2e; box-shadow: inset 0 0 10px rgba(0,0,0,.6);
-    background: linear-gradient(180deg, rgba(30,26,20,.85), rgba(12,10,7,.95));
-    display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px;
-  }
-  .flask.life  svg { color: #c0392b; }
-  .flask.mana  svg { color: #2e6fb0; }
 
   /* ---------- Scan-Bereich ---------- */
   .trade-sel {
@@ -564,8 +557,8 @@
   }
   .gem-lvl { font-size: 10px; color: var(--text-dim); font-weight: 400; }
   /* ---------- Charms / Flasks ---------- */
-  #consumablesSection { display: none; }
   .consum-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
+  .consum-row:last-child { margin-bottom: 0; }
   .consum-chip {
     font-size: 12px; padding: 6px 11px; border-radius: 6px;
     background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
@@ -683,33 +676,6 @@
     </div>
 
     <!-- RESISTENZ-CAP-RECHNER (rechnet die Resis aus dem getragenen Gear zusammen) -->
-    <div id="resCapBox">
-      <div class="rc-top">
-        <span class="rc-title">🛡️ Resistenzen (aus deinem Gear)</span>
-        <span class="rc-capwrap">
-          Cap:
-          <select id="resCapSelect" onchange="renderResCap()" title="Max-Resistenz (Standard 75%)">
-            <option value="75">75%</option>
-            <option value="76">76%</option>
-            <option value="77">77%</option>
-            <option value="78">78%</option>
-            <option value="79">79%</option>
-            <option value="80">80%</option>
-            <option value="81">81%</option>
-            <option value="82">82%</option>
-            <option value="83">83%</option>
-            <option value="84">84%</option>
-            <option value="85">85%</option>
-            <option value="90">90%</option>
-          </select>
-        </span>
-      </div>
-      <div id="resCapRows"></div>
-      <div class="rc-note">
-        ⚠️ Nur Werte aus deinem <b>getragenen Gear</b>. Passivbaum, Ascendancy &amp; Liga-Strafe (-30%/-60% je Akt) sind <b>nicht</b> enthalten – im Spiel können die Werte also abweichen.
-      </div>
-    </div>
-
     <div class="hud-frame">
       <div class="hud" id="hud">
 
@@ -775,18 +741,11 @@
 
       </div>
 
-      <!-- Flask-Reihe (Deko, wie im echten Spiel) -->
-      <div class="flask-row">
-        <div class="flask life"><svg width="14" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 2h6v3l3 6v9a2 2 0 01-2 2H8a2 2 0 01-2-2v-9l3-6V2z"/></svg></div>
-        <div class="flask mana"><svg width="14" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 2h6v3l3 6v9a2 2 0 01-2 2H8a2 2 0 01-2-2v-9l3-6V2z"/></svg></div>
+      <!-- Flasks & Charms direkt im Inventar (wie im echten Spiel) -->
+      <div id="consumablesInHud" class="hud-consumables" style="display:none">
+        <div id="consumablesList"></div>
       </div>
     </div>
-  </div>
-
-  <!-- CHARMS / FLASKS (direkt unter dem Inventar, gehört zum Equipment) -->
-  <div class="section" id="consumablesSection">
-    <h2>Flasks &amp; Charms</h2>
-    <div id="consumablesList"></div>
   </div>
 
   <!-- SKILLS / GEMS (erscheint nach Build-Import) -->
@@ -797,6 +756,34 @@
 
   <div class="section">
     <h2>Gewichtung · was ist dir wichtig?</h2>
+
+    <!-- RESISTENZ-CAP-RECHNER (zeigt Resis aus dem getragenen Gear) -->
+    <div id="resCapBox">
+      <div class="rc-top">
+        <span class="rc-title">🛡️ Resistenzen (aus deinem Gear)</span>
+        <span class="rc-capwrap">
+          Cap:
+          <select id="resCapSelect" onchange="renderResCap()" title="Max-Resistenz (Standard 75%)">
+            <option value="75">75%</option>
+            <option value="76">76%</option>
+            <option value="77">77%</option>
+            <option value="78">78%</option>
+            <option value="79">79%</option>
+            <option value="80">80%</option>
+            <option value="81">81%</option>
+            <option value="82">82%</option>
+            <option value="83">83%</option>
+            <option value="84">84%</option>
+            <option value="85">85%</option>
+            <option value="90">90%</option>
+          </select>
+        </span>
+      </div>
+      <div id="resCapRows"></div>
+      <div class="rc-note">
+        ⚠️ Nur Werte aus deinem <b>getragenen Gear</b>. Passivbaum, Ascendancy &amp; Liga-Strafe (-30%/-60% je Akt) sind <b>nicht</b> enthalten – im Spiel können die Werte also abweichen.
+      </div>
+    </div>
 
     <!-- Vorlagen -->
     <div class="weight-presets" id="presets">
@@ -967,7 +954,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.1</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.2</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px">Datenschutz</a> ·
@@ -987,7 +974,7 @@
 //  erkennt, ob die neue Seite geladen ist.
 //  TIPP: Auch in sw.js die CACHE-Nummer hochzählen (exile-eye-vX)!
 // ============================================================
-const APP_VERSION = "v1.1";
+const APP_VERSION = "v1.2";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1522,7 +1509,7 @@ function clearBuild() {
   applyPreset("balanced");
   // Skills/Charms-Sektionen ausblenden
   document.getElementById("skillsSection").style.display = "none";
-  document.getElementById("consumablesSection").style.display = "none";
+  document.getElementById("consumablesInHud").style.display = "none";
   document.getElementById("buildResult").style.display = "none";
   document.getElementById("buildCode").value = "";
   // betroffene Slot-Markierungen im HUD entfernen
@@ -2551,7 +2538,7 @@ function showGem(skillIdx, supIdx) {
 }
 
 function renderConsumables(flasks, charms) {
-  const sec = document.getElementById("consumablesSection");
+  const sec = document.getElementById("consumablesInHud");
   const list = document.getElementById("consumablesList");
   if (!flasks.length && !charms.length) { sec.style.display = "none"; return; }
   let html = "";
