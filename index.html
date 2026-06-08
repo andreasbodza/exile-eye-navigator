@@ -319,6 +319,30 @@
     display: flex; justify-content: space-between; font-size: 13px;
     padding: 4px 0; border-bottom: 1px solid var(--border);
   }
+  /* editierbare Scan-Stat-Zeile */
+  .scan-edit-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 0; border-bottom: 1px solid var(--border);
+  }
+  .scan-edit-label { flex: 1; font-size: 13px; color: var(--text); }
+  .scan-edit-input {
+    width: 78px; text-align: right; font-size: 14px; font-weight: 600;
+    background: var(--panel); color: var(--gold);
+    border: 1px solid var(--gold-soft); border-radius: 6px; padding: 7px 8px;
+    -moz-appearance: textfield;
+  }
+  .scan-edit-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 6px rgba(200,160,79,.4); }
+  .scan-edit-del {
+    width: 28px; height: 28px; flex: 0 0 auto; border-radius: 6px;
+    background: rgba(208,88,78,.12); border: 1px solid var(--red); color: var(--red);
+    font-size: 13px; cursor: pointer; line-height: 1;
+  }
+  .scan-edit-del:hover { background: rgba(208,88,78,.28); }
+  .scan-edit-add { margin-top: 10px; }
+  .scan-edit-add select {
+    width: 100%; background: var(--panel-2); color: var(--text);
+    border: 1px dashed var(--gold-soft); border-radius: 6px; padding: 9px; font-size: 13px;
+  }
   /* ============================================================
      ITEM-DETAIL POPUP (PoE-Tooltip Stil)
      ============================================================ */
@@ -700,15 +724,29 @@
     <!-- Build-Import -->
     <div class="build-import">
       <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:5px">
-        🧠 Build importieren – funktioniert mit (optional):
+        🧠 Build importieren – wähle den einfachsten Weg:
+      </label>
+
+      <!-- Weg 1: .build-Datei direkt wählen (perfekt fürs Handy – KEIN Decoder nötig!) -->
+      <input type="file" id="buildFileInput" accept=".build,.json,.txt,application/json,text/plain" style="display:none">
+      <button class="btn primary" style="width:100%;margin-bottom:6px" onclick="document.getElementById('buildFileInput').click()">
+        📂 .build-Datei auswählen (Handy &amp; PC)
+      </button>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.5">
+        Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus.
+        Am iPhone: Datei landet in „Downloads/Dateien“ – einfach antippen. <b>Du brauchst keinen Decoder!</b> ⭐ am genauesten
+      </div>
+
+      <!-- Weg 2: Link / Code / Text einfügen -->
+      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px">
+        …oder einen Link / Code / Text einfügen:
       </label>
       <ul style="font-size:11px;color:var(--text-dim);margin:0 0 6px 16px;line-height:1.5">
-        <li><b>.build-Datei-Inhalt</b> (von Mobalytics herunterladen, entpacken, Inhalt reinkopieren) ⭐ am genauesten</li>
         <li>pobb.in-Link oder PoB-Export-Code</li>
         <li>maxroll.gg Build-Link</li>
         <li>oder einfach den <b>kopierten Gear-Text</b></li>
       </ul>
-      <textarea id="buildCode" placeholder='{"author":...} .build-Inhalt  •  https://pobb.in/xxxxx  •  https://maxroll.gg/...  •  oder Item-Text'></textarea>
+      <textarea id="buildCode" placeholder='https://pobb.in/xxxxx  •  https://maxroll.gg/...  •  PoB-Code  •  oder Item-Text'></textarea>
       <button class="btn primary" style="margin-top:8px" onclick="importBuild()">📥 Build importieren &amp; Gewichtung übernehmen</button>
       <div id="buildResult"></div>
     </div>
@@ -1482,11 +1520,45 @@ document.querySelectorAll(".preset-btn").forEach(b => {
   b.addEventListener("click", () => applyPreset(b.dataset.preset));
 });
 
-// Build importieren
-async function importBuild() {
-  const code = document.getElementById("buildCode").value.trim();
+// ---------- .build-Datei direkt auswählen (handytauglich, kein Decoder!) ----------
+// Eine Mobalytics .build-Datei ist reines JSON (nur auf eine Zeile gepresst).
+// Wir lesen sie im Browser als Text und schicken den Inhalt an den Import.
+document.getElementById("buildFileInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
   const out = document.getElementById("buildResult");
-  if (!code) { showBanner("Bitte erst einen Link, PoB-Code oder Gear-Text einfügen"); return; }
+  out.style.display = "block";
+  out.className = "";
+  out.textContent = "Lese Datei „" + file.name + "“…";
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    let text = String(reader.result || "").trim();
+    // UTF-8 BOM am Anfang entfernen (kommt bei manchen Downloads vor)
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+    if (!text) {
+      out.className = "err";
+      out.textContent = "Die Datei ist leer.";
+      return;
+    }
+    // Inhalt ins Textfeld spiegeln (zur Kontrolle) und importieren
+    document.getElementById("buildCode").value = text;
+    importBuild(text);
+  };
+  reader.onerror = () => {
+    out.className = "err";
+    out.textContent = "Datei konnte nicht gelesen werden.";
+  };
+  reader.readAsText(file);
+  // gleiche Datei erneut wählbar machen
+  e.target.value = "";
+});
+
+// Build importieren. Optional codeOverride (z.B. aus einer .build-Datei).
+async function importBuild(codeOverride) {
+  const code = (typeof codeOverride === "string" ? codeOverride : document.getElementById("buildCode").value).trim();
+  const out = document.getElementById("buildResult");
+  if (!code) { showBanner("Bitte erst einen Link, PoB-Code oder Gear-Text einfügen – oder eine .build-Datei wählen"); return; }
 
   // freundlicher Hinweis bei Mobalytics (geht nicht direkt wegen Cloudflare)
   if (code.includes("mobalytics.gg")) {
@@ -1794,22 +1866,10 @@ async function analyzeImage() {
     }
 
     // Scan-Ergebnis merken (für den Vergleich)
+    // Stats in eine editierbare Kopie übernehmen (OCR ist nicht perfekt!)
     lastScan = data;
-
-    let html = `<div class="score-big">${data.score}</div>`;
-    const stats = data.stats || {};
-    if (Object.keys(stats).length === 0) {
-      html += `<p style="color:var(--text-dim);text-align:center">Keine Stats erkannt – Foto schärfer/näher versuchen.</p>`;
-    } else {
-      for (const [k, v] of Object.entries(stats)) {
-        html += `<div class="stat-row"><span>${labelFor(k)}</span><span>${v}</span></div>`;
-      }
-      // Preis-Check-Button (öffnet Trade mit den gescannten Stats = echte Preise)
-      html += `<a class="tt-trade" href="#" style="margin:14px 0 0" onclick="priceCheckScan();return false;">💰 Preis checken – lohnt sich der Verkauf?</a>`;
-      html += `<div style="font-size:10px;color:var(--text-dim);text-align:center;margin-top:6px">Öffnet die Trade-Suche mit diesen Stats – du siehst, was vergleichbare Items kosten</div>`;
-    }
-    result.innerHTML = html;
-    result.style.display = "block";
+    lastScan.stats = { ...(data.stats || {}) };
+    renderScanResult();
 
     // Slot-Dropdown zeigen + Auto-Vorschlag setzen
     const box = document.getElementById("scanSlotBox");
@@ -1837,6 +1897,112 @@ async function analyzeImage() {
     btn.disabled = false;
     btn.innerHTML = "🔍 Analysieren";
   }
+}
+
+// ============================================================
+//  SCAN-ERGEBNIS: editierbare Stat-Tabelle (OCR korrigierbar!)
+// ============================================================
+// alle Stat-Keys, die man manuell hinzufügen kann
+const SCAN_STAT_KEYS = [
+  "life","mana","energy_shield","spirit",
+  "fire_res","cold_res","lightning_res","chaos_res",
+  "armour","movement_speed","spell_damage","spell_skills",
+  "crit_chance","crit_dmg_bonus","eva_es",
+];
+
+// Score aus einem Stat-Objekt (key->wert) mit der aktuellen Gewichtung berechnen.
+// Identisch zur Backend-Logik: score = Σ wert * gewicht
+function scoreFromStats(stats) {
+  const w = currentWeights || {};
+  let score = 0;
+  for (const [k, v] of Object.entries(stats || {})) {
+    const val = parseFloat(v);
+    if (!isNaN(val)) score += val * (w[k] ?? 0);
+  }
+  return Math.round(score);
+}
+
+// Baut die editierbare Ergebnis-Anzeige neu auf
+function renderScanResult() {
+  const result = document.getElementById("scanResult");
+  if (!lastScan) { result.style.display = "none"; return; }
+  const stats = lastScan.stats || {};
+
+  // Score immer aus den (ggf. korrigierten) Werten neu berechnen
+  lastScan.score = scoreFromStats(stats);
+
+  let html = `<div class="score-big">${lastScan.score}</div>`;
+  html += `<div style="font-size:11px;color:var(--text-dim);text-align:center;margin:-4px 0 10px">
+    ✏️ Werte stimmen nicht? Tippe rein und korrigiere sie – Score, Vergleich &amp; Preis-Check passen sich an.
+  </div>`;
+
+  const keys = Object.keys(stats);
+  if (keys.length === 0) {
+    html += `<p style="color:var(--text-dim);text-align:center;margin-bottom:10px">Keine Stats erkannt – Foto schärfer/näher versuchen oder unten manuell hinzufügen.</p>`;
+  } else {
+    for (const [k, v] of Object.entries(stats)) {
+      html += `<div class="scan-edit-row">
+        <span class="scan-edit-label">${labelFor(k)}</span>
+        <input type="number" inputmode="numeric" class="scan-edit-input"
+               value="${esc(String(v))}" data-key="${esc(k)}"
+               oninput="updateScanStat('${esc(k)}', this.value)">
+        <button class="scan-edit-del" title="Stat entfernen" onclick="removeScanStat('${esc(k)}')">✕</button>
+      </div>`;
+    }
+  }
+
+  // Zeile zum Hinzufügen eines fehlenden Stats
+  let opts = '<option value="">+ Stat hinzufügen…</option>';
+  SCAN_STAT_KEYS.filter(k => !(k in stats)).forEach(k => {
+    opts += `<option value="${esc(k)}">${esc(labelFor(k))}</option>`;
+  });
+  html += `<div class="scan-edit-add">
+    <select id="addScanStatSel" onchange="addScanStat(this.value)">${opts}</select>
+  </div>`;
+
+  // Preis-Check-Button (öffnet Trade mit den – ggf. korrigierten – Stats)
+  if (keys.length > 0) {
+    html += `<a class="tt-trade" href="#" style="margin:14px 0 0" onclick="priceCheckScan();return false;">💰 Preis checken – lohnt sich der Verkauf?</a>`;
+    html += `<div style="font-size:10px;color:var(--text-dim);text-align:center;margin-top:6px">Öffnet die Trade-Suche mit diesen Stats – du siehst, was vergleichbare Items kosten</div>`;
+  }
+
+  result.innerHTML = html;
+  result.style.display = "block";
+}
+
+// Ein einzelner Wert wurde geändert -> übernehmen, Score + Vergleich neu rechnen
+function updateScanStat(key, value) {
+  if (!lastScan) return;
+  const num = parseInt(value, 10);
+  if (value === "" || isNaN(num)) {
+    lastScan.stats[key] = 0;
+  } else {
+    lastScan.stats[key] = num;
+  }
+  // Score live oben aktualisieren (ohne Cursor aus dem Feld zu reißen)
+  lastScan.score = scoreFromStats(lastScan.stats);
+  const big = document.querySelector("#scanResult .score-big");
+  if (big) big.textContent = lastScan.score;
+  // wenn ein Slot gewählt ist, Vergleich live aktualisieren
+  if (document.getElementById("scanSlotSelect").value) runCompare();
+}
+
+// Stat entfernen (z.B. falsch erkannt)
+function removeScanStat(key) {
+  if (!lastScan) return;
+  delete lastScan.stats[key];
+  renderScanResult();
+  if (document.getElementById("scanSlotSelect").value) runCompare();
+}
+
+// Stat hinzufügen (OCR hat ihn übersehen)
+function addScanStat(key) {
+  if (!lastScan || !key) return;
+  if (!(key in lastScan.stats)) lastScan.stats[key] = 0;
+  renderScanResult();
+  // Fokus direkt ins neue Feld setzen, damit man tippen kann
+  const inp = document.querySelector(`#scanResult .scan-edit-input[data-key="${key}"]`);
+  if (inp) { inp.focus(); inp.select(); }
 }
 
 // ============================================================
@@ -1906,10 +2072,11 @@ function runCompare() {
   if (!slot || !lastScan) { panel.style.display = "none"; return; }
 
   const oldItem = equippedItems[slot];          // getragenes Item
-  const newStats = lastScan.stats || {};        // gescannte Stats
-  const newScore = lastScan.score || 0;
+  const newStats = lastScan.stats || {};        // gescannte (ggf. korrigierte) Stats
+  // beide Scores mit DERSELBEN Logik (scoreFromStats) berechnen -> fairer Vergleich
+  const newScore = scoreFromStats(newStats);
   const oldStats = oldItem ? (oldItem.parsed_stats || {}) : {};
-  const oldScore = oldItem ? (oldItem._score || 0) : 0;
+  const oldScore = oldItem ? scoreFromStats(oldStats) : 0;
 
   // alle vorkommenden Stat-Keys sammeln
   const keys = [...new Set([...Object.keys(oldStats), ...Object.keys(newStats)])];
@@ -2145,5 +2312,5 @@ function installApp() {
 // Start
 init();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a08b198c9bec4d88',t:'MTc4MDk1NTI5Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

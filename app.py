@@ -1226,13 +1226,20 @@ def parse_build_skills(data):
     """
     result = []
     for skill in data.get("skills", []):
+        # skills koennen laut GGG-Format Strings ODER Objekte sein
+        if isinstance(skill, str):
+            skill = {"id": skill}
+        elif not isinstance(skill, dict):
+            continue
         main = gem_info_from_id(skill.get("id", ""))
         if not main:
             continue
-        lvl = (skill.get("level_interval") or [None])[0]
+        li = skill.get("level_interval")
+        lvl = li[0] if isinstance(li, list) and li else (li if isinstance(li, int) else None)
         supports = []
         for s in skill.get("support_skills", []):
-            si = gem_info_from_id(s.get("id", ""))
+            sid = s.get("id", "") if isinstance(s, dict) else str(s)
+            si = gem_info_from_id(sid)
             if si:
                 supports.append({"name": si["name"], "tags": si["tags"],
                                  "color": si.get("color")})
@@ -1299,9 +1306,10 @@ def parse_build_json(raw):
     info.update(asc)   # fuegt class, ascendancy (Name), ascendancy_id hinzu
 
     # Passiv-Baum-Themen zaehlen -> Hinweise auf wichtige Stats
+    # WICHTIG: passives koennen laut GGG-Format Strings ODER Objekte sein!
     passive_hints = {}
     for p in data.get("passives", []):
-        pid = p.get("id", "")
+        pid = p.get("id", "") if isinstance(p, dict) else str(p)
         base = re.sub(r"[0-9_]+$", "", pid).lower()
         for theme, stats in PASSIVE_THEME_HINTS.items():
             if theme in base:
@@ -1317,9 +1325,23 @@ def parse_build_json(raw):
 
 
 def _looks_like_build_json(s):
-    """Erkennt eine .build JSON-Datei."""
+    """Erkennt eine .build JSON-Datei (offizielles GGG-Format, einzeilig moeglich)."""
     s = s.strip()
-    return s.startswith("{") and ("inventory_slots" in s or "passives" in s)
+    if not s.startswith("{"):
+        return False
+    # Schnell-Check ueber Schluesselwoerter (die .build ist oft auf einer Zeile)
+    if any(k in s for k in ("inventory_slots", "passives", "support_skills", "ascendancy")):
+        return True
+    # Sicherer Fallback: echtes JSON-Parse und nach .build-typischen Keys schauen
+    try:
+        obj = json.loads(s)
+        if isinstance(obj, dict) and any(
+            k in obj for k in ("inventory_slots", "passives", "skills", "ascendancy", "name")
+        ):
+            return True
+    except Exception:
+        pass
+    return False
 
 
 # ------------------------------------------------------------
