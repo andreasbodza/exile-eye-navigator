@@ -809,7 +809,7 @@
       </label>
 
       <!-- Weg 1: .build-Datei direkt wählen (perfekt fürs Handy – KEIN Decoder nötig!) -->
-      <input type="file" id="buildFileInput" accept=".build,.json,.txt,application/json,text/plain" style="display:none">
+      <input type="file" id="buildFileInput" style="display:none">
       <button class="btn primary" style="width:100%;margin-bottom:6px" onclick="document.getElementById('buildFileInput').click()">
         📂 .build-Datei auswählen (Handy &amp; PC)
       </button>
@@ -817,7 +817,8 @@
         Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus.
         <b>Du brauchst nichts zu öffnen oder zu entpacken – kein Notepad++, kein Decoder!</b> ⭐ am genauesten<br>
         <span style="opacity:.85">💻 <b>Am PC:</b> Button klicken → Datei aus deinem Download-Ordner wählen.
-        📱 <b>Am Handy:</b> Button antippen → Datei aus „Downloads/Dateien“ wählen.</span>
+        📱 <b>Am iPhone/iPad:</b> Button antippen → „Datei auswählen“ → in „Downloads“ die <b>.build</b>-Datei antippen.
+        (Falls sie ausgegraut wirkt, tippe oben rechts auf die drei Punkte „•••“ und sortiere/durchsuche – wählbar ist sie jetzt.)</span>
       </div>
 
       <!-- Weg 2: Link / Code / Text einfügen -->
@@ -954,7 +955,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.2</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.3</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px">Datenschutz</a> ·
@@ -974,7 +975,7 @@
 //  erkennt, ob die neue Seite geladen ist.
 //  TIPP: Auch in sw.js die CACHE-Nummer hochzählen (exile-eye-vX)!
 // ============================================================
-const APP_VERSION = "v1.2";
+const APP_VERSION = "v1.3";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1700,6 +1701,15 @@ document.getElementById("buildFileInput").addEventListener("change", (e) => {
   out.className = "";
   out.textContent = "Lese Datei „" + file.name + "“…";
 
+  // Bilder/offensichtliche Binärdateien direkt abfangen (freundlich)
+  if (file.type && file.type.startsWith("image/")) {
+    out.className = "err";
+    out.innerHTML = "Das sieht nach einem <b>Bild</b> aus 🖼️. Bitte wähle die "
+      + "<b>.build</b>-Datei (von Mobalytics „Build Planner Export“) – nicht den Screenshot.";
+    e.target.value = "";
+    return;
+  }
+
   const reader = new FileReader();
   reader.onload = () => {
     let text = String(reader.result || "").trim();
@@ -1708,6 +1718,15 @@ document.getElementById("buildFileInput").addEventListener("change", (e) => {
     if (!text) {
       out.className = "err";
       out.textContent = "Die Datei ist leer.";
+      return;
+    }
+    // Sieht der Inhalt nach Müll aus (kein JSON/kein Build/Link/Text)?
+    // -> wir versuchen den Import trotzdem, geben aber einen klaren Hinweis.
+    const looksUsable = text.startsWith("{") || /pobb\.in|maxroll|https?:\/\//i.test(text) || /[A-Za-z]{3,}/.test(text);
+    if (!looksUsable) {
+      out.className = "err";
+      out.innerHTML = "Diese Datei enthält keinen lesbaren Build-Text. "
+        + "Bitte wähle die <b>.build</b>-Datei von Mobalytics „Build Planner Export“.";
       return;
     }
     // Inhalt ins Textfeld spiegeln (zur Kontrolle) und importieren
