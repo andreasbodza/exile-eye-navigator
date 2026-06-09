@@ -543,6 +543,11 @@ def ocr_best_effort(pil_img, pytesseract, ocr_lang="deu+eng"):
     Versucht mehrere Bildaufbereitungen und gibt den besten OCR-Text zurueck.
     ocr_lang: Tesseract-Sprache je nach Spiel-Sprache des Users.
     Nutzt OpenCV falls verfuegbar (viel besser bei Fotos), sonst Pillow-Fallback.
+
+    GESCHWINDIGKEIT: Tesseract ist der Flaschenhals (~1,5s pro Aufruf).
+    Darum: Varianten nach Erfolgswahrscheinlichkeit sortiert + Smart-Stop -
+    sobald eine Variante "gut genug" ist, hoeren wir sofort auf (oft 1 statt 6
+    Aufrufe = bis zu 6x schneller bei klaren Screenshots).
     """
     from PIL import Image, ImageOps, ImageFilter
 
@@ -557,63 +562,79 @@ def ocr_best_effort(pil_img, pytesseract, ocr_lang="deu+eng"):
         arr = np.array(rgb)[:, :, ::-1].copy()   # RGB -> BGR fuer cv2
         gray = cv2.cvtColor(arr, cv2.COLOR_BGR2GRAY)
 
-        # hochskalieren (OCR mag grosse Schrift)
+        # hochskalieren (OCR mag grosse Schrift) - 1500 reicht & ist schneller als 1800
         h, w = gray.shape
-        if max(h, w) < 1800:
-            scale = 1800 / max(h, w)
+        if max(h, w) < 1500:
+            scale = 1500 / max(h, w)
             gray = cv2.resize(gray, (int(w * scale), int(h * scale)),
                               interpolation=cv2.INTER_CUBIC)
 
-        # Rauschen reduzieren
+        # Rauschen reduzieren (guenstig: ~0,02s)
         denoised = cv2.bilateralFilter(gray, 9, 75, 75)
 
-        # Variante 1: Otsu-Threshold (gut bei gleichmaessigem Hintergrund)
+        # PoE = heller Text auf dunkel. Mittlere Helligkeit pruefen, um zu
+        # entscheiden, ob wir invertieren muessen (Text soll schwarz auf weiss).
+        mean_val = float(denoised.mean())
+
+        # Variante 1 (BESTE zuerst): Otsu-Threshold
         _, otsu = cv2.threshold(denoised, 0, 255,
                                 cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        # PoE = heller Text auf dunkel -> Otsu macht Text schwarz auf weiss = passt
-        candidates.append((Image.fromarray(otsu), "--psm 6"))
-        candidates.append((Image.fromarray(255 - otsu), "--psm 6"))  # invertiert
+        # Bei dunklem Hintergrund (heller Text) zuerst die invertierte nehmen,
+        # damit der Smart-Stop sofort die richtige erwischt.
+        if mean_val < 110:
+            candidates.append((Image.fromarray(255 - otsu), "--psm 6"))
+            candidates.append((Image.fromarray(otsu), "--psm 6"))
+        else:
+            candidates.append((Image.fromarray(otsu), "--psm 6"))
+            candidates.append((Image.fromarray(255 - otsu), "--psm 6"))
 
-        # Variante 2: adaptiver Threshold (gut bei ungleichmaessiger Beleuchtung/Fotos)
+        # Variante 2 (Fallback): adaptiver Threshold (ungleichmaessige Beleuchtung)
         adaptive = cv2.adaptiveThreshold(
             denoised, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
             cv2.THRESH_BINARY, 31, 11)
-        candidates.append((Image.fromarray(adaptive), "--psm 6"))
-        candidates.append((Image.fromarray(255 - adaptive), "--psm 6"))
+        if mean_val < 110:
+            candidates.append((Image.fromarray(255 - adaptive), "--psm 6"))
+            candidates.append((Image.fromarray(adaptive), "--psm 6"))
+        else:
+            candidates.append((Image.fromarray(adaptive), "--psm 6"))
+            candidates.append((Image.fromarray(255 - adaptive), "--psm 6"))
 
     except ImportError:
         pass  # kein OpenCV -> Pillow-Fallback unten
 
-    # --- Pillow-Fallback / Zusatz-Varianten ---
-    try:
-        g = pil_img.convert("L")
-        w, h = g.size
-        if max(w, h) < 1800:
-            s = 1800 / max(w, h)
-            g = g.resize((int(w * s), int(h * s)))
-        inv = ImageOps.autocontrast(ImageOps.invert(g)).filter(ImageFilter.SHARPEN)
-        candidates.append((inv, "--psm 6"))
-        candidates.append((ImageOps.autocontrast(g), "--psm 6"))
-    except Exception:
-        candidates.append((pil_img, "--psm 6"))
+    # --- Pillow-Fallback / Zusatz-Varianten (nur wenn OpenCV fehlt) ---
+    if not candidates:
+        try:
+            g = pil_img.convert("L")
+            w, h = g.size
+            if max(w, h) < 1500:
+                s = 1500 / max(w, h)
+                g = g.resize((int(w * s), int(h * s)))
+            inv = ImageOps.autocontrast(ImageOps.invert(g)).filter(ImageFilter.SHARPEN)
+            candidates.append((inv, "--psm 6"))
+            candidates.append((ImageOps.autocontrast(g), "--psm 6"))
+        except Exception:
+            candidates.append((pil_img, "--psm 6"))
 
-    # --- alle Kandidaten durch Tesseract jagen, besten nehmen ---
+    # --- Kandidaten durch Tesseract jagen, mit SMART-STOP ---
+    # "gut genug" = genug Stat-Schluesselwoerter erkannt -> sofort aufhoeren.
+    GOOD_ENOUGH = 18   # empirischer Schwellwert (mehrere Stats + Zahlen erkannt)
     best_text = ""
     best_score = -1
     for cand_img, cfg in candidates:
         try:
-            # gewaehlte Sprache (z.B. "deu+eng" oder "eng")
-            # Fallback auf eng, falls das Sprachpaket nicht installiert ist
             try:
                 t = pytesseract.image_to_string(cand_img, lang=ocr_lang, config=cfg)
             except Exception:
                 t = pytesseract.image_to_string(cand_img, lang="eng", config=cfg)
         except Exception:
             continue
-        # "Güte" = wie viele relevante Stat-Schluesselwoerter gefunden wurden
         score = _ocr_quality(t)
         if score > best_score:
             best_score, best_text = score, t
+        # Smart-Stop: wenn schon klar gut, weitere Tesseract-Aufrufe sparen
+        if best_score >= GOOD_ENOUGH:
+            break
 
     return best_text
 
