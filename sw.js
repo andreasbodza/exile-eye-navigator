@@ -3,7 +3,7 @@
 // ============================================================
 // WICHTIG: Bei jeder neuen App-Version diese Zahl hochzaehlen (v1 -> v2 -> ...).
 // Das raeumt alte Caches auf und erzwingt frische Dateien.
-const CACHE = "exile-eye-v3";
+const CACHE = "exile-eye-v6";
 
 // Diese Dateien werden fuer schnelles Laden gecacht.
 // (HTML/Seiten NICHT vorab cachen - die holen wir immer frisch, siehe fetch)

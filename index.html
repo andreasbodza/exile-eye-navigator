@@ -245,6 +245,28 @@
     background: linear-gradient(90deg, var(--gold-soft), var(--gold));
   }
   #buildProgress .bp-hint { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+  .bp-missing-toggle {
+    width: 100%; margin-top: 10px; background: var(--panel);
+    color: var(--gold); border: 1px solid var(--gold-soft); border-radius: 6px;
+    padding: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .bp-missing-toggle:hover { background: var(--panel-2); }
+  #bpMissingList { margin-top: 10px; }
+  .miss-item {
+    background: var(--panel); border: 1px solid var(--red); border-left: 3px solid var(--red);
+    border-radius: 6px; padding: 10px 12px; margin-bottom: 8px;
+  }
+  .miss-item .miss-slot { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .miss-item .miss-detail { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; line-height: 1.5; }
+  .miss-item .miss-detail .miss-need { color: #f0a89e; font-weight: 600; }
+  .miss-item .miss-detail .miss-uniq { color: #d08020; font-weight: 700; }
+  .miss-item .miss-trade {
+    display: inline-block; font-size: 11px; padding: 6px 12px; border-radius: 5px;
+    background: linear-gradient(180deg, #2e6fb0, #1d4a78); color: #fff;
+    border: 1px solid #4a90d0; cursor: pointer; text-decoration: none;
+  }
+  .miss-item .miss-trade:hover { background: linear-gradient(180deg, #3a82c8, #245a90); }
+  #bpMissingList .miss-empty { font-size: 12px; color: var(--green); text-align: center; padding: 12px; }
 
   /* ---------- Resistenz-Cap-Rechner ---------- */
   #resCapBox {
@@ -629,8 +651,9 @@
     </div>
   </div>
   <div style="display:flex;gap:8px;align-items:center">
+    <button id="langToggle" class="btn" style="padding:7px 11px;font-size:12px" onclick="toggleLang()" title="Sprache / Language">🌍 DE</button>
     <button id="installBtn" class="btn" style="display:none" onclick="installApp()">📲 App installieren</button>
-    <button id="logoutBtn" class="btn danger hidden" onclick="location.href='/logout'">Logout</button>
+    <button id="logoutBtn" class="btn danger hidden" onclick="location.href='/logout'" data-i18n="logout">Logout</button>
   </div>
 </header>
 
@@ -641,11 +664,11 @@
   <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#9a7d3e" stroke-width="1.5" style="margin-bottom:10px">
     <path d="M12 2L2 7v6c0 5 4 8 10 9 6-1 10-4 10-9V7L12 2z"/>
   </svg>
-  <h2 style="color:var(--gold);letter-spacing:1px">Willkommen, Exile</h2>
-  <p>Melde dich mit deinem Path&nbsp;of&nbsp;Exile&nbsp;Account an,<br>um deine Charaktere und Ausrüstung zu laden.</p>
-  <a href="/login" class="btn primary">🔐 Mit GGG anmelden</a>
+  <h2 style="color:var(--gold);letter-spacing:1px" data-i18n="login_welcome">Willkommen, Exile</h2>
+  <p data-i18n="login_sub">Melde dich mit deinem Path&nbsp;of&nbsp;Exile&nbsp;Account an,<br>um deine Charaktere und Ausrüstung zu laden.</p>
+  <a href="/login" class="btn primary" data-i18n="login_btn">🔐 Mit GGG anmelden</a>
   <div style="margin-top:14px">
-    <button class="btn" onclick="loadDemo()" style="font-size:12px">🎮 Demo ausprobieren (ohne Login)</button>
+    <button class="btn" onclick="loadDemo()" style="font-size:12px" data-i18n="demo_btn">🎮 Demo ausprobieren (ohne Login)</button>
     <p style="font-size:11px;color:var(--text-dim);margin-top:8px">
       Probier die App mit Beispiel-Charakter aus – Scanner, Build-Vergleich &amp; HUD live testen!
     </p>
@@ -656,14 +679,14 @@
 <div id="mainView" class="hidden">
 
   <div class="section">
-    <h2>Charakter</h2>
+    <h2 data-i18n="h_character">Charakter</h2>
     <select id="charSelect">
       <option value="">– Charakter wählen –</option>
     </select>
   </div>
 
   <div class="section">
-    <h2>Aktuelle Ausrüstung</h2>
+    <h2 data-i18n="h_equipment">Aktuelle Ausrüstung</h2>
 
     <!-- Build-Fortschritts-Leiste (erscheint, wenn ein Build aktiv ist) -->
     <div id="buildProgress">
@@ -673,6 +696,10 @@
       </div>
       <div class="bp-bar"><div class="bp-fill" id="bpFill" style="width:0%"></div></div>
       <div class="bp-hint" id="bpHint">Importiere einen Build, um deinen Fortschritt zu sehen</div>
+      <!-- "Was fehlt mir?" – Liste aller offenen Build-Slots -->
+      <button id="bpMissingToggle" class="bp-missing-toggle" style="display:none"
+              onclick="toggleMissingList()">🔍 Was fehlt mir? Liste anzeigen</button>
+      <div id="bpMissingList" style="display:none"></div>
     </div>
 
     <!-- RESISTENZ-CAP-RECHNER (rechnet die Resis aus dem getragenen Gear zusammen) -->
@@ -750,12 +777,12 @@
 
   <!-- SKILLS / GEMS (erscheint nach Build-Import) -->
   <div class="section" id="skillsSection">
-    <h2>Skills &amp; Support-Gems</h2>
+    <h2 data-i18n="h_skills">Skills &amp; Support-Gems</h2>
     <div id="skillsList"></div>
   </div>
 
   <div class="section">
-    <h2>Gewichtung · was ist dir wichtig?</h2>
+    <h2 data-i18n="h_weights">Gewichtung · was ist dir wichtig?</h2>
 
     <!-- RESISTENZ-CAP-RECHNER (zeigt Resis aus dem getragenen Gear) -->
     <div id="resCapBox">
@@ -797,9 +824,20 @@
     <div id="weightSliders"></div>
 
     <!-- Aktiver Build (zeigt an, ob ein Build geladen ist) -->
-    <div id="activeBuildBar" style="display:none; background:rgba(46,111,176,.12); border:1px solid #2e5a80; border-radius:6px; padding:9px 12px; margin-bottom:12px; font-size:12px; display:flex; align-items:center; justify-content:space-between; gap:10px">
-      <span id="activeBuildName" style="color:#9ab8d8"></span>
-      <button class="btn danger" style="padding:5px 10px;font-size:11px;white-space:nowrap" onclick="clearBuild()">✕ Build entfernen</button>
+    <div id="activeBuildBar" style="display:none; background:rgba(46,111,176,.12); border:1px solid #2e5a80; border-radius:6px; padding:10px 12px; margin-bottom:12px; font-size:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <span id="activeBuildName" style="color:#9ab8d8"></span>
+        <button class="btn danger" style="padding:5px 10px;font-size:11px;white-space:nowrap" onclick="clearBuild()">✕ Aktiven Build entfernen</button>
+      </div>
+    </div>
+
+    <!-- Gespeicherte Builds: umschalten zwischen mehreren Builds -->
+    <div id="savedBuildsBar" style="display:none; margin-bottom:12px">
+      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px">💾 Gespeicherte Builds – umschalten:</label>
+      <div style="display:flex;gap:8px">
+        <select id="savedBuildsSelect" class="trade-sel" style="flex:1" onchange="switchBuild(this.value)"></select>
+        <button class="btn danger" style="padding:7px 11px;font-size:12px;white-space:nowrap" onclick="deleteSavedBuild()" title="Diesen gespeicherten Build löschen">🗑</button>
+      </div>
     </div>
 
     <!-- Build-Import -->
@@ -831,7 +869,7 @@
         <li>oder einfach den <b>kopierten Gear-Text</b></li>
       </ul>
       <textarea id="buildCode" placeholder='https://pobb.in/xxxxx  •  https://maxroll.gg/...  •  PoB-Code  •  oder Item-Text'></textarea>
-      <button class="btn primary" style="margin-top:8px" onclick="importBuild()">📥 Build importieren &amp; Gewichtung übernehmen</button>
+      <button class="btn primary" style="margin-top:8px" onclick="importBuild()" data-i18n="import_btn">📥 Build importieren &amp; Gewichtung übernehmen</button>
       <div id="buildResult"></div>
     </div>
   </div>
@@ -840,7 +878,7 @@
 
 <!-- TRADE-EINSTELLUNGEN -->
 <div class="section">
-  <h2>🛒 Trade-Einstellungen</h2>
+  <h2 data-i18n="h_trade">🛒 Trade-Einstellungen</h2>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
     <div>
       <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px">Liga</label>
@@ -877,7 +915,7 @@
 
 <!-- ITEM-SCANNER (immer sichtbar, auch ohne Login!) -->
 <div class="section scan-area">
-  <h2>📷 Item scannen (kein Login nötig)</h2>
+  <h2 data-i18n="h_scan">📷 Item scannen (kein Login nötig)</h2>
   <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px">
     <label style="font-size:12px;color:var(--text-dim)">Spiel-Sprache:</label>
     <select id="gameLang" class="trade-sel" style="width:auto;padding:6px 10px">
@@ -890,7 +928,7 @@
     Mach ein Foto vom Item-Tooltip oder wähle ein Bild – Exile Eye liest die Stats aus.
   </p>
   <input type="file" id="fileInput" accept="image/*" capture="environment">
-  <button class="btn primary" onclick="document.getElementById('fileInput').click()">📷 Foto aufnehmen / Bild wählen</button>
+  <button class="btn primary" onclick="document.getElementById('fileInput').click()" data-i18n="photo_btn">📷 Foto aufnehmen / Bild wählen</button>
 
   <!-- Auto-Crop Schalter -->
   <label style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-size:13px;color:var(--text);cursor:pointer">
@@ -955,7 +993,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.3</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.4</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px">Datenschutz</a> ·
@@ -975,11 +1013,55 @@
 //  erkennt, ob die neue Seite geladen ist.
 //  TIPP: Auch in sw.js die CACHE-Nummer hochzählen (exile-eye-vX)!
 // ============================================================
-const APP_VERSION = "v1.3";
+const APP_VERSION = "v1.4";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
 });
+
+// ============================================================
+//  MEHRSPRACHIGKEIT (DE / EN) – Oberfläche umschaltbar
+// ============================================================
+const I18N = {
+  de: {
+    h_character: "Charakter", h_equipment: "Aktuelle Ausrüstung",
+    h_skills: "Skills & Support-Gems", h_weights: "Gewichtung · was ist dir wichtig?",
+    h_trade: "🛒 Trade-Einstellungen", h_scan: "📷 Item scannen (kein Login nötig)",
+    login_welcome: "Willkommen, Exile",
+    login_sub: "Melde dich mit deinem Path&nbsp;of&nbsp;Exile&nbsp;Account an,<br>um deine Charaktere und Ausrüstung zu laden.",
+    login_btn: "🔐 Mit GGG anmelden", demo_btn: "🎮 Demo ausprobieren (ohne Login)",
+    logout: "Logout", import_btn: "📥 Build importieren & Gewichtung übernehmen",
+    photo_btn: "📷 Foto aufnehmen / Bild wählen",
+  },
+  en: {
+    h_character: "Character", h_equipment: "Current Equipment",
+    h_skills: "Skills & Support Gems", h_weights: "Weighting · what matters to you?",
+    h_trade: "🛒 Trade Settings", h_scan: "📷 Scan item (no login needed)",
+    login_welcome: "Welcome, Exile",
+    login_sub: "Sign in with your Path&nbsp;of&nbsp;Exile&nbsp;account<br>to load your characters and equipment.",
+    login_btn: "🔐 Sign in with GGG", demo_btn: "🎮 Try the demo (no login)",
+    logout: "Logout", import_btn: "📥 Import build & apply weighting",
+    photo_btn: "📷 Take photo / choose image",
+  },
+};
+let currentLang = localStorage.getItem("exileEye_lang") || "de";
+
+function applyLang() {
+  const dict = I18N[currentLang] || I18N.de;
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (dict[key]) el.innerHTML = dict[key];
+  });
+  const tog = document.getElementById("langToggle");
+  if (tog) tog.textContent = currentLang === "de" ? "🌍 DE" : "🌍 EN";
+  document.documentElement.lang = currentLang;
+}
+
+function toggleLang() {
+  currentLang = currentLang === "de" ? "en" : "de";
+  localStorage.setItem("exileEye_lang", currentLang);
+  applyLang();
+}
 
 const STORAGE_KEY = "exileEye_gear";
 
@@ -1295,6 +1377,8 @@ function updateBuildStatus() {
 
   if (!hasBuild || !hasGear) {
     progress.style.display = "none";
+    document.getElementById("bpMissingToggle").style.display = "none";
+    document.getElementById("bpMissingList").style.display = "none";
     return;
   }
 
@@ -1328,6 +1412,79 @@ function updateBuildStatus() {
   document.getElementById("bpHint").textContent = missing === 0
     ? "🎉 Perfekt! Alle Build-Slots erfüllt!"
     : `Noch ${missing} Slot${missing > 1 ? "s" : ""} zu verbessern – tippe auf rote Slots für Details`;
+
+  // "Was fehlt mir?"-Button + Liste aktualisieren
+  const toggle = document.getElementById("bpMissingToggle");
+  if (missing > 0) {
+    toggle.style.display = "block";
+    // wenn die Liste offen ist, frisch rendern
+    if (document.getElementById("bpMissingList").style.display !== "none") renderMissingList();
+  } else {
+    toggle.style.display = "none";
+    document.getElementById("bpMissingList").style.display = "none";
+  }
+}
+
+// "Was fehlt mir?"-Liste auf-/zuklappen
+function toggleMissingList() {
+  const list = document.getElementById("bpMissingList");
+  const toggle = document.getElementById("bpMissingToggle");
+  const open = list.style.display === "none";
+  if (open) {
+    renderMissingList();
+    list.style.display = "block";
+    toggle.textContent = "🔼 Liste ausblenden";
+  } else {
+    list.style.display = "none";
+    toggle.textContent = "🔍 Was fehlt mir? Liste anzeigen";
+  }
+}
+
+// Baut die Liste aller offenen (nicht erfüllten) Build-Slots
+function renderMissingList() {
+  const list = document.getElementById("bpMissingList");
+  const buildSlots = new Set([
+    ...Object.keys(buildSlotStats),
+    ...Object.keys(buildSlotUniques),
+  ]);
+
+  let html = "";
+  buildSlots.forEach(slot => {
+    if (checkSlotFulfilled(slot)) return;   // nur offene Slots
+    const item = equippedItems[slot];
+    let detail = "";
+
+    if (buildSlotUniques[slot]) {
+      // Unique fehlt
+      const have = item ? (item.name || item.typeLine || "(leer)") : "Slot ist leer";
+      detail = `Build verlangt Unique <span class="miss-uniq">${esc(buildSlotUniques[slot])}</span><br>`
+             + `<span style="opacity:.8">Du trägst: ${esc(have)}</span>`;
+    } else {
+      // Stats fehlen -> auflisten, was zu wenig ist
+      const want = buildSlotStats[slot] || {};
+      const have = item ? (item.parsed_stats || {}) : {};
+      const haveEle = (have.fire_res || 0) + (have.cold_res || 0) + (have.lightning_res || 0);
+      const parts = [];
+      for (const [key, need] of Object.entries(want)) {
+        const haveVal = (key === "ele_res") ? haveEle : (have[key] || 0);
+        if (haveVal < need) {
+          parts.push(`<span class="miss-need">${labelFor(key)}: ${haveVal}/${need}</span>`);
+        }
+      }
+      detail = item
+        ? "Zu wenig: " + parts.join(" · ")
+        : `Slot ist leer – Build will: ${parts.join(" · ")}`;
+    }
+
+    html += `
+      <div class="miss-item">
+        <div class="miss-slot">${esc(slotLabel(slot))}</div>
+        <div class="miss-detail">${detail}</div>
+        <a class="miss-trade" href="#" onclick="openTrade('${esc(slot)}');return false;">🔍 Passendes Item suchen</a>
+      </div>`;
+  });
+
+  list.innerHTML = html || `<div class="miss-empty">🎉 Alles erfüllt – nichts fehlt!</div>`;
 }
 
 // Prüft, ob das getragene Item den Build für diesen Slot erfüllt
@@ -1493,10 +1650,103 @@ function updateActiveBuildBar() {
   const hasBuild = name && (Object.keys(buildSlotStats).length > 0 || Object.keys(buildSlotUniques).length > 0);
   if (hasBuild) {
     nameEl.textContent = "🧠 Aktiver Build: " + name;
-    bar.style.display = "flex";
+    bar.style.display = "block";
   } else {
     bar.style.display = "none";
   }
+  renderSavedBuildsBar();
+}
+
+// ============================================================
+//  MEHRERE BUILDS SPEICHERN & UMSCHALTEN
+// ============================================================
+const SAVED_BUILDS_KEY = "exileEye_savedBuilds";
+
+function getSavedBuilds() {
+  try { return JSON.parse(localStorage.getItem(SAVED_BUILDS_KEY) || "[]"); }
+  catch { return []; }
+}
+function setSavedBuilds(arr) {
+  localStorage.setItem(SAVED_BUILDS_KEY, JSON.stringify(arr));
+}
+
+// Speichert das komplette Build-Paket aus einem Import (oder aktualisiert es,
+// falls schon ein Build mit gleichem Namen existiert).
+function saveBuild(pkg) {
+  let builds = getSavedBuilds();
+  const idx = builds.findIndex(b => b.name === pkg.name);
+  if (idx >= 0) builds[idx] = pkg;      // gleichen Namen überschreiben
+  else builds.unshift(pkg);             // neuen vorne anfügen
+  if (builds.length > 10) builds = builds.slice(0, 10);  // max 10
+  setSavedBuilds(builds);
+}
+
+// Dropdown der gespeicherten Builds aufbauen
+function renderSavedBuildsBar() {
+  const bar = document.getElementById("savedBuildsBar");
+  const sel = document.getElementById("savedBuildsSelect");
+  if (!bar || !sel) return;
+  const builds = getSavedBuilds();
+  const activeName = localStorage.getItem("exileEye_buildName") || "";
+
+  // Bar nur zeigen, wenn mind. 2 Builds da sind (sonst lohnt Umschalten nicht)
+  if (builds.length < 2) { bar.style.display = "none"; return; }
+
+  sel.innerHTML = "";
+  builds.forEach(b => {
+    const opt = document.createElement("option");
+    opt.value = b.name;
+    const sub = [b.info?.class, b.info?.ascendancy].filter(Boolean).join(" ");
+    opt.textContent = b.name + (sub ? `  (${sub})` : "");
+    if (b.name === activeName) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  bar.style.display = "block";
+}
+
+// Auf einen gespeicherten Build umschalten
+function switchBuild(name) {
+  const b = getSavedBuilds().find(x => x.name === name);
+  if (!b) return;
+  applyBuildPackage(b);
+  showBanner("Build gewechselt zu: " + name, "ok");
+}
+
+// Ein komplettes Build-Paket aktiv schalten (Gewichtung, Slots, Skills...)
+function applyBuildPackage(b) {
+  currentWeights = { ...currentWeights, ...(b.weights || {}) };
+  buildSliders();
+  saveWeights();
+  clearActivePreset();
+
+  buildSlotStats = b.slot_stats || {};
+  buildSlotUniques = b.slot_uniques || {};
+  localStorage.setItem("exileEye_slotStats", JSON.stringify(buildSlotStats));
+  localStorage.setItem("exileEye_slotUniques", JSON.stringify(buildSlotUniques));
+  localStorage.setItem("exileEye_buildName", b.name);
+
+  renderSkills(b.skills || []);
+  renderConsumables(b.flasks || [], b.charms || []);
+  updateActiveBuildBar();
+  updateBuildStatus();
+}
+
+// Den aktuell gewählten gespeicherten Build löschen
+function deleteSavedBuild() {
+  const sel = document.getElementById("savedBuildsSelect");
+  const name = sel.value;
+  if (!name) return;
+  if (!confirm(`Gespeicherten Build „${name}“ löschen?`)) return;
+  let builds = getSavedBuilds().filter(b => b.name !== name);
+  setSavedBuilds(builds);
+  // war es der aktive Build? -> auf einen anderen wechseln oder leeren
+  if (localStorage.getItem("exileEye_buildName") === name) {
+    if (builds.length) applyBuildPackage(builds[0]);
+    else clearBuild();
+  } else {
+    renderSavedBuildsBar();
+  }
+  showBanner("Build gelöscht: " + name, "ok");
 }
 
 // Entfernt den importierten Build komplett (Gewichtung + Slot-Daten + Skills)
@@ -1517,7 +1767,10 @@ function clearBuild() {
   document.querySelectorAll(".slot").forEach(s => s.classList.remove("better","worse"));
   updateActiveBuildBar();
   updateBuildStatus();   // Badges + Fortschritts-Leiste zurücksetzen
-  showBanner("Build entfernt – Gewichtung zurückgesetzt", "ok");
+  const remaining = getSavedBuilds().length;
+  showBanner(remaining > 0
+    ? `Aktiver Build entfernt – ${remaining} gespeicherte${remaining > 1 ? "" : "r"} Build${remaining > 1 ? "s" : ""} bleibt erhalten (oben umschaltbar)`
+    : "Build entfernt – Gewichtung zurückgesetzt", "ok");
 }
 
 async function openTrade(slot) {
@@ -1793,6 +2046,19 @@ async function importBuild(codeOverride) {
     const bInfo = data.build_info || {};
     const bName = bInfo.name || [bInfo.class, bInfo.ascendancy].filter(Boolean).join(" ") || "Importierter Build";
     localStorage.setItem("exileEye_buildName", bName);
+
+    // Build als komplettes Paket speichern (für "mehrere Builds")
+    saveBuild({
+      name: bName,
+      info: bInfo,
+      weights: data.weights || {},
+      slot_stats: buildSlotStats,
+      slot_uniques: buildSlotUniques,
+      skills: data.skills || [],
+      flasks: data.flasks || [],
+      charms: data.charms || [],
+      saved: Date.now(),
+    });
     updateActiveBuildBar();
 
     // Skills/Gems + Charms/Flasks anzeigen
@@ -2673,6 +2939,7 @@ function installApp() {
 }
 
 // Start
+applyLang();         // gespeicherte Sprache (DE/EN) anwenden
 init();
 loadScanHistory();   // Scan-Verlauf (Scanner ist auch ohne Login sichtbar)
 </script>
