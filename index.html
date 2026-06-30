@@ -377,6 +377,8 @@
     width: 100%; font-size: 16px; padding: 15px;
     box-shadow: 0 0 16px rgba(200,160,79,.4);
   }
+  .scanner-paste-btn { width: 100%; margin-top: 8px; font-size: 13px; padding: 11px; }
+  .scanner-paste-hint { font-size: 11px; color: var(--text-dim); margin: 8px 0 0; line-height: 1.4; }
   .scanner-options {
     display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: center;
     align-items: center; margin-top: 14px;
@@ -717,6 +719,8 @@
 
   <input type="file" id="fileInput" accept="image/*" capture="environment">
   <button class="btn primary scanner-hero-btn" onclick="document.getElementById('fileInput').click()" data-i18n="photo_btn">📷 Foto aufnehmen / Bild wählen</button>
+  <button class="btn scanner-paste-btn" onclick="pasteFromClipboard()" data-i18n="paste_btn">📋 Screenshot aus Zwischenablage einfügen</button>
+  <p class="scanner-paste-hint" data-i18n="paste_hint">💡 Tipp: Screenshot machen und einfach <b>Strg + V</b> drücken – kein Suchen auf der Festplatte nötig.</p>
 
   <div class="scanner-options">
     <label class="scan-opt-lang">
@@ -1051,7 +1055,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.6</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.7</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px">Datenschutz</a> ·
@@ -1071,7 +1075,7 @@
 //  erkennt, ob die neue Seite geladen ist.
 //  TIPP: Auch in sw.js die CACHE-Nummer hochzählen (exile-eye-vX)!
 // ============================================================
-const APP_VERSION = "v1.6";
+const APP_VERSION = "v1.7";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1094,6 +1098,8 @@ const I18N = {
     photo_btn: "📷 Foto aufnehmen / Bild wählen",
     bug_btn: "🐞 Fehler melden / Feedback geben",
     bug_hint: "Etwas funktioniert nicht oder du hast einen Vorschlag? Sag uns Bescheid – öffnet eine vorausgefüllte E-Mail.",
+    paste_btn: "📋 Screenshot aus Zwischenablage einfügen",
+    paste_hint: "💡 Tipp: Screenshot machen und einfach <b>Strg + V</b> drücken – kein Suchen auf der Festplatte nötig.",
   },
   en: {
     h_character: "Character", h_equipment: "Current Equipment",
@@ -1108,6 +1114,8 @@ const I18N = {
     photo_btn: "📷 Take photo / choose image",
     bug_btn: "🐞 Report bug / Send feedback",
     bug_hint: "Something not working or got a suggestion? Let us know – opens a pre-filled email.",
+    paste_btn: "📋 Paste screenshot from clipboard",
+    paste_hint: "💡 Tip: Take a screenshot and just press <b>Ctrl + V</b> – no need to search your hard drive.",
   },
 };
 let currentLang = localStorage.getItem("exileEye_lang") || "de";
@@ -1209,57 +1217,145 @@ async function init() {
 // ============================================================
 //  DEMO-MODUS (zum Ausprobieren ohne GGG-Login)
 // ============================================================
+// Mehrere Demo-Charaktere mit jeweils eigener Ausrüstung (zum Testen ohne Login)
+const DEMO_CHARACTERS = {
+  sorc: {
+    label: "🎮 Demo: Sorceress (Lvl 90, Caster/ES)",
+    items: [
+      { slot:"Weapon", name:"Klingender Stab", typeLine:"Klingender Stab", baseType:"Klingender Stab",
+        icon:"", rarity:2, corrupted:false,
+        properties:[{name:"Zauberschaden",value:"120%"}], requirements:[{name:"Level",value:"60"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["34% erhöhter Zauberschaden","+6 zu Stufen aller Zauberfertigkeiten"],crafted:[],fractured:[]},
+        all_mods:["34% erhöhter Zauberschaden","+6 zu Stufen aller Zauberfertigkeiten"],
+        parsed_stats:{spell_damage:34, spell_skills:6} },
+      { slot:"Helm", name:"Alte Sturmhaube", typeLine:"Sturmhaube", baseType:"Sturmhaube",
+        icon:"", rarity:2, corrupted:false, properties:[{name:"Rüstung",value:"180"}], requirements:[{name:"Level",value:"45"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+45 zu maximalem Leben","+25% zu Feuerwiderstand"],crafted:[],fractured:[]},
+        all_mods:["+45 zu maximalem Leben","+25% zu Feuerwiderstand"],
+        parsed_stats:{life:45, fire_res:25} },
+      { slot:"BodyArmour", name:"Robe des Lehrlings", typeLine:"Seidenrobe", baseType:"Seidenrobe",
+        icon:"", rarity:1, corrupted:false, properties:[{name:"Energieschild",value:"95"}], requirements:[{name:"Level",value:"55"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+96 zu maximalem Energieschild","+30% zu Kältewiderstand"],crafted:[],fractured:[]},
+        all_mods:["+96 zu maximalem Energieschild","+30% zu Kältewiderstand"],
+        parsed_stats:{energy_shield:96, cold_res:30} },
+      { slot:"Gloves", name:"Schäbige Handschuhe", typeLine:"Stoffhandschuhe", baseType:"Stoffhandschuhe",
+        icon:"", rarity:0, corrupted:false, properties:[], requirements:[{name:"Level",value:"30"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+12 zu maximalem Mana"],crafted:[],fractured:[]},
+        all_mods:["+12 zu maximalem Mana"], parsed_stats:{mana:12} },
+      { slot:"Boots", name:"Sekhema-Sandalen", typeLine:"Sandalen", baseType:"Sandalen",
+        icon:"", rarity:2, corrupted:false, properties:[], requirements:[{name:"Level",value:"50"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+80 zu maximalem Leben","35% erhöhte Bewegungsgeschwindigkeit","+40% zu Blitzwiderstand"],crafted:[],fractured:[]},
+        all_mods:["+80 zu maximalem Leben","35% erhöhte Bewegungsgeschwindigkeit","+40% zu Blitzwiderstand"],
+        parsed_stats:{life:80, movement_speed:35, lightning_res:40} },
+      { slot:"Amulet", name:"Solar-Amulett", typeLine:"Solar-Amulett", baseType:"Solar-Amulett",
+        icon:"", rarity:2, corrupted:false, properties:[], requirements:[{name:"Level",value:"40"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+3 zu Stufen aller Zauberfertigkeiten","+150 zu maximalem Mana"],crafted:[],fractured:[]},
+        all_mods:["+3 zu Stufen aller Zauberfertigkeiten","+150 zu maximalem Mana"],
+        parsed_stats:{spell_skills:3, mana:150} },
+      { slot:"Ring", name:"Saphirring", typeLine:"Saphirring", baseType:"Saphirring",
+        icon:"", rarity:1, corrupted:false, properties:[], requirements:[{name:"Level",value:"20"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+20% zu Kältewiderstand"],crafted:[],fractured:[]},
+        all_mods:["+20% zu Kältewiderstand"], parsed_stats:{cold_res:20} },
+    ],
+  },
+  warrior: {
+    label: "🎮 Demo: Warrior (Lvl 88, Life/Armour)",
+    items: [
+      { slot:"Weapon", name:"Brutaler Streitkolben", typeLine:"Streitkolben", baseType:"Streitkolben",
+        icon:"", rarity:2, corrupted:false,
+        properties:[{name:"Physischer Schaden",value:"180-250"}], requirements:[{name:"Level",value:"62"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+95 zu maximalem Leben","12% erhöhte Angriffsgeschwindigkeit"],crafted:[],fractured:[]},
+        all_mods:["+95 zu maximalem Leben","12% erhöhte Angriffsgeschwindigkeit"],
+        parsed_stats:{life:95} },
+      { slot:"Helm", name:"Eiserner Vollhelm", typeLine:"Vollhelm", baseType:"Vollhelm",
+        icon:"", rarity:2, corrupted:false, properties:[{name:"Rüstung",value:"420"}], requirements:[{name:"Level",value:"55"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+70 zu maximalem Leben","+350 zu Rüstung","+35% zu Feuerwiderstand"],crafted:[],fractured:[]},
+        all_mods:["+70 zu maximalem Leben","+350 zu Rüstung","+35% zu Feuerwiderstand"],
+        parsed_stats:{life:70, armour:350, fire_res:35} },
+      { slot:"BodyArmour", name:"Plattenpanzer der Wache", typeLine:"Plattenpanzer", baseType:"Plattenpanzer",
+        icon:"", rarity:2, corrupted:false, properties:[{name:"Rüstung",value:"950"}], requirements:[{name:"Level",value:"60"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+120 zu maximalem Leben","+800 zu Rüstung","+30% zu Kältewiderstand"],crafted:[],fractured:[]},
+        all_mods:["+120 zu maximalem Leben","+800 zu Rüstung","+30% zu Kältewiderstand"],
+        parsed_stats:{life:120, armour:800, cold_res:30} },
+      { slot:"Gloves", name:"Gepanzerte Handschuhe", typeLine:"Plattenhandschuhe", baseType:"Plattenhandschuhe",
+        icon:"", rarity:1, corrupted:false, properties:[{name:"Rüstung",value:"160"}], requirements:[{name:"Level",value:"48"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+55 zu maximalem Leben","+30% zu Blitzwiderstand"],crafted:[],fractured:[]},
+        all_mods:["+55 zu maximalem Leben","+30% zu Blitzwiderstand"], parsed_stats:{life:55, lightning_res:30} },
+      { slot:"Boots", name:"Schwere Stiefel", typeLine:"Plattenstiefel", baseType:"Plattenstiefel",
+        icon:"", rarity:2, corrupted:false, properties:[{name:"Rüstung",value:"180"}], requirements:[{name:"Level",value:"52"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+85 zu maximalem Leben","30% erhöhte Bewegungsgeschwindigkeit","+25% zu Kältewiderstand"],crafted:[],fractured:[]},
+        all_mods:["+85 zu maximalem Leben","30% erhöhte Bewegungsgeschwindigkeit","+25% zu Kältewiderstand"],
+        parsed_stats:{life:85, movement_speed:30, cold_res:25} },
+      { slot:"Belt", name:"Lederngürtel des Riesen", typeLine:"Ledergürtel", baseType:"Ledergürtel",
+        icon:"", rarity:2, corrupted:false, properties:[], requirements:[{name:"Level",value:"40"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+110 zu maximalem Leben","+28% zu Chaoswiderstand"],crafted:[],fractured:[]},
+        all_mods:["+110 zu maximalem Leben","+28% zu Chaoswiderstand"], parsed_stats:{life:110, chaos_res:28} },
+      { slot:"Amulet", name:"Stahlamulett", typeLine:"Stahlamulett", baseType:"Stahlamulett",
+        icon:"", rarity:1, corrupted:false, properties:[], requirements:[{name:"Level",value:"35"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+60 zu maximalem Leben","+40% zu Feuerwiderstand"],crafted:[],fractured:[]},
+        all_mods:["+60 zu maximalem Leben","+40% zu Feuerwiderstand"], parsed_stats:{life:60, fire_res:40} },
+    ],
+  },
+  ranger: {
+    label: "🎮 Demo: Ranger (Lvl 85, Bow/Evasion)",
+    items: [
+      { slot:"Weapon", name:"Sturmbogen", typeLine:"Kriegsbogen", baseType:"Kriegsbogen",
+        icon:"", rarity:2, corrupted:false,
+        properties:[{name:"Physischer Schaden",value:"95-180"}], requirements:[{name:"Level",value:"58"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["28% erhöhte Angriffsgeschwindigkeit","+45 zu maximalem Leben"],crafted:[],fractured:[]},
+        all_mods:["28% erhöhte Angriffsgeschwindigkeit","+45 zu maximalem Leben"], parsed_stats:{life:45} },
+      { slot:"Helm", name:"Kapuze des Jägers", typeLine:"Lederkappe", baseType:"Lederkappe",
+        icon:"", rarity:2, corrupted:false, properties:[{name:"Ausweichwert",value:"240"}], requirements:[{name:"Level",value:"45"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+55 zu maximalem Leben","+30% zu Feuerwiderstand"],crafted:[],fractured:[]},
+        all_mods:["+55 zu maximalem Leben","+30% zu Feuerwiderstand"], parsed_stats:{life:55, fire_res:30} },
+      { slot:"BodyArmour", name:"Wendige Rüstung", typeLine:"Geschmeidige Rüstung", baseType:"Geschmeidige Rüstung",
+        icon:"", rarity:2, corrupted:false, properties:[{name:"Ausweichwert",value:"680"}], requirements:[{name:"Level",value:"57"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+90 zu maximalem Leben","+38% zu Kältewiderstand","+32% zu Blitzwiderstand"],crafted:[],fractured:[]},
+        all_mods:["+90 zu maximalem Leben","+38% zu Kältewiderstand","+32% zu Blitzwiderstand"],
+        parsed_stats:{life:90, cold_res:38, lightning_res:32} },
+      { slot:"Gloves", name:"Schnelle Handschuhe", typeLine:"Wildlederhandschuhe", baseType:"Wildlederhandschuhe",
+        icon:"", rarity:1, corrupted:false, properties:[], requirements:[{name:"Level",value:"42"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+48 zu maximalem Leben","18% erhöhte Angriffsgeschwindigkeit"],crafted:[],fractured:[]},
+        all_mods:["+48 zu maximalem Leben","18% erhöhte Angriffsgeschwindigkeit"], parsed_stats:{life:48} },
+      { slot:"Boots", name:"Windläufer-Stiefel", typeLine:"Wildlederstiefel", baseType:"Wildlederstiefel",
+        icon:"", rarity:2, corrupted:false, properties:[], requirements:[{name:"Level",value:"50"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+65 zu maximalem Leben","40% erhöhte Bewegungsgeschwindigkeit"],crafted:[],fractured:[]},
+        all_mods:["+65 zu maximalem Leben","40% erhöhte Bewegungsgeschwindigkeit"], parsed_stats:{life:65, movement_speed:40} },
+      { slot:"Ring", name:"Topasring", typeLine:"Topasring", baseType:"Topasring",
+        icon:"", rarity:1, corrupted:false, properties:[], requirements:[{name:"Level",value:"30"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+35% zu Blitzwiderstand","+25 zu maximalem Leben"],crafted:[],fractured:[]},
+        all_mods:["+35% zu Blitzwiderstand","+25 zu maximalem Leben"], parsed_stats:{lightning_res:35, life:25} },
+    ],
+  },
+};
+
 function loadDemo() {
   // Ansicht auf "eingeloggt" umschalten
   document.getElementById("loginView").classList.add("hidden");
   document.getElementById("mainView").classList.remove("hidden");
   document.getElementById("logoutBtn").classList.remove("hidden");
   loadWeights();
-
-  // Demo-Charakter ins Dropdown
-  const sel = document.getElementById("charSelect");
-  sel.innerHTML = '<option value="demo">🎮 Demo-Charakter (Lvl 90 Sorceress)</option>';
   currentLeague = "Standard";
 
-  // Beispiel-Ausrüstung (deutsche Items, gemischte Qualität)
-  const demoItems = [
-    { slot:"Weapon", name:"Klingender Stab", typeLine:"Klingender Stab", baseType:"Klingender Stab",
-      icon:"", rarity:2, corrupted:false,
-      properties:[{name:"Zauberschaden",value:"120%"}], requirements:[{name:"Level",value:"60"}],
-      mods:{implicit:[],enchant:[],rune:[],explicit:["34% erhöhter Zauberschaden","+6 zu Stufen aller Zauberfertigkeiten"],crafted:[],fractured:[]},
-      all_mods:["34% erhöhter Zauberschaden","+6 zu Stufen aller Zauberfertigkeiten"],
-      parsed_stats:{spell_damage:34, spell_skills:6} },
-    { slot:"Helm", name:"Alte Sturmhaube", typeLine:"Sturmhaube", baseType:"Sturmhaube",
-      icon:"", rarity:2, corrupted:false, properties:[{name:"Rüstung",value:"180"}], requirements:[{name:"Level",value:"45"}],
-      mods:{implicit:[],enchant:[],rune:[],explicit:["+45 zu maximalem Leben","+25% zu Feuerwiderstand"],crafted:[],fractured:[]},
-      all_mods:["+45 zu maximalem Leben","+25% zu Feuerwiderstand"],
-      parsed_stats:{life:45, fire_res:25} },
-    { slot:"BodyArmour", name:"Robe des Lehrlings", typeLine:"Seidenrobe", baseType:"Seidenrobe",
-      icon:"", rarity:1, corrupted:false, properties:[{name:"Energieschild",value:"95"}], requirements:[{name:"Level",value:"55"}],
-      mods:{implicit:[],enchant:[],rune:[],explicit:["+96 zu maximalem Energieschild","+30% zu Kältewiderstand"],crafted:[],fractured:[]},
-      all_mods:["+96 zu maximalem Energieschild","+30% zu Kältewiderstand"],
-      parsed_stats:{energy_shield:96, cold_res:30} },
-    { slot:"Gloves", name:"Schäbige Handschuhe", typeLine:"Stoffhandschuhe", baseType:"Stoffhandschuhe",
-      icon:"", rarity:0, corrupted:false, properties:[], requirements:[{name:"Level",value:"30"}],
-      mods:{implicit:[],enchant:[],rune:[],explicit:["+12 zu maximalem Mana"],crafted:[],fractured:[]},
-      all_mods:["+12 zu maximalem Mana"], parsed_stats:{mana:12} },
-    { slot:"Boots", name:"Sekhema-Sandalen", typeLine:"Sandalen", baseType:"Sandalen",
-      icon:"", rarity:2, corrupted:false, properties:[], requirements:[{name:"Level",value:"50"}],
-      mods:{implicit:[],enchant:[],rune:[],explicit:["+80 zu maximalem Leben","35% erhöhte Bewegungsgeschwindigkeit","+40% zu Blitzwiderstand"],crafted:[],fractured:[]},
-      all_mods:["+80 zu maximalem Leben","35% erhöhte Bewegungsgeschwindigkeit","+40% zu Blitzwiderstand"],
-      parsed_stats:{life:80, movement_speed:35, lightning_res:40} },
-    { slot:"Amulet", name:"Solar-Amulett", typeLine:"Solar-Amulett", baseType:"Solar-Amulett",
-      icon:"", rarity:2, corrupted:false, properties:[], requirements:[{name:"Level",value:"40"}],
-      mods:{implicit:[],enchant:[],rune:[],explicit:["+3 zu Stufen aller Zauberfertigkeiten","+150 zu maximalem Mana"],crafted:[],fractured:[]},
-      all_mods:["+3 zu Stufen aller Zauberfertigkeiten","+150 zu maximalem Mana"],
-      parsed_stats:{spell_skills:3, mana:150} },
-    { slot:"Ring", name:"Saphirring", typeLine:"Saphirring", baseType:"Saphirring",
-      icon:"", rarity:1, corrupted:false, properties:[], requirements:[{name:"Level",value:"20"}],
-      mods:{implicit:[],enchant:[],rune:[],explicit:["+20% zu Kältewiderstand"],crafted:[],fractured:[]},
-      all_mods:["+20% zu Kältewiderstand"], parsed_stats:{cold_res:20} },
-  ];
-  renderGear(demoItems);
-  showBanner("🎮 Demo-Modus aktiv – probier alles aus! (Beispiel-Daten)", "ok");
+  // Alle Demo-Charaktere ins Dropdown (per data-demo markiert)
+  const sel = document.getElementById("charSelect");
+  let opts = "";
+  for (const [key, c] of Object.entries(DEMO_CHARACTERS)) {
+    opts += `<option value="demo:${key}">${c.label}</option>`;
+  }
+  sel.innerHTML = opts;
+
+  // ersten Demo-Char laden
+  const firstKey = Object.keys(DEMO_CHARACTERS)[0];
+  loadDemoCharacter(firstKey);
+  showBanner("🎮 Demo-Modus aktiv – oben den Charakter wechseln zum Vergleichen!", "ok");
+}
+
+// Lädt die Ausrüstung eines bestimmten Demo-Charakters ins HUD
+function loadDemoCharacter(key) {
+  const c = DEMO_CHARACTERS[key];
+  if (!c) return;
+  renderGear(c.items);
 }
 
 // ---------- Charakterliste laden ----------
@@ -1297,6 +1393,12 @@ async function loadCharacters() {
 document.getElementById("charSelect").addEventListener("change", async (e) => {
   const name = e.target.value;
   if (!name) return;
+  // Demo-Charakter? (Wert "demo:sorc" etc.) -> lokale Demo-Ausrüstung laden
+  if (name.startsWith("demo:")) {
+    currentLeague = "Standard";
+    loadDemoCharacter(name.slice(5));
+    return;
+  }
   // Liga des gewählten Charakters merken (für Trade-Links)
   const opt = e.target.options[e.target.selectedIndex];
   currentLeague = opt?.dataset?.league || "Standard";
@@ -1373,8 +1475,10 @@ function renderGear(items) {
     // Raritäts-Schimmer auf dem Slot
     slotEl.classList.add("rar-" + (it.rarity ?? 0));
 
-    // Score aus den Mods schätzen (Life/Res)
-    const sc = scoreFromMods(it.all_mods || []);
+    // Score aus den bereits geparsten Stats berechnen (sprachunabhängig!)
+    // (scoreFromMods las nur englische Mod-Texte -> bei deutschen Items / anderen
+    //  Builds kam 0 raus. parsed_stats ist zweisprachig korrekt geparst.)
+    const sc = scoreFromStats(it.parsed_stats || {});
     it._score = sc;
     if (sc > 0) {
       const s = document.createElement("span");
@@ -2206,18 +2310,73 @@ async function importBuild(codeOverride) {
 let cropImg = null;          // geladenes Bild (Image-Objekt)
 let cropRect = null;         // {x,y,w,h} im Canvas-Koordinaten
 
-document.getElementById("fileInput").addEventListener("change", (e) => {
-  const file = e.target.files[0];
+// Bild aus einer Datei (File/Blob) in den Scanner laden – gemeinsam genutzt
+// von Datei-Auswahl UND Zwischenablage (Strg+V).
+function loadImageFromFile(file) {
   if (!file) return;
   const img = new Image();
   img.onload = () => {
     cropImg = img;
     setupCropper(img);
+    // zum Scanner scrollen, damit man sofort sieht, dass das Bild da ist
+    document.querySelector(".scanner-hero")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
   img.onerror = () => showBanner("Bild konnte nicht geladen werden");
   img.src = URL.createObjectURL(file);
   document.getElementById("scanResult").style.display = "none";
   document.getElementById("previewImg").style.display = "none";
+}
+
+document.getElementById("fileInput").addEventListener("change", (e) => {
+  loadImageFromFile(e.target.files[0]);
+});
+
+// Button "Aus Zwischenablage einfügen" -> moderne Clipboard-API (Klick statt Strg+V)
+async function pasteFromClipboard() {
+  if (!navigator.clipboard || !navigator.clipboard.read) {
+    showBanner("Dein Browser unterstützt das nicht direkt – drück stattdessen Strg + V", "ok");
+    return;
+  }
+  try {
+    const items = await navigator.clipboard.read();
+    for (const it of items) {
+      const imgType = it.types.find(t => t.startsWith("image/"));
+      if (imgType) {
+        const blob = await it.getType(imgType);
+        loadImageFromFile(blob);
+        showBanner("📋 Screenshot aus der Zwischenablage eingefügt – jetzt analysieren!", "ok");
+        return;
+      }
+    }
+    showBanner("Kein Bild in der Zwischenablage. Erst einen Screenshot machen, dann einfügen.");
+  } catch (err) {
+    // Browser verlangt evtl. eine Berechtigung oder blockt -> Strg+V als Fallback
+    showBanner("Einfügen per Knopf blockiert – drück stattdessen einfach Strg + V", "ok");
+  }
+}
+
+// ZWISCHENABLAGE: Screenshot mit Strg+V direkt einfügen (kein Datei-Suchen nötig)
+document.addEventListener("paste", (e) => {
+  // nicht stören, wenn der Nutzer gerade in ein Textfeld tippt
+  const tag = (document.activeElement?.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea") {
+    // Ausnahme: in Zahlen-/Datei-Feldern trotzdem Bild-Paste erlauben
+    const type = (document.activeElement?.type || "").toLowerCase();
+    if (type !== "number" && tag !== "input") return;
+  }
+  const items = (e.clipboardData || window.clipboardData)?.items;
+  if (!items) return;
+  for (const it of items) {
+    if (it.type && it.type.startsWith("image/")) {
+      const file = it.getAsFile();
+      if (file) {
+        loadImageFromFile(file);
+        showBanner("📋 Screenshot aus der Zwischenablage eingefügt – jetzt analysieren!", "ok");
+        e.preventDefault();
+      }
+      return;
+    }
+  }
 });
 
 // Umschalten Auto/Manuell nach Foto-Wahl -> Ansicht neu aufbauen
@@ -3045,5 +3204,5 @@ applyLang();         // gespeicherte Sprache (DE/EN) anwenden
 init();
 loadScanHistory();   // Scan-Verlauf (Scanner ist auch ohne Login sichtbar)
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0921fc86813dcb2',t:'MTc4MTAyODk1Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
