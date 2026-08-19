@@ -429,8 +429,18 @@ def api_character_gear():
         # alle Mods zusammen (fuer Score-Berechnung)
         all_mods = implicit + enchant + rune + explicit + crafted + fractured
 
+        # GGG gibt Mods manchmal als {"text": "mod-string"} zurueck, statt nur "mod-string".
+        # Hier sicherstellen, dass wir immer den Text ziehen.
+        processed_mods = []
+        for mod_entry in all_mods:
+            if isinstance(mod_entry, dict) and 'text' in mod_entry:
+                processed_mods.append(mod_entry['text'])
+            elif isinstance(mod_entry, str):
+                processed_mods.append(mod_entry)
+            # Unerwartete Typen werden ignoriert
+
         # Einzelstats parsen (fuer Alt/Neu-Vergleich Stat-fuer-Stat)
-        parsed = parse_item_stats("\n".join(all_mods))
+        parsed = parse_item_stats("\n".join(processed_mods))
 
         # --- Eigenschaften (Schaden, Ruestung, Krit etc.) ---
         props = []
