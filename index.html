@@ -773,7 +773,7 @@
             <span class="bp-count" id="bpCount">0 / 0</span>
           </div>
           <div class="bp-bar"><div class="bp-fill" id="bpFill" style="width:0%"></div></div>
-          <div class="bp-hint" id="bpHint">Importiere einen Build, um deinen Fortschritt zu sehen</div>
+          <div class="bp-hint" id="bpHint" title="Zählt pro Slot, den dein Build fordert: ✓ = Anforderungen komplett erfüllt · ✗ = fehlt oder zu niedrig">Importiere einen Build, um deinen Fortschritt zu sehen</div>
           <button id="bpMissingToggle" class="bp-missing-toggle" style="display:none" onclick="toggleMissingList()">🔍 Was fehlt mir? Liste anzeigen</button>
           <div id="bpMissingList" style="display:none"></div>
         </div>
@@ -2273,7 +2273,11 @@ function renderSkills(skills) {
   allSkills = skills || [];
   const sec = document.getElementById("skillsSection");
   const list = document.getElementById("skillsList");
-  if (!skills.length) { sec.style.display = "none"; return; }
+  if (!skills.length) {
+    list.innerHTML = `<div style="text-align:center;padding:18px 12px;color:var(--text-dim);font-size:12px">📚 Skills erscheinen automatisch, sobald du einen Build importierst.<br><span style="opacity:.7">(Mobalytics .build-Datei, pobb.in-Link, oder Maxroll-URL)</span></div>`;
+    sec.style.display = "block";
+    return;
+  }
   list.innerHTML = "";
   skills.forEach((s, idx) => {
     const g = document.createElement("div");
