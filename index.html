@@ -683,6 +683,50 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .disclaimer { text-align: center; color: #5a513c; font-size: 10px; margin: 18px 18px 0; line-height: 1.4; }
   footer { text-align: center; color: var(--text-dim); font-size: 11px; margin-top: 14px; }
+
+  /* ========= ACCORDION-PANELS (einklappbar) ========= */
+  .panel {
+    background: linear-gradient(180deg, var(--panel-2), #14100b);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 16px 18px 0;
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    cursor: pointer;
+    user-select: none;
+    background: linear-gradient(180deg, rgba(200,160,79,.05), transparent);
+    transition: background .15s;
+  }
+  .panel-head:hover { background: linear-gradient(180deg, rgba(200,160,79,.12), transparent); }
+  .panel-head h2 {
+    font-size: 14px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--gold-soft); margin: 0; border: 0; padding: 0;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel-head .arrow {
+    font-size: 14px; color: var(--gold);
+    transition: transform .2s;
+    flex: 0 0 auto;
+  }
+  .panel.open .panel-head .arrow { transform: rotate(90deg); }
+  .panel-body {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .panel.open .panel-body { display: block; }
+  .panel-body .section { padding: 12px 0 0; }
+  .panel-body .section:first-child { padding-top: 4px; }
+  .panel-body .build-import { margin-top: 12px; }
+  .panel-body > .login-card { margin: 12px 0 4px; }
+  .panel-head .status-badge {
+    font-size: 11px; color: var(--green); margin-right: 10px;
+  }
+  .panel-head .head-right { display: flex; align-items: center; }
+</style>
 </style>
 </head>
 <body>
