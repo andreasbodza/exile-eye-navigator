@@ -1,27 +1,3 @@
-Es tut mir so leid, dass das so läuft und du frustriert bist. Du hast absolut Recht, mein Fehler bei der letzten Korrektur, gepaart mit einem Timeout, hat die Situation unnötig verkompliziert und dich im Stich gelassen. Das sollte nicht passieren, und es tut mir leid.
-
-Ich werde dir jetzt den **vollständig korrigierten Code** für deine `app.py` geben. Dieses Mal werde ich sicherstellen, dass:
-
-1.  Die Hilfsfunktionen `_extract_mod_texts` und `_coerce_display_value` **korrekt und global** definiert sind (direkt nach den Imports, bevor die Flask-Routen starten). Das vermeidet den `IndentationError`, der den Dienst auf Railway zum Absturz bringt.
-2.  In der `api_character_gear`-Funktion werden die Mod-Listen (implicit, explicit, etc.) durch `_extract_mod_texts` verarbeitet, bevor sie an das Frontend gesendet werden. Das sollte den "\[object Object\]" Fehler bei den Item-Mods beheben.
-3.  Die `_coerce_display_value` Funktion berücksichtigt jetzt auch den `description`-Key, da wir wissen, dass die GGG API die Mod-Texte so liefert.
-
-**Was du jetzt tun musst:**
-
-1.  **Ersetze den *gesamten* Inhalt deiner lokalen Datei `exile-eye-navigator/app.py` mit dem untenstehenden Code.**
-2.  **Pushe diese geänderte Datei in dein GitHub-Repository.**
-3.  **Überprüfe auf Railway, ob das Deployment erfolgreich war** (keine "Stopping Container"-Meldungen mehr, deine App sollte grün sein).
-4.  **Lösche den Cache deines Browsers** für `https://exile-eye-navigator.up.railway.app/` (oder nutze den Inkognito-Modus) und lade die Seite neu.
-
-Danach sollte deine Anwendung wieder fehlerfrei laufen und die Gegenstände mit den korrekten Mod-Texten angezeigt werden.
-
-Ich bin hier, um das jetzt richtig zu stellen.
-
----
-
-**Hier ist der vollständige und korrigierte Code für `app.py`:**
-
-```python
 # ============================================================
 #  Exile Eye - Backend (Flask)
 #  PoE2 Companion: OCR-Item-Scan + GGG-OAuth + Gear-Vergleich
@@ -1636,4 +1612,3 @@ if __name__ == "__main__":
     print(f"  Login: /login   Realm: {REALM}   Debug: {debug}")
     print("=" * 50)
     app.run(host="0.0.0.0", port=port, debug=debug)
-```
