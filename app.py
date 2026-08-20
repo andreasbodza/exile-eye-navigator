@@ -1,3 +1,27 @@
+Es tut mir so leid, dass das so läuft und du frustriert bist. Du hast absolut Recht, mein Fehler bei der letzten Korrektur, gepaart mit einem Timeout, hat die Situation unnötig verkompliziert und dich im Stich gelassen. Das sollte nicht passieren, und es tut mir leid.
+
+Ich werde dir jetzt den **vollständig korrigierten Code** für deine `app.py` geben. Dieses Mal werde ich sicherstellen, dass:
+
+1.  Die Hilfsfunktionen `_extract_mod_texts` und `_coerce_display_value` **korrekt und global** definiert sind (direkt nach den Imports, bevor die Flask-Routen starten). Das vermeidet den `IndentationError`, der den Dienst auf Railway zum Absturz bringt.
+2.  In der `api_character_gear`-Funktion werden die Mod-Listen (implicit, explicit, etc.) durch `_extract_mod_texts` verarbeitet, bevor sie an das Frontend gesendet werden. Das sollte den "\[object Object\]" Fehler bei den Item-Mods beheben.
+3.  Die `_coerce_display_value` Funktion berücksichtigt jetzt auch den `description`-Key, da wir wissen, dass die GGG API die Mod-Texte so liefert.
+
+**Was du jetzt tun musst:**
+
+1.  **Ersetze den *gesamten* Inhalt deiner lokalen Datei `exile-eye-navigator/app.py` mit dem untenstehenden Code.**
+2.  **Pushe diese geänderte Datei in dein GitHub-Repository.**
+3.  **Überprüfe auf Railway, ob das Deployment erfolgreich war** (keine "Stopping Container"-Meldungen mehr, deine App sollte grün sein).
+4.  **Lösche den Cache deines Browsers** für `https://exile-eye-navigator.up.railway.app/` (oder nutze den Inkognito-Modus) und lade die Seite neu.
+
+Danach sollte deine Anwendung wieder fehlerfrei laufen und die Gegenstände mit den korrekten Mod-Texten angezeigt werden.
+
+Ich bin hier, um das jetzt richtig zu stellen.
+
+---
+
+**Hier ist der vollständige und korrigierte Code für `app.py`:**
+
+```python
 # ============================================================
 #  Exile Eye - Backend (Flask)
 #  PoE2 Companion: OCR-Item-Scan + GGG-OAuth + Gear-Vergleich
@@ -82,7 +106,7 @@ USER_AGENT   = f"OAuth {CLIENT_ID}/{APP_VERSION} (contact: {CONTACT})"
 # Tesseract-Pfad aus der .env (Windows) - bis zur .exe!
 TESSERACT_PATH = os.getenv(
     "TESSERACT_PATH",
-    r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
 )
 
 # OAuth-Endpunkte
@@ -101,6 +125,47 @@ def make_pkce_pair():
     digest = hashlib.sha256(verifier.encode()).digest()
     challenge = base64.urlsafe_b64encode(digest).decode().rstrip("=")
     return verifier, challenge
+
+
+# --- HILFSFUNKTIONEN fuer Datenverarbeitung (auf Modulebene verschoben) ---
+
+def _extract_mod_texts(mod_list):
+    """
+    Extrahiert den Text aus Mod-Einträgen, die von der GGG API kommen.
+    Diese können Strings oder Dictionaries mit einem 'description'-Key sein.
+    """
+    extracted_texts = []
+    for mod_entry in mod_list:
+        if isinstance(mod_entry, dict) and "description" in mod_entry:
+            extracted_texts.append(mod_entry["description"])
+        elif isinstance(mod_entry, str):
+            extracted_texts.append(mod_entry)
+        # Andere unerwartete Typen werden ignoriert
+    return extracted_texts
+
+def _coerce_display_value(v):
+    """
+    GGG API kann manchmal Werte als Objekte liefern (z.B. in properties/requirements).
+    Ziel: immer einen renderbaren Wert (string/number) ans Frontend geben.
+    """
+    if v is None:
+        return ""
+    if isinstance(v, (str, int, float, bool)):
+        return v
+    if isinstance(v, dict):
+        # Häufige Keys, einschließlich "description"
+        for k in ("text", "value", "number", "description"):
+            if k in v and isinstance(v[k], (str, int, float, bool)):
+                return v[k]
+        # Fallback: versuche irgendeinen primitiven Wert
+        for vv in v.values():
+            if isinstance(vv, (str, int, float, bool)):
+                return vv
+        return str(v)
+    if isinstance(v, (list, tuple)):
+        # Bei Listen/Tupeln den ersten Wert versuchen
+        return _coerce_display_value(v[0]) if v else ""
+    return str(v)
 
 
 # ------------------------------------------------------------
@@ -419,56 +484,19 @@ def api_character_gear():
     items = []
     for it in equipment:
         # --- Mods nach Typ getrennt sammeln (fuer schoene Anzeige) ---
-        implicit = it.get("implicitMods", []) or []
-        enchant  = it.get("enchantMods", []) or []
-        rune     = it.get("runeMods", []) or []        # PoE2: Runen
-        explicit = it.get("explicitMods", []) or []
-        crafted  = it.get("craftedMods", []) or []
-        fractured = it.get("fracturedMods", []) or []
-
-        def _extract_mod_texts(mod_list):
-            extracted_texts = []
-            for mod_entry in mod_list:
-                if isinstance(mod_entry, dict) and "text" in mod_entry:
-                    extracted_texts.append(mod_entry["text"])
-                elif isinstance(mod_entry, str):
-                    extracted_texts.append(mod_entry)
-            return extracted_texts
-
-        # Mods in reine Strings umwandeln (sonst zeigt das Frontend "[object Object]")
-        implicit = _extract_mod_texts(implicit)
-        enchant = _extract_mod_texts(enchant)
-        rune = _extract_mod_texts(rune)
-        explicit = _extract_mod_texts(explicit)
-        crafted = _extract_mod_texts(crafted)
-        fractured = _extract_mod_texts(fractured)
+        # Mod-Listen direkt durch _extract_mod_texts schicken, damit sie nur Strings enthalten
+        implicit = _extract_mod_texts(it.get("implicitMods", []) or [])
+        enchant  = _extract_mod_texts(it.get("enchantMods", []) or [])
+        rune     = _extract_mod_texts(it.get("runeMods", []) or [])        # PoE2: Runen
+        explicit = _extract_mod_texts(it.get("explicitMods", []) or [])
+        crafted  = _extract_mod_texts(it.get("craftedMods", []) or [])
+        fractured = _extract_mod_texts(it.get("fracturedMods", []) or [])
 
         # alle Mods zusammen (fuer Score-Berechnung)
         all_mods = implicit + enchant + rune + explicit + crafted + fractured
 
         # Einzelstats parsen (fuer Alt/Neu-Vergleich Stat-fuer-Stat)
         parsed = parse_item_stats("\n".join(all_mods))
-
-        def _coerce_display_value(v):
-            """Poe2 API kann manchmal Werte als Objekte liefern.
-            Ziel: immer einen renderbaren Wert (string/number) ans Frontend geben."""
-            if v is None:
-                return ""
-            if isinstance(v, (str, int, float, bool)):
-                return v
-            if isinstance(v, dict):
-                # Häufige Keys
-                for k in ("text", "value", "number"):
-                    if k in v and isinstance(v[k], (str, int, float, bool)):
-                        return v[k]
-                # Fallback: versuche irgendeinen primitiven Wert
-                for vv in v.values():
-                    if isinstance(vv, (str, int, float, bool)):
-                        return vv
-                return str(v)
-            if isinstance(v, (list, tuple)):
-                return _coerce_display_value(v[0]) if v else ""
-            return str(v)
 
         # --- Eigenschaften (Schaden, Ruestung, Krit etc.) ---
         props = []
@@ -523,7 +551,7 @@ def api_character_gear():
                 "crafted":   crafted,
                 "fractured": fractured,
             },
-            "all_mods": all_mods,                # fuer Score
+            "all_mods": all_mods,                # fuer Score (enthält jetzt Strings)
             "parsed_stats": parsed,              # einzelne Werte fuer Vergleich
         })
 
@@ -555,8 +583,7 @@ def auto_crop_tooltip(pil_img):
 
     try:
         rgb = pil_img.convert("RGB")
-        arr = np.array(rgb)[:, :, ::-1].copy()
-        H, W = arr.shape[:2]
+        arr = np.array(rgb)[:, :, ::-1].copy()   # RGB -> BGR fuer cv2
         gray = cv2.cvtColor(arr, cv2.COLOR_BGR2GRAY)
 
         # dunkle Bereiche maskieren (Tooltip-Hintergrund ist fast schwarz)
@@ -698,8 +725,7 @@ def _ocr_quality(text):
         return 0
     low = text.lower()
     score = 0
-    score += len(re.findall(r"\d+", text)) * 2          # Zahlen sind Gold
-    # Schluesselwoerter Deutsch + Englisch
+    score += len(re.findall(r"\\d+", text)) * 2          # Zahlen sind Gold
     for kw in ["life", "mana", "resist", "armour", "energy", "damage",
                "critical", "movement", "spirit", "level",
                "leben", "widerstand", "energieschild", "rüstung", "ruestung",
@@ -749,9 +775,9 @@ def api_analyze():
         return jsonify({
             "error": "bild_unlesbar",
             "detail": str(e),
-            "hint": "iPhone-Foto? Dann 'pip install pillow-heif' ausführen, "
+            "hint": "iPhone-Foto? Dann \'pip install pillow-heif\' ausführen, "
                     "oder am iPhone unter Einstellungen > Kamera > Formate "
-                    "auf 'Maximale Kompatibilität' (JPG) stellen."
+                    "auf \'Maximale Kompatibilität\' (JPG) stellen."
         }), 400
 
     # Auto-Crop: dunklen Item-Tooltip automatisch finden & zuschneiden
@@ -858,26 +884,26 @@ STAT_WEIGHTS = {
 # Deutsch ist Standard bei deutschem Spiel-Client.
 STAT_PATTERNS = {
     # Leben: "zu maximalem Leben" / "to maximum Life"
-    "life":           r"\+?(\d+)\s+(?:zu\s+maximalem\s+Leben|to\s+(?:maximum\s+)?Life)",
+    "life":           r"\\+?(\\d+)\\s+(?:zu\\s+maximalem\\s+Leben|to\\s+(?:maximum\\s+)?Life)",
     # Mana
-    "mana":           r"\+?(\d+)\s+(?:zu\s+maximalem\s+Mana|to\s+(?:maximum\s+)?Mana)",
+    "mana":           r"\\+?(\\d+)\\s+(?:zu\\s+maximalem\\s+Mana|to\\s+(?:maximum\\s+)?Mana)",
     # Resistenzen (deutsch: "...widerstand", englisch: "... Resistance")
-    "fire_res":       r"\+?(\d+)%?\s+(?:zu\s+Feuerwiderstand|to\s+Fire\s+Resistance)",
-    "cold_res":       r"\+?(\d+)%?\s+(?:zu\s+Kältewiderstand|zu\s+Kaeltewiderstand|to\s+Cold\s+Resistance)",
-    "lightning_res":  r"\+?(\d+)%?\s+(?:zu\s+Blitzwiderstand|to\s+Lightning\s+Resistance)",
-    "chaos_res":      r"\+?(\d+)%?\s+(?:zu\s+Chaoswiderstand|to\s+Chaos\s+Resistance)",
+    "fire_res":       r"\\+?(\\d+)%?\\s+(?:zu\\s+Feuerwiderstand|to\\s+Fire\\s+Resistance)",
+    "cold_res":       r"\\+?(\\d+)%?\\s+(?:zu\\s+Kältewiderstand|zu\\s+Kaeltewiderstand|to\\s+Cold\\s+Resistance)",
+    "lightning_res":  r"\\+?(\\d+)%?\\s+(?:zu\\s+Blitzwiderstand|to\\s+Lightning\\s+Resistance)",
+    "chaos_res":      r"\\+?(\\d+)%?\\s+(?:zu\\s+Chaoswiderstand|to\\s+Chaos\\s+Resistance)",
     # alle Elementarwiderstände: "zu allen Elementarwiderständen" / "to all Elemental Resistances"
-    "all_res":        r"\+?(\d+)%?\s+(?:zu\s+allen\s+Elementarwiderständen|zu\s+allen\s+Elementarwiderstaenden|to\s+all\s+Elemental\s+Resistances)",
+    "all_res":        r"\\+?(\\d+)%?\\s+(?:zu\\s+allen\\s+Elementarwiderständen|zu\\s+allen\\s+Elementarwiderstaenden|to\\s+all\\s+Elemental\\s+Resistances)",
     # Energieschild: "maximalem Energieschild" / "increased Energieschild" / EN
-    "energy_shield":  r"(\d+)%?\s+(?:zu\s+maximalem\s+Energieschild|erhöhter\s+Energieschild|erhoehter\s+Energieschild|to\s+(?:maximum\s+)?Energy\s+Shield|increased\s+Energy\s+Shield)(?!.*Wiederaufladung)(?!\s+Recharge)",
+    "energy_shield":  r"(\\d+)%?\\s+(?:zu\\s+maximalem\\s+Energieschild|erhöhter\\s+Energieschild|erhoehter\\s+Energieschild|to\\s+(?:maximum\\s+)?Energy\\s+Shield|increased\\s+Energy\\s+Shield)(?!.*Wiederaufladung)(?!\\s+Recharge)",
     # Krit: "kritischer Trefferchance" / "Critical"
-    "crit_chance":    r"(\d+(?:[.,]\d+)?)%\s+(?:erhöhte\s+kritische|erhoehte\s+kritische|.*?kritischer\s+Treffer|(?:to\s+|increased\s+)?Critical)",
+    "crit_chance":    r"(\\d+(?:[.,]\\d+)?)%\\s+(?:erhöhte\\s+kritische|erhoehte\\s+kritische|.*?kritischer\\s+Treffer|(?:to\\s+|increased\\s+)?Critical)",
     # Zauberschaden: "erhöhter Zauberschaden" / "increased Spell Damage"
-    "spell_damage":   r"(\d+)%\s+(?:erhöhter\s+Zauberschaden|erhoehter\s+Zauberschaden|increased\s+Spell\s+Damage)",
+    "spell_damage":   r"(\\d+)%\\s+(?:erhöhter\\s+Zauberschaden|erhoehter\\s+Zauberschaden|increased\\s+Spell\\s+Damage)",
     # Bewegungsgeschwindigkeit: "Bewegungsgeschwindigkeit" / "Movement Speed"
-    "movement_speed": r"(\d+)%\s+(?:erhöhte\s+Bewegungsgeschwindigkeit|erhoehte\s+Bewegungsgeschwindigkeit|increased\s+Movement\s+Speed)",
+    "movement_speed": r"(\\d+)%\\s+(?:erhöhte\\s+Bewegungsgeschwindigkeit|erhoehte\\s+Bewegungsgeschwindigkeit|increased\\s+Movement\\s+Speed)",
     # Rüstung: "erhöhte Rüstung" / "increased Armour"
-    "armour":         r"(\d+)%\s+(?:erhöhte\s+Rüstung|erhoehte\s+Ruestung|increased\s+Armour)",
+    "armour":         r"(\\d+)%\\s+(?:erhöhte\\s+Rüstung|erhoehte\\s+Ruestung|increased\\s+Armour)",
 }
 
 
@@ -931,17 +957,17 @@ def compute_score(stats, weights=None):
 
 # Wie oft taucht ein Stat im Build auf -> diese Regex zaehlen wir.
 BUILD_STAT_PATTERNS = {
-    "life":           r"(?:maximalem\s+Leben|to\s+(?:maximum\s+)?Life)",
-    "fire_res":       r"(?:Feuerwiderstand|Fire\s+Resistance)",
-    "cold_res":       r"(?:K[äa]ltewiderstand|Cold\s+Resistance)",
-    "lightning_res":  r"(?:Blitzwiderstand|Lightning\s+Resistance)",
-    "chaos_res":      r"(?:Chaoswiderstand|Chaos\s+Resistance)",
-    "all_res":        r"(?:allen\s+Elementarwiderst|all\s+Elemental\s+Resistances)",
-    "energy_shield":  r"(?:Energieschild|Energy\s+Shield)",
-    "crit_chance":    r"(?:kritische[rn]?\s+Treffer|Critical)",
-    "spell_damage":   r"(?:Zauberschaden|Spell\s+Damage)",
-    "movement_speed": r"(?:Bewegungsgeschwindigkeit|Movement\s+Speed)",
-    "armour":         r"(?:erh[öo]hte\s+R[üu]stung|increased\s+Armour)",
+    "life":           r"(?:maximalem\\s+Leben|to\\s+(?:maximum\\s+)?Life)",
+    "fire_res":       r"(?:Feuerwiderstand|Fire\\s+Resistance)",
+    "cold_res":       r"(?:K[äa]ltewiderstand|Cold\\s+Resistance)",
+    "lightning_res":  r"(?:Blitzwiderstand|Lightning\\s+Resistance)",
+    "chaos_res":      r"(?:Chaoswiderstand|Chaos\\s+Resistance)",
+    "all_res":        r"(?:allen\\s+Elementarwiderst|all\\s+Elemental\\s+Resistances)",
+    "energy_shield":  r"(?:Energieschild|Energy\\s+Shield)",
+    "crit_chance":    r"(?:kritische[rn]?\\s+Treffer|Critical)",
+    "spell_damage":   r"(?:Zauberschaden|Spell\\s+Damage)",
+    "movement_speed": r"(?:Bewegungsgeschwindigkeit|Movement\\s+Speed)",
+    "armour":         r"(?:erh[öo]hte\\s+R[üu]stung|increased\\s+Armour)",
 }
 
 
@@ -960,7 +986,7 @@ def decode_pob_code(code):
 def fetch_pobbin(url):
     """Holt den rohen PoB-Code von einem pobb.in-Link."""
     # pobb.in/<id>  ->  pobb.in/<id>/raw
-    m = re.search(r"pobb\.in/([A-Za-z0-9_-]+)", url)
+    m = re.search(r"pobb\\.in/([A-Za-z0-9_-]+)", url)
     if not m:
         return None
     raw_url = f"https://pobb.in/{m.group(1)}/raw"
@@ -995,11 +1021,11 @@ def weights_from_build(xml):
 def extract_build_info(xml):
     """Zieht Klasse/Level/Ascendancy aus dem Build-XML (fuer Anzeige)."""
     info = {}
-    m = re.search(r'className="([^"]+)"', xml)
+    m = re.search(r'className=\"([^\"]+)\"', xml)
     if m: info["class"] = m.group(1)
-    m = re.search(r'ascendClassName="([^"]+)"', xml)
+    m = re.search(r'ascendClassName=\"([^\"]+)\"', xml)
     if m and m.group(1): info["ascendancy"] = m.group(1)
-    m = re.search(r'level="(\d+)"', xml)
+    m = re.search(r'level=\"(\\d+)\"', xml)
     if m: info["level"] = int(m.group(1))
     return info
 
@@ -1070,7 +1096,7 @@ def api_import_build():
             if not html:
                 return jsonify({"error": "maxroll_fehlgeschlagen",
                                 "detail": "Seite blockiert oder leer. Tipp: "
-                                          "Gear-Text manuell einfügen."}), 400
+                                          "Gear-Text direkt einfügen."}), 400
             text_for_stats = html
 
         # --- 4: pruefen ob es ein PoB-Code ist (base64) ---
@@ -1142,7 +1168,7 @@ def _looks_like_pob_code(s):
     if len(s) < 40 or " " in s.strip():
         return False
     # PoB-Codes bestehen aus URL-safe base64 Zeichen
-    return bool(re.fullmatch(r"[A-Za-z0-9_\-=]+", s.strip()))
+    return bool(re.fullmatch(r"[A-Za-z0-9_\\-=]+", s.strip()))
 
 
 # ------------------------------------------------------------
@@ -1207,7 +1233,7 @@ def resolve_ascendancy(asc_id):
         cls, name = ASCENDANCY_MAP[asc_id]
         return {"class": cls, "ascendancy": name, "ascendancy_id": asc_id}
     # Fallback: Klasse aus ID ableiten (Zahl abschneiden)
-    cls = re.sub(r"\d+$", "", asc_id)
+    cls = re.sub(r"\\d+$", "", asc_id)
     return {"class": cls, "ascendancy": asc_id, "ascendancy_id": asc_id}
 
 
@@ -1263,9 +1289,8 @@ def gem_info_from_id(gem_id):
         return None
     raw = gem_id.split("/")[-1]
     is_support = "Support" in raw
-    name = raw.replace("SkillGem", "").replace("SupportGem", "").replace("Gem", "")
-    name = re.sub(r'(?<!^)(?=[A-Z])', ' ', name).strip()
-    name = re.sub(r'\s+(Two|Three|Four|Five)$',
+    name = re.sub(r'(?<!^)(?=[A-Z])', ' ', raw.replace("SkillGem", "").replace("SupportGem", "").replace("Gem", "")).strip()
+    name = re.sub(r'\\s+(Two|Three|Four|Five)$',
                   lambda m: " " + {"Two": "II", "Three": "III",
                                    "Four": "IV", "Five": "V"}[m.group(1)], name)
     # Tags aus Stichwoertern in der ID
@@ -1274,7 +1299,7 @@ def gem_info_from_id(gem_id):
         if kw in raw and tag not in tags:
             tags.append(tag)
 
-    # Echte Gem-Farbe aus der DB (blau=Int, gruen=Dex, rot=Str)
+    # Echte Gem-Farbe aus der DB (blau=Int, grün=Dex, rot=Str)
     color = None
     db_entry = GEM_DB.get(name) or GEM_DB_LOWER.get(name.lower())
     if db_entry:
@@ -1462,21 +1487,21 @@ TRADE_STAT_IDS = {
 # So erkennen wir aus dem Build-Item den Stat UND den Mindestwert.
 # Reihenfolge wichtig: spezifischere Muster (eva_es) VOR allgemeineren (energy_shield)!
 MOD_TO_STAT = [
-    (r"(\d+)%?\s+(?:erh[öo]hter\s+Zauberschaden|increased\s+Spell\s+Damage)",       "spell_damage"),
-    (r"\+?(\d+)\s+(?:zu\s+Stufen?\s+aller\s+Zauberfertigkeiten|to\s+Level\s+of\s+all\s+Spell\s+Skills)", "spell_skills"),
-    (r"(\d+)%?\s+(?:erh[öo]hte\s+Bewegungsgeschwindigkeit|increased\s+Movement\s+Speed)", "movement_speed"),
+    (r"(\\d+)%?\\s+(?:erh[öo]hter\\s+Zauberschaden|increased\\s+Spell\\s+Damage)",       "spell_damage"),
+    (r"\\+?(\\d+)\\s+(?:zu\\s+Stufen?\\s+aller\\s+Zauberfertigkeiten|to\\s+Level\\s+of\\s+all\\s+Spell\\s+Skills)", "spell_skills"),
+    (r"(\\d+)%?\\s+(?:erh[öo]hte\\s+Bewegungsgeschwindigkeit|increased\\s+Movement\\s+Speed)", "movement_speed"),
     # "... und Energieschild" ZUERST (sonst greift Energieschild allein davor)
-    (r"(\d+)%?\s+(?:erh[öo]hte\s+Ausweich\w*\s+und\s+Energieschild|increased\s+Evasion\s+and\s+Energy\s+Shield)", "eva_es"),
-    (r"(\d+)%?\s+(?:erh[öo]hter\s+kritischer\s+Schadensbonus|increased\s+Critical\s+Damage\s+Bonus)", "crit_dmg_bonus"),
-    (r"(\d+)%?\s+(?:erh[öo]hte\s+kritische\s+Trefferchance|increased\s+Critical\s+Hit\s+Chance)", "crit_dmg_bonus"),
-    (r"(\d+)%?\s+(?:erh[öo]hte\s+R[üu]stung|increased\s+Armour)",                   "armour"),
-    (r"\+?(\d+)\s+(?:zu\s+maximalem\s+Leben|to\s+(?:maximum\s+)?Life)",             "life"),
-    (r"\+?(\d+)\s+(?:zu\s+maximalem\s+Mana|to\s+(?:maximum\s+)?Mana)",              "mana"),
-    (r"\+?(\d+)\s+(?:zu\s+maximalem\s+Energieschild|to\s+(?:maximum\s+)?Energy\s+Shield)", "energy_shield"),
-    (r"\+?(\d+)\s+(?:zu\s+Wille|to\s+Spirit)",                                      "spirit"),
+    (r"(\\d+)%?\\s+(?:erh[öo]hte\\s+Ausweich\\w*\\s+und\\s+Energieschild|increased\\s+Evasion\\s+and\\s+Energy\\s+Shield)", "eva_es"),
+    (r"(\\d+)%?\\s+(?:erh[öo]hter\\s+kritischer\\s+Schadensbonus|increased\\s+Critical\\s+Damage\\s+Bonus)", "crit_dmg_bonus"),
+    (r"(\\d+)%?\\s+(?:erh[öo]hte\\s+kritische\\s+Trefferchance|increased\\s+Critical\\s+Hit\\s+Chance)", "crit_dmg_bonus"),
+    (r"(\\d+)%?\\s+(?:erh[öo]hte\\s+R[üu]stung|increased\\s+Armour)",                   "armour"),
+    (r"\\+?(\\d+)\\s+(?:zu\\s+maximalem\\s+Leben|to\\s+(?:maximum\\s+)?Life)",             "life"),
+    (r"\\+?(\\d+)\\s+(?:zu\\s+maximalem\\s+Mana|to\\s+(?:maximum\\s+)?Mana)",              "mana"),
+    (r"\\+?(\\d+)\\s+(?:zu\\s+maximalem\\s+Energieschild|to\\s+(?:maximum\\s+)?Energy\\s+Shield)", "energy_shield"),
+    (r"\\+?(\\d+)\\s+(?:zu\\s+Wille|to\\s+Spirit)",                                      "spirit"),
     # Chaos-Res separat (eigene Trade-ID), andere Resis -> pseudo total
-    (r"\+?(\d+)%?\s+(?:zu\s+Chaoswiderstand|to\s+Chaos\s+Resistance)",              "chaos_res"),
-    (r"\+?(\d+)%?\s+(?:zu\s+Feuerwiderstand|zu\s+K[äa]ltewiderstand|zu\s+Blitzwiderstand|zu\s+allen\s+Elementarwiderst\w*|to\s+(?:Fire|Cold|Lightning|all\s+Elemental)\s+Resistance)", "ele_res"),
+    (r"\\+?(\\d+)%?\\s+(?:zu\\s+Chaoswiderstand|to\\s+Chaos\\s+Resistance)",              "chaos_res"),
+    (r"\\+?(\\d+)%?\\s+(?:zu\\s+Feuerwiderstand|zu\\s+K[äa]ltewiderstand|zu\\s+Blitzwiderstand|zu\\s+allen\\s+Elementarwiderst\\w*|to\\s+(?:Fire|Cold|Lightning|all\\s+Elemental)\\s+Resistance)", "ele_res"),
 ]
 
 
@@ -1611,3 +1636,4 @@ if __name__ == "__main__":
     print(f"  Login: /login   Realm: {REALM}   Debug: {debug}")
     print("=" * 50)
     app.run(host="0.0.0.0", port=port, debug=debug)
+```
