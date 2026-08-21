@@ -178,8 +178,17 @@
   }
   #totalScore .ts-label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
   #totalScore .ts-count { font-size: 11px; color: var(--text-dim); }
-  #totalScore .ts-value { font-size: 22px; font-weight: 700; color: var(--gold); transition: color .2s; }
-  #totalScore .ts-value.ts-bump { color: #eede9a; }
+  #totalScore .ts-value {
+    font-size: 22px; font-weight: 700; color: var(--gold);
+    transition: color .3s ease, transform .3s ease;
+    display: inline-block;
+    transform-origin: center;
+  }
+  #totalScore .ts-value.ts-bump {
+    color: #eede9a;
+    transform: scale(1.18);                 /* leichtes "Aufploppen" */
+    text-shadow: 0 0 12px rgba(238,222,154,.55); /* goldener Schein */
+  }
 
   .hud {
     display: grid;
