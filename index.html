@@ -180,21 +180,30 @@
   #totalScore .ts-count { font-size: 11px; color: var(--text-dim); }
   #totalScore .ts-value {
     font-size: 22px; font-weight: 700; color: var(--gold);
-    transition: color .3s ease, transform .3s ease;
     display: inline-block;
     transform-origin: center;
   }
-  @keyframes scoreBump {
-    0%   { transform: scale(1);    }
-    45%  { transform: scale(1.30); }                /* großes Overshoot */
-    72%  { transform: scale(0.94); }                /* kleine Gegenbewegung */
-    100% { transform: scale(1);    }
+  @keyframes scoreBumpUp {
+    0%   { transform: scale(1); color: var(--gold); }
+    45%  { transform: scale(1.25); color: #88ffaa; text-shadow: 0 0 16px rgba(136,255,170,.6); }
+    72%  { transform: scale(0.96); }
+    100% { transform: scale(1); color: var(--gold); }
   }
-  #totalScore .ts-value.ts-bump {
-    color: #eede9a;
-    text-shadow: 0 0 14px rgba(238,222,154,.6);
-    animation: scoreBump 380ms cubic-bezier(.34, 1.4, .64, 1);   /* sanftes Springen */
+  @keyframes scoreBumpDown {
+    0%   { transform: scale(1); color: var(--gold); }
+    45%  { transform: scale(1.15); color: #ff8888; text-shadow: 0 0 16px rgba(255,136,136,.6); }
+    72%  { transform: scale(0.98); }
+    100% { transform: scale(1); color: var(--gold); }
   }
+  @keyframes scoreBumpNeutral {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.20); color: #eede9a; text-shadow: 0 0 14px rgba(238,222,154,.6); }
+    72%  { transform: scale(0.97); }
+    100% { transform: scale(1); }
+  }
+  #totalScore .ts-value.ts-bump-up { animation: scoreBumpUp 450ms cubic-bezier(.34, 1.4, .64, 1); }
+  #totalScore .ts-value.ts-bump-down { animation: scoreBumpDown 450ms cubic-bezier(.34, 1.4, .64, 1); }
+  #totalScore .ts-value.ts-bump-neutral { animation: scoreBumpNeutral 450ms cubic-bezier(.34, 1.4, .64, 1); }
 
   .hud {
     display: grid;
@@ -1793,14 +1802,25 @@ function updateTotalScore(total, counted) {
   const box = document.getElementById("totalScore");
   if (!box) return;
   if (counted === 0) { box.style.display = "none"; return; }
+  
   const valueEl = document.getElementById("tsValue");
+  const oldTotal = parseInt(valueEl.textContent) || 0;
   valueEl.textContent = total;
   document.getElementById("tsCount").textContent = counted + " Slots gewertet";
   box.style.display = "flex";
-  // kleiner visueller Puls bei Änderung, damit man sieht: hier hat sich was getan
-  valueEl.classList.remove("ts-bump");
-  void valueEl.offsetWidth; // Reflow erzwingen, damit die Animation neu startet
-  valueEl.classList.add("ts-bump");
+  
+  // Reflow erzwingen und Klassen resetten
+  valueEl.classList.remove("ts-bump-up", "ts-bump-down", "ts-bump-neutral");
+  void valueEl.offsetWidth; 
+  
+  // Passende Animation je nach Trend
+  if (total > oldTotal && oldTotal > 0) {
+    valueEl.classList.add("ts-bump-up");
+  } else if (total < oldTotal && oldTotal > 0) {
+    valueEl.classList.add("ts-bump-down");
+  } else {
+    valueEl.classList.add("ts-bump-neutral");
+  }
 }
 
 const STAT_KEYS = ["life","fire_res","cold_res","lightning_res","chaos_res","energy_shield","crit_chance","spell_damage","movement_speed","armour"];
@@ -2521,5 +2541,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2e16412de98dbfb',t:'MTc4NzIyODgzMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2e16412de98dbfb',t:'MTc4NzIyODgzMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2e867a6bc4ddca5',t:'MTc4NzMwMjM4MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
