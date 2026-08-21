@@ -1832,6 +1832,7 @@ function applyPreset(name) {
   buildSliders();
   saveWeights();
   document.querySelectorAll(".preset-btn").forEach(b => b.classList.toggle("active", b.dataset.preset === name));
+  refreshItemScores();
 }
 function clearActivePreset() { document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active")); }
 function saveWeights() { localStorage.setItem(WEIGHT_STORAGE, JSON.stringify(currentWeights)); }
