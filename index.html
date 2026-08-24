@@ -177,7 +177,7 @@
     display: none; align-items: center; justify-content: space-between;
     gap: 10px;
     position: sticky;
-    top: 60px;
+    top: var(--header-h, 60px);
     z-index: 40;
     box-shadow: 0 4px 12px rgba(0,0,0,.4);
   }
@@ -242,6 +242,7 @@
     border-radius: 5px;
     padding: 7px 8px;
     min-height: 64px;
+    min-width: 0;
     display: flex; flex-direction: column; gap: 2px;
     position: relative;
     transition: border-color .2s, box-shadow .2s, transform .1s;
@@ -402,7 +403,7 @@
   .slot .item-name.rarity-2 { color: #f0e060; }
   .slot .item-name.rarity-3 { color: #d08020; }
   .slot .item-name.empty    { color: #5a513c; font-style: italic; font-weight: 400; }
-  .slot .item-meta { font-size: 9px; color: var(--text-dim); }
+  .slot .item-meta { font-size: 9px; color: var(--text-dim); word-break: break-word; overflow-wrap: break-word; }
   .slot .item-score { font-size: 10px; color: var(--green); margin-top: auto; font-weight: 600; }
   .slot.filled { border-color: var(--gold-soft); box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 4px rgba(200,160,79,.2); }
   .slot.better { border-color: var(--green); box-shadow: 0 0 10px rgba(76,175,106,.4); }
@@ -1040,6 +1041,20 @@ document.addEventListener("DOMContentLoaded", () => {
   if (v) v.textContent = APP_VERSION;
 });
 
+// Setzt die reale Header-Höhe als CSS-Variable, damit #totalScore (sticky)
+// immer exakt darunter andockt - unabhängig davon, ob z.B. der Logout-Button
+// eingeblendet ist/umbricht und der Header dadurch höher wird als angenommen.
+function syncHeaderHeight() {
+  const header = document.querySelector("header");
+  if (!header) return;
+  document.documentElement.style.setProperty("--header-h", header.offsetHeight + "px");
+}
+document.addEventListener("DOMContentLoaded", syncHeaderHeight);
+window.addEventListener("resize", syncHeaderHeight);
+window.addEventListener("orientationchange", syncHeaderHeight);
+// Erneut messen, falls Login/Logout-Buttons erst nach dem Auth-Check ein-/ausgeblendet werden
+window.addEventListener("load", syncHeaderHeight);
+
 // ============================================================
 //  ACCORDION-LOGIK (alle 4 Panels)
 // ============================================================
@@ -1160,6 +1175,7 @@ async function init() {
       document.getElementById("loginView").classList.add("hidden");
       document.getElementById("mainView").classList.remove("hidden");
       document.getElementById("logoutBtn").classList.remove("hidden");
+      syncHeaderHeight();
       setPanelStatus("character", "✓ " + (data.account || "?"));
       loadWeights();
       updateActiveBuildBar();
