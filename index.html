@@ -1929,7 +1929,9 @@ async function importBuild(codeOverride) {
   const code = (typeof codeOverride === "string" ? codeOverride : document.getElementById("buildCode").value).trim();
   const out = document.getElementById("buildResult");
   if (!code) { showBanner("Bitte erst Link, Code oder .build-Datei wählen"); return; }
-  if (code.includes("mobalytics.gg")) {
+  const lc = code.toLowerCase();
+  const isUrl = lc.trimStart().startsWith("http:") || lc.trimStart().startsWith("https:");
+  if (isUrl && lc.includes("mobalytics.gg")) {
     out.style.display = "block"; out.className = "err";
     out.innerHTML = "Mobalytics blockiert direkten Zugriff (Cloudflare). Kopiere stattdessen den Gear-Text.";
     return;
