@@ -34,6 +34,7 @@ import json
 # Stat-Woerterbuch (DE + EN) aus separater Datei
 from stats_dict import (
     parse_stats as dict_parse_stats,
+    parse_stats_split as dict_parse_stats_split,
     guess_slot as dict_guess_slot,
     clean_item_text as dict_clean_text,
     PERCENT_STATS,
@@ -82,7 +83,7 @@ USER_AGENT   = f"OAuth {CLIENT_ID}/{APP_VERSION} (contact: {CONTACT})"
 # Tesseract-Pfad aus der .env (Windows) - bis zur .exe!
 TESSERACT_PATH = os.getenv(
     "TESSERACT_PATH",
-    r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+    r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 )
 
 # OAuth-Endpunkte
@@ -460,13 +461,20 @@ def api_character_gear():
     items = []
     for it in equipment:
         # --- Mods nach Typ getrennt sammeln (fuer schoene Anzeige) ---
-        # Mod-Listen direkt durch _extract_mod_texts schicken, damit sie nur Strings enthalten
-        implicit = _extract_mod_texts(it.get("implicitMods", []) or [])
-        enchant  = _extract_mod_texts(it.get("enchantMods", []) or [])
-        rune     = _extract_mod_texts(it.get("runeMods", []) or [])        # PoE2: Runen
-        explicit = _extract_mod_texts(it.get("explicitMods", []) or [])
-        crafted  = _extract_mod_texts(it.get("craftedMods", []) or [])
-        fractured = _extract_mod_texts(it.get("fracturedMods", []) or [])
+        implicit = it.get("implicitMods", []) or []
+        enchant  = it.get("enchantMods", []) or []
+        rune     = it.get("runeMods", []) or []        # PoE2: Runen
+        explicit = it.get("explicitMods", []) or []
+        crafted  = it.get("craftedMods", []) or []
+        fractured = it.get("fracturedMods", []) or []
+
+        # Mods in reine Strings umwandeln (sonst zeigt das Frontend "[object Object]")
+        implicit = _extract_mod_texts(implicit)
+        enchant = _extract_mod_texts(enchant)
+        rune = _extract_mod_texts(rune)
+        explicit = _extract_mod_texts(explicit)
+        crafted = _extract_mod_texts(crafted)
+        fractured = _extract_mod_texts(fractured)
 
         # alle Mods zusammen (fuer Score-Berechnung)
         all_mods = implicit + enchant + rune + explicit + crafted + fractured
@@ -488,6 +496,21 @@ def api_character_gear():
                     val_raw = first
             val_str = _coerce_display_value(val_raw)
             props.append({"name": p.get("name", ""), "value": val_str})
+
+        # Basiswerte aus den Properties (z.B. {"Armour": "369"})
+        base_stats = {}
+        for p in props:
+            bkey = BASE_PROP_MAP.get((p.get("name") or "").strip().lower())
+            if not bkey:
+                continue
+            try:
+                base_stats[bkey] = float(str(p.get("value")).replace(",", "."))
+            except (TypeError, ValueError):
+                pass
+
+        # Stats getrennt nach flat/increased + effektive Werte
+        stats_flat, stats_inc = dict_parse_stats_split("\n".join(all_mods))
+        effective = compute_effective_stats(stats_flat, stats_inc, base_stats)
 
         # --- Anforderungen (Level, Attribute) ---
         reqs = []
@@ -527,8 +550,12 @@ def api_character_gear():
                 "crafted":   crafted,
                 "fractured": fractured,
             },
-            "all_mods": all_mods,                # fuer Score (enthält jetzt Strings)
-            "parsed_stats": parsed,              # einzelne Werte fuer Vergleich
+            "all_mods": all_mods,                # fuer Score
+            "parsed_stats": parsed,              # einzelne Werte fuer Vergleich (Kompatibilitaet)
+            "base_stats": base_stats,            # Basiswerte aus Properties (z.B. 369 Ruestung)
+            "stats_flat": stats_flat,            # additive Mod-Werte ("+45 zu maximalem ES")
+            "stats_inc":  stats_inc,             # Prozent-Multiplikatoren ("40% increased ES")
+            "effective_stats": effective,        # (Basis+flat)*(1+inc/100) - fuer den Score
         })
 
 
@@ -559,7 +586,8 @@ def auto_crop_tooltip(pil_img):
 
     try:
         rgb = pil_img.convert("RGB")
-        arr = np.array(rgb)[:, :, ::-1].copy()   # RGB -> BGR fuer cv2
+        arr = np.array(rgb)[:, :, ::-1].copy()
+        H, W = arr.shape[:2]
         gray = cv2.cvtColor(arr, cv2.COLOR_BGR2GRAY)
 
         # dunkle Bereiche maskieren (Tooltip-Hintergrund ist fast schwarz)
@@ -701,7 +729,8 @@ def _ocr_quality(text):
         return 0
     low = text.lower()
     score = 0
-    score += len(re.findall(r"\\d+", text)) * 2          # Zahlen sind Gold
+    score += len(re.findall(r"\d+", text)) * 2          # Zahlen sind Gold
+    # Schluesselwoerter Deutsch + Englisch
     for kw in ["life", "mana", "resist", "armour", "energy", "damage",
                "critical", "movement", "spirit", "level",
                "leben", "widerstand", "energieschild", "rüstung", "ruestung",
@@ -751,9 +780,9 @@ def api_analyze():
         return jsonify({
             "error": "bild_unlesbar",
             "detail": str(e),
-            "hint": "iPhone-Foto? Dann \'pip install pillow-heif\' ausführen, "
+            "hint": "iPhone-Foto? Dann 'pip install pillow-heif' ausführen, "
                     "oder am iPhone unter Einstellungen > Kamera > Formate "
-                    "auf \'Maximale Kompatibilität\' (JPG) stellen."
+                    "auf 'Maximale Kompatibilität' (JPG) stellen."
         }), 400
 
     # Auto-Crop: dunklen Item-Tooltip automatisch finden & zuschneiden
@@ -860,26 +889,26 @@ STAT_WEIGHTS = {
 # Deutsch ist Standard bei deutschem Spiel-Client.
 STAT_PATTERNS = {
     # Leben: "zu maximalem Leben" / "to maximum Life"
-    "life":           r"\\+?(\\d+)\\s+(?:zu\\s+maximalem\\s+Leben|to\\s+(?:maximum\\s+)?Life)",
+    "life":           r"\+?(\d+)\s+(?:zu\s+maximalem\s+Leben|to\s+(?:maximum\s+)?Life)",
     # Mana
-    "mana":           r"\\+?(\\d+)\\s+(?:zu\\s+maximalem\\s+Mana|to\\s+(?:maximum\\s+)?Mana)",
+    "mana":           r"\+?(\d+)\s+(?:zu\s+maximalem\s+Mana|to\s+(?:maximum\s+)?Mana)",
     # Resistenzen (deutsch: "...widerstand", englisch: "... Resistance")
-    "fire_res":       r"\\+?(\\d+)%?\\s+(?:zu\\s+Feuerwiderstand|to\\s+Fire\\s+Resistance)",
-    "cold_res":       r"\\+?(\\d+)%?\\s+(?:zu\\s+Kältewiderstand|zu\\s+Kaeltewiderstand|to\\s+Cold\\s+Resistance)",
-    "lightning_res":  r"\\+?(\\d+)%?\\s+(?:zu\\s+Blitzwiderstand|to\\s+Lightning\\s+Resistance)",
-    "chaos_res":      r"\\+?(\\d+)%?\\s+(?:zu\\s+Chaoswiderstand|to\\s+Chaos\\s+Resistance)",
+    "fire_res":       r"\+?(\d+)%?\s+(?:zu\s+Feuerwiderstand|to\s+Fire\s+Resistance)",
+    "cold_res":       r"\+?(\d+)%?\s+(?:zu\s+Kältewiderstand|zu\s+Kaeltewiderstand|to\s+Cold\s+Resistance)",
+    "lightning_res":  r"\+?(\d+)%?\s+(?:zu\s+Blitzwiderstand|to\s+Lightning\s+Resistance)",
+    "chaos_res":      r"\+?(\d+)%?\s+(?:zu\s+Chaoswiderstand|to\s+Chaos\s+Resistance)",
     # alle Elementarwiderstände: "zu allen Elementarwiderständen" / "to all Elemental Resistances"
-    "all_res":        r"\\+?(\\d+)%?\\s+(?:zu\\s+allen\\s+Elementarwiderständen|zu\\s+allen\\s+Elementarwiderstaenden|to\\s+all\\s+Elemental\\s+Resistances)",
+    "all_res":        r"\+?(\d+)%?\s+(?:zu\s+allen\s+Elementarwiderständen|zu\s+allen\s+Elementarwiderstaenden|to\s+all\s+Elemental\s+Resistances)",
     # Energieschild: "maximalem Energieschild" / "increased Energieschild" / EN
-    "energy_shield":  r"(\\d+)%?\\s+(?:zu\\s+maximalem\\s+Energieschild|erhöhter\\s+Energieschild|erhoehter\\s+Energieschild|to\\s+(?:maximum\\s+)?Energy\\s+Shield|increased\\s+Energy\\s+Shield)(?!.*Wiederaufladung)(?!\\s+Recharge)",
+    "energy_shield":  r"(\d+)%?\s+(?:zu\s+maximalem\s+Energieschild|erhöhter\s+Energieschild|erhoehter\s+Energieschild|to\s+(?:maximum\s+)?Energy\s+Shield|increased\s+Energy\s+Shield)(?!.*Wiederaufladung)(?!\s+Recharge)",
     # Krit: "kritischer Trefferchance" / "Critical"
-    "crit_chance":    r"(\\d+(?:[.,]\\d+)?)%\\s+(?:erhöhte\\s+kritische|erhoehte\\s+kritische|.*?kritischer\\s+Treffer|(?:to\\s+|increased\\s+)?Critical)",
+    "crit_chance":    r"(\d+(?:[.,]\d+)?)%\s+(?:erhöhte\s+kritische|erhoehte\s+kritische|.*?kritischer\s+Treffer|(?:to\s+|increased\s+)?Critical)",
     # Zauberschaden: "erhöhter Zauberschaden" / "increased Spell Damage"
-    "spell_damage":   r"(\\d+)%\\s+(?:erhöhter\\s+Zauberschaden|erhoehter\\s+Zauberschaden|increased\\s+Spell\\s+Damage)",
+    "spell_damage":   r"(\d+)%\s+(?:erhöhter\s+Zauberschaden|erhoehter\s+Zauberschaden|increased\s+Spell\s+Damage)",
     # Bewegungsgeschwindigkeit: "Bewegungsgeschwindigkeit" / "Movement Speed"
-    "movement_speed": r"(\\d+)%\\s+(?:erhöhte\\s+Bewegungsgeschwindigkeit|erhoehte\\s+Bewegungsgeschwindigkeit|increased\\s+Movement\\s+Speed)",
+    "movement_speed": r"(\d+)%\s+(?:erhöhte\s+Bewegungsgeschwindigkeit|erhoehte\s+Bewegungsgeschwindigkeit|increased\s+Movement\s+Speed)",
     # Rüstung: "erhöhte Rüstung" / "increased Armour"
-    "armour":         r"(\\d+)%\\s+(?:erhöhte\\s+Rüstung|erhoehte\\s+Ruestung|increased\\s+Armour)",
+    "armour":         r"(\d+)%\s+(?:erhöhte\s+Rüstung|erhoehte\s+Ruestung|increased\s+Armour)",
 }
 
 
@@ -925,6 +954,57 @@ def compute_score(stats, weights=None):
     return round(score, 1)
 
 
+# ------------------------------------------------------------
+#  Effektive Werte: (Basis + flat) * (1 + increased%/100)
+#  Rechnet wie das Game - so wird ein 85%-Mod auf einer 1000er-
+#  Basis automatisch richtig schwerer gewichtet als auf 200, und
+#  die Basiswerte (Properties) zaehlen endlich mit.
+# ------------------------------------------------------------
+
+# Property-Name (GGG API, EN/DE) -> stat-key
+BASE_PROP_MAP = {
+    "armour": "armour",
+    "ruestung": "armour",
+    "rüstung": "armour",
+    "energy shield": "energy_shield",
+    "energieschild": "energy_shield",
+    "evasion": "evasion",
+    "evasion rating": "evasion",
+    "ausweichwertung": "evasion",
+    "life": "life",
+    "leben": "life",
+    "mana": "mana",
+}
+
+# Stats, auf die die Effektive-Formel anwendbar ist (haben einen Basiswert).
+# Alle anderen (Resis, Krit, MS, Schaden ...) bleiben unveraendert.
+EFFECTIVE_STATS = ("armour", "energy_shield", "evasion", "life")
+
+
+def compute_effective_stats(flat, inc, base):
+    """
+    (Basis + flat) * (1 + increased%/100)  -  fuer EFFECTIVE_STATS.
+    Alle anderen Stats (Resis, Krit, MS, Schaden, ...) unveraendert.
+    """
+    eff = {}
+    for key in EFFECTIVE_STATS:
+        try:
+            b = float(base.get(key, 0) or 0)
+        except (TypeError, ValueError):
+            b = 0.0
+        f = float(flat.get(key, 0) or 0)
+        p = float(inc.get(key, 0) or 0)
+        if b or f or p:
+            eff[key] = round((b + f) * (1.0 + p / 100.0), 1)
+    for key, val in flat.items():
+        if key not in eff:
+            eff[key] = val
+    for key, val in inc.items():
+        if key not in eff:
+            eff[key] = val
+    return eff
+
+
 # ============================================================
 #  BUILD-IMPORT (Path of Building)
 #  Liest einen PoB-Code oder pobb.in-Link und leitet daraus
@@ -933,17 +1013,17 @@ def compute_score(stats, weights=None):
 
 # Wie oft taucht ein Stat im Build auf -> diese Regex zaehlen wir.
 BUILD_STAT_PATTERNS = {
-    "life":           r"(?:maximalem\\s+Leben|to\\s+(?:maximum\\s+)?Life)",
-    "fire_res":       r"(?:Feuerwiderstand|Fire\\s+Resistance)",
-    "cold_res":       r"(?:K[äa]ltewiderstand|Cold\\s+Resistance)",
-    "lightning_res":  r"(?:Blitzwiderstand|Lightning\\s+Resistance)",
-    "chaos_res":      r"(?:Chaoswiderstand|Chaos\\s+Resistance)",
-    "all_res":        r"(?:allen\\s+Elementarwiderst|all\\s+Elemental\\s+Resistances)",
-    "energy_shield":  r"(?:Energieschild|Energy\\s+Shield)",
-    "crit_chance":    r"(?:kritische[rn]?\\s+Treffer|Critical)",
-    "spell_damage":   r"(?:Zauberschaden|Spell\\s+Damage)",
-    "movement_speed": r"(?:Bewegungsgeschwindigkeit|Movement\\s+Speed)",
-    "armour":         r"(?:erh[öo]hte\\s+R[üu]stung|increased\\s+Armour)",
+    "life":           r"(?:maximalem\s+Leben|to\s+(?:maximum\s+)?Life)",
+    "fire_res":       r"(?:Feuerwiderstand|Fire\s+Resistance)",
+    "cold_res":       r"(?:K[äa]ltewiderstand|Cold\s+Resistance)",
+    "lightning_res":  r"(?:Blitzwiderstand|Lightning\s+Resistance)",
+    "chaos_res":      r"(?:Chaoswiderstand|Chaos\s+Resistance)",
+    "all_res":        r"(?:allen\s+Elementarwiderst|all\s+Elemental\s+Resistances)",
+    "energy_shield":  r"(?:Energieschild|Energy\s+Shield)",
+    "crit_chance":    r"(?:kritische[rn]?\s+Treffer|Critical)",
+    "spell_damage":   r"(?:Zauberschaden|Spell\s+Damage)",
+    "movement_speed": r"(?:Bewegungsgeschwindigkeit|Movement\s+Speed)",
+    "armour":         r"(?:erh[öo]hte\s+R[üu]stung|increased\s+Armour)",
 }
 
 
@@ -962,7 +1042,7 @@ def decode_pob_code(code):
 def fetch_pobbin(url):
     """Holt den rohen PoB-Code von einem pobb.in-Link."""
     # pobb.in/<id>  ->  pobb.in/<id>/raw
-    m = re.search(r"pobb\\.in/([A-Za-z0-9_-]+)", url)
+    m = re.search(r"pobb\.in/([A-Za-z0-9_-]+)", url)
     if not m:
         return None
     raw_url = f"https://pobb.in/{m.group(1)}/raw"
@@ -997,11 +1077,11 @@ def weights_from_build(xml):
 def extract_build_info(xml):
     """Zieht Klasse/Level/Ascendancy aus dem Build-XML (fuer Anzeige)."""
     info = {}
-    m = re.search(r'className=\"([^\"]+)\"', xml)
+    m = re.search(r'className="([^"]+)"', xml)
     if m: info["class"] = m.group(1)
-    m = re.search(r'ascendClassName=\"([^\"]+)\"', xml)
+    m = re.search(r'ascendClassName="([^"]+)"', xml)
     if m and m.group(1): info["ascendancy"] = m.group(1)
-    m = re.search(r'level=\"(\\d+)\"', xml)
+    m = re.search(r'level="(\d+)"', xml)
     if m: info["level"] = int(m.group(1))
     return info
 
@@ -1072,7 +1152,7 @@ def api_import_build():
             if not html:
                 return jsonify({"error": "maxroll_fehlgeschlagen",
                                 "detail": "Seite blockiert oder leer. Tipp: "
-                                          "Gear-Text direkt einfügen."}), 400
+                                          "Gear-Text manuell einfügen."}), 400
             text_for_stats = html
 
         # --- 4: pruefen ob es ein PoB-Code ist (base64) ---
@@ -1144,7 +1224,7 @@ def _looks_like_pob_code(s):
     if len(s) < 40 or " " in s.strip():
         return False
     # PoB-Codes bestehen aus URL-safe base64 Zeichen
-    return bool(re.fullmatch(r"[A-Za-z0-9_\\-=]+", s.strip()))
+    return bool(re.fullmatch(r"[A-Za-z0-9_\-=]+", s.strip()))
 
 
 # ------------------------------------------------------------
@@ -1209,7 +1289,7 @@ def resolve_ascendancy(asc_id):
         cls, name = ASCENDANCY_MAP[asc_id]
         return {"class": cls, "ascendancy": name, "ascendancy_id": asc_id}
     # Fallback: Klasse aus ID ableiten (Zahl abschneiden)
-    cls = re.sub(r"\\d+$", "", asc_id)
+    cls = re.sub(r"\d+$", "", asc_id)
     return {"class": cls, "ascendancy": asc_id, "ascendancy_id": asc_id}
 
 
@@ -1265,8 +1345,9 @@ def gem_info_from_id(gem_id):
         return None
     raw = gem_id.split("/")[-1]
     is_support = "Support" in raw
-    name = re.sub(r'(?<!^)(?=[A-Z])', ' ', raw.replace("SkillGem", "").replace("SupportGem", "").replace("Gem", "")).strip()
-    name = re.sub(r'\\s+(Two|Three|Four|Five)$',
+    name = raw.replace("SkillGem", "").replace("SupportGem", "").replace("Gem", "")
+    name = re.sub(r'(?<!^)(?=[A-Z])', ' ', name).strip()
+    name = re.sub(r'\s+(Two|Three|Four|Five)$',
                   lambda m: " " + {"Two": "II", "Three": "III",
                                    "Four": "IV", "Five": "V"}[m.group(1)], name)
     # Tags aus Stichwoertern in der ID
@@ -1275,7 +1356,7 @@ def gem_info_from_id(gem_id):
         if kw in raw and tag not in tags:
             tags.append(tag)
 
-    # Echte Gem-Farbe aus der DB (blau=Int, grün=Dex, rot=Str)
+    # Echte Gem-Farbe aus der DB (blau=Int, gruen=Dex, rot=Str)
     color = None
     db_entry = GEM_DB.get(name) or GEM_DB_LOWER.get(name.lower())
     if db_entry:
@@ -1463,21 +1544,21 @@ TRADE_STAT_IDS = {
 # So erkennen wir aus dem Build-Item den Stat UND den Mindestwert.
 # Reihenfolge wichtig: spezifischere Muster (eva_es) VOR allgemeineren (energy_shield)!
 MOD_TO_STAT = [
-    (r"(\\d+)%?\\s+(?:erh[öo]hter\\s+Zauberschaden|increased\\s+Spell\\s+Damage)",       "spell_damage"),
-    (r"\\+?(\\d+)\\s+(?:zu\\s+Stufen?\\s+aller\\s+Zauberfertigkeiten|to\\s+Level\\s+of\\s+all\\s+Spell\\s+Skills)", "spell_skills"),
-    (r"(\\d+)%?\\s+(?:erh[öo]hte\\s+Bewegungsgeschwindigkeit|increased\\s+Movement\\s+Speed)", "movement_speed"),
+    (r"(\d+)%?\s+(?:erh[öo]hter\s+Zauberschaden|increased\s+Spell\s+Damage)",       "spell_damage"),
+    (r"\+?(\d+)\s+(?:zu\s+Stufen?\s+aller\s+Zauberfertigkeiten|to\s+Level\s+of\s+all\s+Spell\s+Skills)", "spell_skills"),
+    (r"(\d+)%?\s+(?:erh[öo]hte\s+Bewegungsgeschwindigkeit|increased\s+Movement\s+Speed)", "movement_speed"),
     # "... und Energieschild" ZUERST (sonst greift Energieschild allein davor)
-    (r"(\\d+)%?\\s+(?:erh[öo]hte\\s+Ausweich\\w*\\s+und\\s+Energieschild|increased\\s+Evasion\\s+and\\s+Energy\\s+Shield)", "eva_es"),
-    (r"(\\d+)%?\\s+(?:erh[öo]hter\\s+kritischer\\s+Schadensbonus|increased\\s+Critical\\s+Damage\\s+Bonus)", "crit_dmg_bonus"),
-    (r"(\\d+)%?\\s+(?:erh[öo]hte\\s+kritische\\s+Trefferchance|increased\\s+Critical\\s+Hit\\s+Chance)", "crit_dmg_bonus"),
-    (r"(\\d+)%?\\s+(?:erh[öo]hte\\s+R[üu]stung|increased\\s+Armour)",                   "armour"),
-    (r"\\+?(\\d+)\\s+(?:zu\\s+maximalem\\s+Leben|to\\s+(?:maximum\\s+)?Life)",             "life"),
-    (r"\\+?(\\d+)\\s+(?:zu\\s+maximalem\\s+Mana|to\\s+(?:maximum\\s+)?Mana)",              "mana"),
-    (r"\\+?(\\d+)\\s+(?:zu\\s+maximalem\\s+Energieschild|to\\s+(?:maximum\\s+)?Energy\\s+Shield)", "energy_shield"),
-    (r"\\+?(\\d+)\\s+(?:zu\\s+Wille|to\\s+Spirit)",                                      "spirit"),
+    (r"(\d+)%?\s+(?:erh[öo]hte\s+Ausweich\w*\s+und\s+Energieschild|increased\s+Evasion\s+and\s+Energy\s+Shield)", "eva_es"),
+    (r"(\d+)%?\s+(?:erh[öo]hter\s+kritischer\s+Schadensbonus|increased\s+Critical\s+Damage\s+Bonus)", "crit_dmg_bonus"),
+    (r"(\d+)%?\s+(?:erh[öo]hte\s+kritische\s+Trefferchance|increased\s+Critical\s+Hit\s+Chance)", "crit_dmg_bonus"),
+    (r"(\d+)%?\s+(?:erh[öo]hte\s+R[üu]stung|increased\s+Armour)",                   "armour"),
+    (r"\+?(\d+)\s+(?:zu\s+maximalem\s+Leben|to\s+(?:maximum\s+)?Life)",             "life"),
+    (r"\+?(\d+)\s+(?:zu\s+maximalem\s+Mana|to\s+(?:maximum\s+)?Mana)",              "mana"),
+    (r"\+?(\d+)\s+(?:zu\s+maximalem\s+Energieschild|to\s+(?:maximum\s+)?Energy\s+Shield)", "energy_shield"),
+    (r"\+?(\d+)\s+(?:zu\s+Wille|to\s+Spirit)",                                      "spirit"),
     # Chaos-Res separat (eigene Trade-ID), andere Resis -> pseudo total
-    (r"\\+?(\\d+)%?\\s+(?:zu\\s+Chaoswiderstand|to\\s+Chaos\\s+Resistance)",              "chaos_res"),
-    (r"\\+?(\\d+)%?\\s+(?:zu\\s+Feuerwiderstand|zu\\s+K[äa]ltewiderstand|zu\\s+Blitzwiderstand|zu\\s+allen\\s+Elementarwiderst\\w*|to\\s+(?:Fire|Cold|Lightning|all\\s+Elemental)\\s+Resistance)", "ele_res"),
+    (r"\+?(\d+)%?\s+(?:zu\s+Chaoswiderstand|to\s+Chaos\s+Resistance)",              "chaos_res"),
+    (r"\+?(\d+)%?\s+(?:zu\s+Feuerwiderstand|zu\s+K[äa]ltewiderstand|zu\s+Blitzwiderstand|zu\s+allen\s+Elementarwiderst\w*|to\s+(?:Fire|Cold|Lightning|all\s+Elemental)\s+Resistance)", "ele_res"),
 ]
 
 
