@@ -177,11 +177,13 @@
     display: none; align-items: center; justify-content: space-between;
     gap: 10px;
     position: sticky;
-    top: var(--header-h, 60px);
+    top: 72px; /* Abgestimmt auf Header-Höhe */
     z-index: 40;
     box-shadow: 0 4px 12px rgba(0,0,0,.4);
   }
   #totalScore .ts-label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+  #totalScore .ts-info { cursor: help; opacity: .7; font-size: 11px; margin-left: 5px; letter-spacing: 0; }
+  #totalScore .ts-info:hover { opacity: 1; }
   #totalScore .ts-count { font-size: 11px; color: var(--text-dim); }
   #totalScore .ts-value {
     font-size: 22px; font-weight: 700; color: var(--gold);
@@ -213,7 +215,7 @@
   .hud {
     display: grid;
     gap: 7px;
-    grid-template-columns: 1.15fr 0.85fr 1.3fr 0.85fr 1.15fr;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr) minmax(0, 1.3fr) minmax(0, 0.85fr) minmax(0, 1.15fr);
     grid-template-rows: auto auto auto auto;
     grid-template-areas:
       "weapon  helm    helm    helm    weapon2"
@@ -395,8 +397,10 @@
   .tt-trade-hint { font-size: 10px; color: var(--text-dim); text-align: center; padding: 0 14px 8px; line-height: 1.4; }
   .slot .item-name {
     font-size: 11.5px; font-weight: 700; line-height: 1.25;
-    word-break: break-word;
-    overflow-wrap: break-word; /* <-- NEU: Noch aggressiverer Zeilenumbruch */
+    /* Harter Cut fuer lange Worter in schmalen Handy-Spalten */
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
   }
   .slot .item-name.rarity-0 { color: #d8c8a8; }
   .slot .item-name.rarity-1 { color: #8888f0; }
@@ -700,7 +704,7 @@
 
 <div id="totalScore">
   <div>
-    <div class="ts-label">Gesamt-Score</div>
+    <div class="ts-label">Stat-Score<span class="ts-info" title="Rechnet deine Ausrüstung mit effektiven Werten: (Basiswert + flat-Mods) × (1 + increased%) – so zählt z.B. 85% erhöhte Rüstung auf einer 369er-Basis wie +314 Rüstung. Unique-Effekte, Skill-Synergien und Build-Mechaniken zählen nicht.">ⓘ</span></div>
     <div class="ts-count" id="tsCount">0 Slots gewertet</div>
   </div>
   <div class="ts-value" id="tsValue">0</div>
@@ -1399,7 +1403,7 @@ function renderGear(items) {
       nameEl.after(meta);
     }
     slotEl.classList.add("rar-" + (it.rarity ?? 0));
-    const sc = scoreFromStats(it.parsed_stats || {});
+    const sc = scoreFromStats(it.effective_stats || it.parsed_stats || {});
     it._score = sc;
     if (sc > 0) {
       const s = document.createElement("span");
@@ -1803,7 +1807,7 @@ function refreshItemScores() {
   let total = 0, counted = 0;
   for (const slotKey in equippedItems) {
     const it = equippedItems[slotKey];
-    const sc = scoreFromStats(it.parsed_stats || {});
+    const sc = scoreFromStats(it.effective_stats || it.parsed_stats || {});
     it._score = sc;
     const slotEl = document.querySelector(`.slot[data-slot="${slotKey}"]`);
     if (!slotEl) continue;
@@ -1929,9 +1933,7 @@ async function importBuild(codeOverride) {
   const code = (typeof codeOverride === "string" ? codeOverride : document.getElementById("buildCode").value).trim();
   const out = document.getElementById("buildResult");
   if (!code) { showBanner("Bitte erst Link, Code oder .build-Datei wählen"); return; }
-  const lc = code.toLowerCase();
-  const isUrl = lc.trimStart().startsWith("http:") || lc.trimStart().startsWith("https:");
-  if (isUrl && lc.includes("mobalytics.gg")) {
+  if (code.includes("mobalytics.gg")) {
     out.style.display = "block"; out.className = "err";
     out.innerHTML = "Mobalytics blockiert direkten Zugriff (Cloudflare). Kopiere stattdessen den Gear-Text.";
     return;
@@ -2568,5 +2570,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2e16412de98dbfb',t:'MTc4NzIyODgzMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2e867a6bc4ddca5',t:'MTc4NzMwMjM4MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2e16412de98dbfb',t:'MTc4NzIyODgzMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2e867a6bc4ddca5',t:'MTc4NzMwMjM4MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a3ffe8209f83976a',t:'MTc5MDIzMzE3MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
