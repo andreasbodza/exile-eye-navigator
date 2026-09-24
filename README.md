@@ -20,7 +20,7 @@ Free, open-source companion web tool for **Path of Exile 2** — scan items from
 effective = (base + flat mods) × (1 + Σ increased % / 100)
 ```
 
-You tune 10 weights (life, resistances, ES, crit, spell damage, movement speed, armour, …) via sliders or presets — or just import a build and it's set automatically. The score is a *weighted stat proxy*: unique effects, gem synergies and build mechanics are intentionally not included.
+You tune 14 weights (life, all resistances, ES, crit, spell + elemental fire/cold/lightning/chaos damage, movement speed, armour) via sliders or presets — or just import a build and it's set automatically. The score is a *weighted stat proxy*: unique effects, gem synergies and build mechanics are intentionally not included.
 
 ## Tech stack
 

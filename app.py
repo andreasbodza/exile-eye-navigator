@@ -1022,6 +1022,10 @@ BUILD_STAT_PATTERNS = {
     "energy_shield":  r"(?:Energieschild|Energy\s+Shield)",
     "crit_chance":    r"(?:kritische[rn]?\s+Treffer|Critical)",
     "spell_damage":   r"(?:Zauberschaden|Spell\s+Damage)",
+    "fire_damage":      r"(?:Feuerschaden|Fire\s+Damage)",
+    "cold_damage":      r"(?:K[äa]lteschaden|Cold\s+Damage)",
+    "lightning_damage": r"(?:Blitzschaden|Lightning\s+Damage)",
+    "chaos_damage":     r"(?:Chaosschaden|Chaos\s+Damage)",
     "movement_speed": r"(?:Bewegungsgeschwindigkeit|Movement\s+Speed)",
     "armour":         r"(?:erh[öo]hte\s+R[üu]stung|increased\s+Armour)",
 }

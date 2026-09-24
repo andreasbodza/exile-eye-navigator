@@ -1855,13 +1855,13 @@ function updateTotalScore(total, counted) {
   }
 }
 
-const STAT_KEYS = ["life","fire_res","cold_res","lightning_res","chaos_res","energy_shield","crit_chance","spell_damage","movement_speed","armour"];
+const STAT_KEYS = ["life","fire_res","cold_res","lightning_res","chaos_res","energy_shield","crit_chance","spell_damage","fire_damage","cold_damage","lightning_damage","chaos_damage","movement_speed","armour"];
 const WEIGHT_STORAGE = "exileEye_weights";
 const PRESETS = {
-  balanced: { life:1.0, fire_res:0.8, cold_res:0.8, lightning_res:0.8, chaos_res:1.0, energy_shield:0.6, crit_chance:0.5, spell_damage:0.5, movement_speed:0.4, armour:0.4 },
-  life:     { life:1.0, fire_res:0.6, cold_res:0.6, lightning_res:0.6, chaos_res:0.7, energy_shield:0.1, crit_chance:0.3, spell_damage:0.3, movement_speed:0.4, armour:0.5 },
-  es:       { life:0.2, fire_res:0.7, cold_res:0.7, lightning_res:0.7, chaos_res:0.8, energy_shield:1.0, crit_chance:0.4, spell_damage:0.5, movement_speed:0.4, armour:0.2 },
-  resi:     { life:0.7, fire_res:1.0, cold_res:1.0, lightning_res:1.0, chaos_res:1.0, energy_shield:0.4, crit_chance:0.2, spell_damage:0.3, movement_speed:0.3, armour:0.5 },
+  balanced: { life:1.0, fire_res:0.8, cold_res:0.8, lightning_res:0.8, chaos_res:1.0, energy_shield:0.6, crit_chance:0.5, spell_damage:0.5, fire_damage:0.3, cold_damage:0.3, lightning_damage:0.3, chaos_damage:0.3, movement_speed:0.4, armour:0.4 },
+  life:     { life:1.0, fire_res:0.6, cold_res:0.6, lightning_res:0.6, chaos_res:0.7, energy_shield:0.1, crit_chance:0.3, spell_damage:0.3, fire_damage:0.2, cold_damage:0.2, lightning_damage:0.2, chaos_damage:0.2, movement_speed:0.4, armour:0.5 },
+  es:       { life:0.2, fire_res:0.7, cold_res:0.7, lightning_res:0.7, chaos_res:0.8, energy_shield:1.0, crit_chance:0.4, spell_damage:0.5, fire_damage:0.3, cold_damage:0.3, lightning_damage:0.3, chaos_damage:0.3, movement_speed:0.4, armour:0.2 },
+  resi:     { life:0.7, fire_res:1.0, cold_res:1.0, lightning_res:1.0, chaos_res:1.0, energy_shield:0.4, crit_chance:0.2, spell_damage:0.3, fire_damage:0.2, cold_damage:0.2, lightning_damage:0.2, chaos_damage:0.2, movement_speed:0.3, armour:0.5 },
 };
 let currentWeights = {};
 
@@ -2178,7 +2178,7 @@ async function analyzeImage() {
   finally { btn.disabled = false; btn.innerHTML = "🔍 Analysieren"; }
 }
 
-const SCAN_STAT_KEYS = ["life","mana","energy_shield","spirit","fire_res","cold_res","lightning_res","chaos_res","armour","movement_speed","spell_damage","spell_skills","crit_chance","crit_dmg_bonus","eva_es"];
+const SCAN_STAT_KEYS = ["life","mana","energy_shield","spirit","fire_res","cold_res","lightning_res","chaos_res","armour","movement_speed","spell_damage","fire_damage","cold_damage","lightning_damage","chaos_damage","spell_skills","crit_chance","crit_dmg_bonus","eva_es"];
 
 function renderScanResult() {
   const result = document.getElementById("scanResult");
@@ -2520,7 +2520,10 @@ function labelFor(key) {
     life: "Leben", mana: "Mana", fire_res: "Feuer-Res", cold_res: "Kälte-Res",
     lightning_res: "Blitz-Res", chaos_res: "Chaos-Res",
     energy_shield: "Energieschild", crit_chance: "Krit-Chance",
-    spell_damage: "Zauberschaden", movement_speed: "Lauftempo", armour: "Rüstung",
+    spell_damage: "Zauberschaden",
+    fire_damage: "Feuer-Schaden", cold_damage: "Kälte-Schaden",
+    lightning_damage: "Blitz-Schaden", chaos_damage: "Chaos-Schaden",
+    movement_speed: "Lauftempo", armour: "Rüstung",
     ele_res: "Elem-Res (gesamt)", spell_skills: "+Skill-Level", spirit: "Spirit",
     eva_es: "Eva+ES %", crit_dmg_bonus: "Krit-Schaden",
   };
@@ -2579,5 +2582,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2e16412de98dbfb',t:'MTc4NzIyODgzMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2e867a6bc4ddca5',t:'MTc4NzMwMjM4MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a400a7e5dd478efb',t:'MTc5MDI0MTAyNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a40451a42d8da01d',t:'MTc5MDI3OTQzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
