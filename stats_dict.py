@@ -26,8 +26,8 @@ STAT_DICT = {
     "energy_shield": [
         r"\+?(\d+)\s+zu\s+maximalem\s+Energieschild",
         r"\+?(\d+)\s+to\s+(?:maximum\s+)?Energy\s+Shield",
-        r"(\d+)%\s+erh[öo]hter\s+Energieschild",
-        r"(\d+)%\s+increased\s+Energy\s+Shield(?!\s+Recharge)",
+        r"(\d+)%\s+erh[öo]hter\s+(?:maximaler\s+)?Energieschild",
+        r"(\d+)%\s+increased\s+(?:maximum\s+)?Energy\s+Shield(?!\s+Recharge)",
     ],
     "spirit": [
         r"\+?(\d+)\s+zu\s+Wille",          # PoE2 DE: Spirit = "Wille"
@@ -246,7 +246,74 @@ def parse_stats(text):
                     pass
         if found:
             stats[key] = round(total, 1)
+
+    # Kombi-Stats zaehlen auch auf ihre Komponenten (siehe COMPOUND_TARGETS)
+    _apply_compound(stats)
     return stats
+
+
+# ------------------------------------------------------------
+#  Split-Auswertung: flat ("+45 zu maximalem Leben") vs.
+#  increased ("40% increased Energy Shield") - Basis fuer die
+#  Effektive-Werte-Berechnung im Backend:
+#     effektiv = (Basis + flat) * (1 + increased/100)
+# ------------------------------------------------------------
+
+# Kombi-Stats -> ihre Komponenten (genau das macht der Mod im Game):
+#   "85% increased Armour and Energy Shield" -> +85 Ruestung, +85 ES
+#   "+15% to all Elemental Resistances"      -> +15 Feuer, +15 Kaelte, +15 Blitz
+COMPOUND_TARGETS = (
+    ("eva_es",     ("energy_shield",)),
+    ("armour_es",  ("energy_shield", "armour")),
+    ("armour_eva", ("armour",)),
+    ("all_res",    ("fire_res", "cold_res", "lightning_res")),
+)
+
+
+def _apply_compound(d):
+    """Faellt Kombi-Stats auf ihre Komponenten in Dict d zurueck (summiert)."""
+    for src, targets in COMPOUND_TARGETS:
+        if src in d:
+            for t in targets:
+                d[t] = round(d.get(t, 0) + d[src], 1)
+
+
+def _is_increased_text(text):
+    """Erkannter Mod-Text: Multiplikator ("increased"/"erhöht") oder flat?"""
+    t = text.lower()
+    return ("increased" in t) or ("erhöht" in t) or ("erhoeht" in t)
+
+
+def parse_stats_split(text):
+    """
+    Wie parse_stats, aber zerlegt die erkannten Werte in
+      flat: additive Stats   ("+45 zu maximalem Leben", "+15 zu Feuerwiderstand")
+      inc:  Multiplikatoren  ("40% increased Energy Shield", "85% erhöhte Rüstung")
+    Kombi-Stats werden auf ihre Komponenten aufgeteilt (wie in parse_stats).
+    Gibt (flat, inc) zurueck.
+    """
+    text = clean_item_text(text)
+    flat, inc = {}, {}
+    for key, regexes in _COMPILED.items():
+        f = 0.0
+        p = 0.0
+        for rx in regexes:
+            for m in rx.finditer(text):
+                try:
+                    val = float(m.group(1).replace(",", "."))
+                except (ValueError, IndexError):
+                    continue
+                if _is_increased_text(m.group(0)):
+                    p += val
+                else:
+                    f += val
+        if f:
+            flat[key] = round(f, 1)
+        if p:
+            inc[key] = round(p, 1)
+    _apply_compound(flat)
+    _apply_compound(inc)
+    return flat, inc
 
 
 # ---------- Slot-Erkennung (DE + EN) ----------
