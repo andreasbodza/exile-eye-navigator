@@ -1030,7 +1030,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.9</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.10</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_impressum">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_privacy">Datenschutz</a> ·
@@ -1039,7 +1039,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.9";
+const APP_VERSION = "v1.10";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1575,8 +1575,9 @@ function renderGear(items) {
       slotEl.querySelector(".slot-label").after(img);
     }
     const nameEl = slotEl.querySelector(".item-name");
-    nameEl.textContent = it.name || it.typeLine || "(unbenannt)";
+    nameEl.textContent = it.name || it.typeLine || t("tt_unnamed");
     nameEl.className = "item-name rarity-" + (it.rarity ?? 0);
+    nameEl.removeAttribute("data-i18n");   // gefülltes Slot ist kein i18n-Element mehr
     slotEl.classList.add("filled");
     if (it.name && it.typeLine && it.name !== it.typeLine) {
       const meta = document.createElement("span");
@@ -2778,5 +2779,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a410a18efb5b4d43',t:'MTc5MDQwODUzNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a410b42538f5d233',t:'MTc5MDQwOTI5OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

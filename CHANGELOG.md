@@ -10,6 +10,10 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.10 (25.09.2026, Hotfix)
+- **Fix:** Nach Sprachwechsel zeigten geladene Item-Namen "leer"/"empty" statt des echten Namens — die Name-Spans behielten das `data-i18n="empty_slot"`-Attribut, und der Sprachwechsel setzte es zurück. Attribut wird jetzt beim Befüllen entfernt.
+- **Fix:** `(unbenannt)`-Fallback im HUD war hartkodiert → jetzt `t("tt_unnamed")`
+
 ## v1.9 (25.09.2026, Hotfix)
 - **Fix (EN-UI):** Resistenzen-Panel zeigte deutsche Labels ("Feuer-Resistenz", "noch X% bis Cap") — jetzt in beiden Sprachen
 - **Fix (EN-UI):** Charakter-Dropdown-Platzhalter + "Charakter(e) geladen"-Banner waren hartkodiert deutsch — jetzt übersetzt, Demo-Modus bekommt auch den Platzhalter (konsistente Reihenfolge)
