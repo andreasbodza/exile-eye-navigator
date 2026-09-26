@@ -1030,7 +1030,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.8</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.9</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_impressum">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_privacy">Datenschutz</a> ·
@@ -1039,7 +1039,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.8";
+const APP_VERSION = "v1.9";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1150,6 +1150,9 @@ const I18N = {
     tol_hint:"z.B. -15%: sucht auch Items mit etwas niedrigeren Werten",
     bug_btn:"🐞 Fehler melden / Feedback geben",
     bug_hint:"Etwas funktioniert nicht? Sag uns Bescheid – öffnet eine vorausgefüllte E-Mail.",
+    rc_fire:"Feuer-Resistenz", rc_cold:"Kälte-Resistenz", rc_lightning:"Blitz-Resistenz", rc_chaos:"Chaos-Resistenz",
+    rc_buffer:"+{d}% Puffer ✓", rc_ok:"Cap erreicht ✓", rc_missing:"noch {d}% bis Cap",
+    bn_chars_loaded:"{n} Charakter(e) geladen",
     legal_impressum:"Impressum", legal_privacy:"Datenschutz", legal_terms:"Nutzungsbedingungen",
     empty_slot:"leer", active_build_prefix:"🧠 Aktiver Build: ", score_prefix:"Score ",
     auto_detected:"(auto-erkannt: {s})", not_detected:"(nicht erkannt)", loaded_from_history:"(aus Verlauf geladen)",
@@ -1232,6 +1235,9 @@ const I18N = {
     tol_hint:"e.g. -15%: also matches items with slightly lower values",
     bug_btn:"🐞 Report bug / Send feedback",
     bug_hint:"Something not working? Let us know – opens a pre-filled email.",
+    rc_fire:"Fire Resistance", rc_cold:"Cold Resistance", rc_lightning:"Lightning Resistance", rc_chaos:"Chaos Resistance",
+    rc_buffer:"+{d}% buffer ✓", rc_ok:"Cap reached ✓", rc_missing:"{d}% to cap",
+    bn_chars_loaded:"{n} character(s) loaded",
     legal_impressum:"Imprint", legal_privacy:"Privacy Policy", legal_terms:"Terms of Use",
     empty_slot:"empty", active_build_prefix:"🧠 Active build: ", score_prefix:"Score ",
     auto_detected:"(auto-detected: {s})", not_detected:"(not detected)", loaded_from_history:"(loaded from history)",
@@ -1301,6 +1307,16 @@ function toggleLang() {
     if (typeof renderResCap === "function") renderResCap();
     if (typeof updateBuildStatus === "function") updateBuildStatus();
     if (typeof renderSkills === "function" && typeof allSkills !== "undefined") renderSkills(allSkills);
+    // JS-erzeugte Option (Charakter-Dropdown-Platzhalter)
+    const cs = document.getElementById("charSelect");
+    if (cs) { const ph = cs.querySelector('option[value=""]'); if (ph) ph.textContent = t("char_choose"); }
+    // Stat-Score-Zeile
+    const box = document.getElementById("totalScore");
+    if (box && box.style.display !== "none" && typeof equippedItems !== "undefined") {
+      let total = 0, counted = 0;
+      for (const k in equippedItems) { const sc = equippedItems[k]._score || 0; if (sc > 0) { total += sc; counted++; } }
+      if (counted) updateTotalScore(total, counted);
+    }
   } catch (e) { /* ignorieren */ }
 }
 applyLang();
@@ -1469,7 +1485,7 @@ function loadDemo() {
   loadWeights();
   currentLeague = "Standard";
   const sel = document.getElementById("charSelect");
-  let opts = "";
+  let opts = '<option value="">' + t("char_choose") + '</option>';
   for (const [key, c] of Object.entries(DEMO_CHARACTERS)) {
     opts += `<option value="demo:${key}">${c.label}</option>`;
   }
@@ -1493,7 +1509,7 @@ async function loadCharacters() {
     if (data.error) { showBanner(t("bn_chars_error") + data.error); return; }
     const chars = data.characters || [];
     if (chars.length === 0) { showBanner(t("bn_no_chars")); return; }
-    sel.innerHTML = '<option value="">– Charakter wählen –</option>';
+    sel.innerHTML = '<option value="">' + t("char_choose") + '</option>';
     chars.forEach(c => {
       const opt = document.createElement("option");
       opt.value = c.name;
@@ -1501,7 +1517,7 @@ async function loadCharacters() {
       opt.textContent = `${c.name}  (Lvl ${c.level} ${c.class})`;
       sel.appendChild(opt);
     });
-    showBanner(chars.length + " Charakter(e) geladen", "ok");
+    showBanner(t("bn_chars_loaded", { n: chars.length }), "ok");
   } catch (e) { showBanner(t("bn_error") + e.message); }
 }
 
@@ -1606,10 +1622,10 @@ function renderResCap() {
   });
   const cap = parseInt(document.getElementById("resCapSelect").value, 10) || 75;
   const defs = [
-    { key: "fire_res", name: "Feuer", dot: "fire" },
-    { key: "cold_res", name: "Kälte", dot: "cold" },
-    { key: "lightning_res", name: "Blitz", dot: "light" },
-    { key: "chaos_res", name: "Chaos", dot: "chaos" },
+    { key: "fire_res", name: t("rc_fire"), dot: "fire" },
+    { key: "cold_res", name: t("rc_cold"), dot: "cold" },
+    { key: "lightning_res", name: t("rc_lightning"), dot: "light" },
+    { key: "chaos_res", name: t("rc_chaos"), dot: "chaos" },
   ];
   let html = "";
   defs.forEach(d => {
@@ -1617,14 +1633,14 @@ function renderResCap() {
     const pctOfCap = Math.min(100, Math.round((val / cap) * 100));
     let fillCls, status, statusCol;
     if (val >= cap) {
-      if (val > cap) { fillCls = "over"; status = `+${val - cap}% Puffer ✓`; statusCol = "var(--gold)"; }
-      else { fillCls = "ok"; status = "Cap erreicht ✓"; statusCol = "var(--green)"; }
+      if (val > cap) { fillCls = "over"; status = t("rc_buffer", { d: val - cap }); statusCol = "var(--gold)"; }
+      else { fillCls = "ok"; status = t("rc_ok"); statusCol = "var(--green)"; }
     } else {
-      fillCls = "under"; status = `noch ${cap - val}% bis Cap`; statusCol = "var(--red)";
+      fillCls = "under"; status = t("rc_missing", { d: cap - val }); statusCol = "var(--red)";
     }
     html += `<div class="rc-row">
       <div class="rc-head">
-        <span class="rc-name"><span class="rc-dot ${d.dot}"></span>${d.name}-Resistenz</span>
+        <span class="rc-name"><span class="rc-dot ${d.dot}"></span>${d.name}</span>
         <span class="rc-val">${val}% <span class="rc-status" style="color:${statusCol}">${status}</span></span>
       </div>
       <div class="rc-bar"><div class="rc-fill ${fillCls}" style="width:${pctOfCap}%"></div></div>
@@ -2762,5 +2778,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a410a18efb5b4d43',t:'MTc5MDQwODUzNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

@@ -10,6 +10,10 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.9 (25.09.2026, Hotfix)
+- **Fix (EN-UI):** Resistenzen-Panel zeigte deutsche Labels ("Feuer-Resistenz", "noch X% bis Cap") — jetzt in beiden Sprachen
+- **Fix (EN-UI):** Charakter-Dropdown-Platzhalter + "Charakter(e) geladen"-Banner waren hartkodiert deutsch — jetzt übersetzt, Demo-Modus bekommt auch den Platzhalter (konsistente Reihenfolge)
+
 ## v1.8 (25.09.2026)
 - **EN-UI:** Vollständige zweisprachige App (DE/EN, ~120 Strings), Auto-Erkennung der Browser-Sprache, Toggle oben rechts, Auswahl wird gespeichert
 - **Elementar-Schaden:** 4 neue Gewichts-Regler (Feuer/Kälte/Blitz/Chaos-Schaden), Build-Import leitet daraus Gewichte ab
