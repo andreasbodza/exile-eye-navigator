@@ -10,6 +10,10 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.12 (25.09.2026)
+- **Neu: Runen als eigene Sektion im Item-Tooltip** („◈ Runen"/„◈ Runes", Tealfarbig) — waren bisher unsichtbar unter den anderen Mods versteckt.
+- Hinweis: Runen-Stats zählen **bereits** in den Score mit (sofern der Stat gewichtet ist), z.B. +35% Fire Res auf einer Rune.
+
 ## v1.11 (25.09.2026)
 - **Neu: Gesteckte Gems sichtbar!** Die GGG-API liefert pro Item `socketedItems` — wird jetzt angezeigt: im Item-Tooltip als Liste („✦ Gesteckte Gems"/„✦ Socketed Gems") und im HUD als ✦-Anzeige (Hover = Namen). Tabula-Rasa-Charaktere zeigen jetzt ihre Skills.
 - **Fix:** „Besseres Item auf dem Trade suchen" + „Wichtig für deinen Build" waren hartkodiert deutsch → jetzt übersetzt
