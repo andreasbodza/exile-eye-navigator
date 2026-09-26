@@ -182,6 +182,8 @@
     box-shadow: 0 4px 12px rgba(0,0,0,.4);
   }
   #totalScore .ts-label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+  #totalScore .ts-info { cursor: help; opacity: .7; font-size: 11px; margin-left: 5px; letter-spacing: 0; }
+  #totalScore .ts-info:hover { opacity: 1; }
   #totalScore .ts-count { font-size: 11px; color: var(--text-dim); }
   #totalScore .ts-value {
     font-size: 22px; font-weight: 700; color: var(--gold);
@@ -702,8 +704,8 @@
 
 <div id="totalScore">
   <div>
-    <div class="ts-label">Gesamt-Score</div>
-    <div class="ts-count" id="tsCount">0 Slots gewertet</div>
+    <div class="ts-label">Stat-Score<span class="ts-info" data-i18n-title="ts_tooltip">ⓘ</span></div>
+    <div class="ts-count" id="tsCount" data-i18n="ts_count0">0 Slots gewertet</div>
   </div>
   <div class="ts-value" id="tsValue">0</div>
 </div>
@@ -713,7 +715,7 @@
      ============================================================ -->
 <div class="panel" data-panel-id="scanner">
   <div class="panel-head">
-    <h2>📷 Item-Scanner</h2>
+    <h2 data-i18n="panel_scanner">📷 Item-Scanner</h2>
     <div class="head-right">
       <span class="status-badge"></span>
       <span class="arrow">▶</span>
@@ -724,26 +726,26 @@
       <div class="scanner-hero-head">
         <div class="scanner-hero-icon">📷</div>
         <div>
-          <h2 class="scanner-hero-title">Item scannen</h2>
-          <p class="scanner-hero-sub">Foto vom Item-Tooltip machen – Exile Eye liest die Werte aus und vergleicht. Kein Login nötig.</p>
+          <h2 class="scanner-hero-title" data-i18n="scan_title">Item scannen</h2>
+          <p class="scanner-hero-sub" data-i18n="scan_sub">Foto vom Item-Tooltip machen – Exile Eye liest die Werte aus und vergleicht. Kein Login nötig.</p>
         </div>
       </div>
       <input type="file" id="fileInput" accept="image/*" capture="environment">
-      <button class="btn primary scanner-hero-btn" onclick="document.getElementById('fileInput').click()">📷 Foto aufnehmen / Bild wählen</button>
-      <button class="btn scanner-paste-btn" onclick="pasteFromClipboard()">📋 Screenshot aus Zwischenablage einfügen</button>
-      <p class="scanner-paste-hint">💡 Tipp: Screenshot machen und einfach <b>Strg + V</b> drücken – kein Suchen auf der Festplatte nötig.</p>
+      <button class="btn primary scanner-hero-btn" data-i18n="photo_btn" onclick="document.getElementById('fileInput').click()">📷 Foto aufnehmen / Bild wählen</button>
+      <button class="btn scanner-paste-btn" data-i18n="paste_btn" onclick="pasteFromClipboard()">📋 Screenshot aus Zwischenablage einfügen</button>
+      <p class="scanner-paste-hint" data-i18n-html="paste_hint">💡 Tipp: Screenshot machen und einfach <b>Strg + V</b> drücken – kein Suchen auf der Festplatte nötig.</p>
       <div class="scanner-options">
         <label class="scan-opt-lang">
-          <span>Spiel-Sprache:</span>
+          <span data-i18n="game_lang_lbl">Spiel-Sprache:</span>
           <select id="gameLang" class="trade-sel" style="width:auto;padding:6px 10px">
-            <option value="auto">Automatisch (DE+EN)</option>
-            <option value="de">Deutsch</option>
-            <option value="en">English</option>
+            <option value="auto" data-i18n="lang_auto">Automatisch (DE+EN)</option>
+            <option value="de" data-i18n="lang_de">Deutsch</option>
+            <option value="en" data-i18n="lang_en">English</option>
           </select>
         </label>
         <label class="scan-opt-crop">
           <input type="checkbox" id="autoCropToggle" checked style="width:18px;height:18px;accent-color:var(--gold)">
-          <span>🤖 Auto-Zuschnitt (findet das Item-Tooltip selbst)</span>
+          <span data-i18n="autocrop_lbl">🤖 Auto-Zuschnitt (findet das Item-Tooltip selbst)</span>
         </label>
       </div>
       <div id="cropArea">
@@ -753,35 +755,35 @@
           <div class="crop-handle sw"></div><div class="crop-handle se"></div>
         </div>
       </div>
-      <div class="crop-hint" id="cropHint" style="display:none">
+      <div class="crop-hint" id="cropHint" data-i18n-html="crop_hint" style="display:none">
         🟨 Ziehe den goldenen Rahmen genau um den <b>Item-Text</b> (der Rahmen wurde automatisch vorgeschlagen)
       </div>
       <img id="previewImg" alt="Vorschau">
-      <button id="analyzeBtn" class="btn hidden" onclick="analyzeImage()">🔍 Zugeschnittenes Item analysieren</button>
+      <button id="analyzeBtn" class="btn hidden" data-i18n="analyze_btn" onclick="analyzeImage()">🔍 Zugeschnittenes Item analysieren</button>
       <div id="scanResult"></div>
       <div id="scanSlotBox">
-        <label>Mit welchem Slot vergleichen? <span id="slotAutoHint"></span></label>
+        <label><span data-i18n="slot_select_lbl">Mit welchem Slot vergleichen?</span> <span id="slotAutoHint"></span></label>
         <select id="scanSlotSelect" onchange="runCompare()">
-          <option value="">– Slot wählen –</option>
-          <option value="Weapon">Waffe</option>
-          <option value="Offhand">Nebenhand</option>
-          <option value="Helm">Helm</option>
-          <option value="BodyArmour">Rüstung</option>
-          <option value="Gloves">Handschuhe</option>
-          <option value="Boots">Stiefel</option>
-          <option value="Belt">Gürtel</option>
-          <option value="Amulet">Amulett</option>
-          <option value="Ring">Ring L</option>
-          <option value="Ring2">Ring R</option>
+          <option value="" data-i18n="slot_choose">– Slot wählen –</option>
+          <option value="Weapon" data-i18n="slot_weapon">Waffe</option>
+          <option value="Offhand" data-i18n="slot_offhand">Nebenhand</option>
+          <option value="Helm" data-i18n="slot_helm">Helm</option>
+          <option value="BodyArmour" data-i18n="slot_body">Rüstung</option>
+          <option value="Gloves" data-i18n="slot_gloves">Handschuhe</option>
+          <option value="Boots" data-i18n="slot_boots">Stiefel</option>
+          <option value="Belt" data-i18n="slot_belt">Gürtel</option>
+          <option value="Amulet" data-i18n="slot_amulet">Amulett</option>
+          <option value="Ring" data-i18n="slot_ring_l">Ring L</option>
+          <option value="Ring2" data-i18n="slot_ring_r">Ring R</option>
         </select>
       </div>
       <div id="comparePanel"></div>
       <div id="scanHistorySection" style="display:none;margin-top:20px;text-align:left">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-soft)">📜 Scan-Verlauf</span>
-          <button class="btn danger" style="padding:4px 10px;font-size:11px" onclick="clearScanHistory()">🗑 Alle löschen</button>
+          <span style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-soft)" data-i18n="scan_history_title">📜 Scan-Verlauf</span>
+          <button class="btn danger" style="padding:4px 10px;font-size:11px" data-i18n="scan_history_clear" onclick="clearScanHistory()">🗑 Alle löschen</button>
         </div>
-        <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px">Deine letzten Scans – tippe einen an, um ihn erneut anzusehen.</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px" data-i18n="scan_history_hint">Deine letzten Scans – tippe einen an, um ihn erneut anzusehen.</div>
         <div id="scanHistoryList"></div>
       </div>
     </div>
@@ -793,7 +795,7 @@
      ============================================================ -->
 <div class="panel" data-panel-id="character">
   <div class="panel-head">
-    <h2>🎮 Charakter & Ausrüstung</h2>
+    <h2 data-i18n="panel_character">🎮 Charakter & Ausrüstung</h2>
     <div class="head-right">
       <span class="status-badge"></span>
       <span class="arrow">▶</span>
@@ -806,12 +808,12 @@
       <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#9a7d3e" stroke-width="1.5" style="margin-bottom:10px">
         <path d="M12 2L2 7v6c0 5 4 8 10 9 6-1 10-4 10-9V7L12 2z"/>
       </svg>
-      <h2 style="color:var(--gold);letter-spacing:1px">Willkommen, Exile</h2>
-      <p>Melde dich mit deinem Path&nbsp;of&nbsp;Exile&nbsp;Account an,<br>um deine Charaktere und Ausrüstung zu laden.</p>
-      <a href="/login" class="btn primary">🔐 Mit GGG anmelden</a>
+      <h2 style="color:var(--gold);letter-spacing:1px" data-i18n="login_welcome">Willkommen, Exile</h2>
+      <p data-i18n-html="login_sub">Melde dich mit deinem Path&nbsp;of&nbsp;Exile&nbsp;Account an,<br>um deine Charaktere und Ausrüstung zu laden.</p>
+      <a href="/login" class="btn primary" data-i18n="login_btn">🔐 Mit GGG anmelden</a>
       <div style="margin-top:14px">
-        <button class="btn" onclick="loadDemo()" style="font-size:12px">🎮 Demo ausprobieren (ohne Login)</button>
-        <p style="font-size:11px;color:var(--text-dim);margin-top:8px">Probier die App mit Beispiel-Charakter aus – Scanner, Build-Vergleich &amp; HUD live testen!</p>
+        <button class="btn" data-i18n="demo_btn" onclick="loadDemo()" style="font-size:12px">🎮 Demo ausprobieren (ohne Login)</button>
+        <p style="font-size:11px;color:var(--text-dim);margin-top:8px" data-i18n-html="demo_hint">Probier die App mit Beispiel-Charakter aus – Scanner, Build-Vergleich &amp; HUD live testen!</p>
       </div>
     </div>
 
@@ -819,21 +821,21 @@
     <div id="mainView" class="hidden">
 
       <div class="section">
-        <h2>Charakter</h2>
-        <select id="charSelect"><option value="">– Charakter wählen –</option></select>
+        <h2 data-i18n="char_section">Charakter</h2>
+        <select id="charSelect"><option value="" data-i18n="char_choose">– Charakter wählen –</option></select>
       </div>
 
       <div class="section">
-        <h2>Aktuelle Ausrüstung</h2>
+        <h2 data-i18n="equip_section">Aktuelle Ausrüstung</h2>
 
         <div id="buildProgress">
           <div class="bp-top">
-            <span class="bp-label">🎯 Build-Fortschritt</span>
+            <span class="bp-label" data-i18n="bp_label">🎯 Build-Fortschritt</span>
             <span class="bp-count" id="bpCount">0 / 0</span>
           </div>
           <div class="bp-bar"><div class="bp-fill" id="bpFill" style="width:0%"></div></div>
-          <div class="bp-hint" id="bpHint" title="Zählt pro Slot, den dein Build fordert: ✓ = Anforderungen komplett erfüllt · ✗ = fehlt oder zu niedrig">Importiere einen Build, um deinen Fortschritt zu sehen</div>
-          <button id="bpMissingToggle" class="bp-missing-toggle" style="display:none" onclick="toggleMissingList()">🔍 Was fehlt mir? Liste anzeigen</button>
+          <div class="bp-hint" id="bpHint" data-i18n-title="bp_hint_title" data-i18n="bp_hint">Importiere einen Build, um deinen Fortschritt zu sehen</div>
+          <button id="bpMissingToggle" class="bp-missing-toggle" data-i18n="bp_missing_show" style="display:none" onclick="toggleMissingList()">🔍 Was fehlt mir? Liste anzeigen</button>
           <div id="bpMissingList" style="display:none"></div>
         </div>
 
@@ -841,43 +843,43 @@
           <div class="hud" id="hud">
             <div class="slot" data-area="weapon" data-slot="Weapon">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M6.92 5L5 6.92l9.06 9.06-1.06 1.06-2.83-2.83-1.41 1.41 2.12 2.12-2.12 2.13 1.41 1.41 2.13-2.12 2.12 2.12 1.41-1.41-2.83-2.83 1.06-1.06L17.08 19 19 17.08 6.92 5z"/></svg>
-              <span class="slot-label">Waffe</span><span class="item-name empty">leer</span>
+              <span class="slot-label" data-i18n="slot_weapon">Waffe</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="helm" data-slot="Helm">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 2a7 7 0 00-7 7v6h2v-3h10v3h2V9a7 7 0 00-7-7zm-3 8a1 1 0 110-2 1 1 0 010 2zm6 0a1 1 0 110-2 1 1 0 010 2z"/></svg>
-              <span class="slot-label">Helm</span><span class="item-name empty">leer</span>
+              <span class="slot-label" data-i18n="slot_helm">Helm</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="weapon2" data-slot="Offhand">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 2L4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5l-8-3z"/></svg>
-              <span class="slot-label">Nebenhand</span><span class="item-name empty">leer</span>
+              <span class="slot-label" data-i18n="slot_offhand">Nebenhand</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="amulet" data-slot="Amulet">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 3a5 5 0 00-5 5h2a3 3 0 116 0h2a5 5 0 00-5-5zm0 8a3 3 0 100 6 3 3 0 000-6z"/></svg>
-              <span class="slot-label">Amulett</span><span class="item-name empty">leer</span>
+              <span class="slot-label" data-i18n="slot_amulet">Amulett</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="body" data-slot="BodyArmour">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 2l7 3v6c0 5-3 8-7 11-4-3-7-6-7-11V5l7-3z"/></svg>
-              <span class="slot-label">Rüstung</span><span class="item-name empty">leer</span>
+              <span class="slot-label" data-i18n="slot_body">Rüstung</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="ring2" data-slot="Ring2">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 8a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm0-7l2 3h-4l2-3z"/></svg>
-              <span class="slot-label">Ring R</span><span class="item-name empty">leer</span>
+              <span class="slot-label" data-i18n="slot_ring_r">Ring R</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="ring1" data-slot="Ring">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 8a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm0-7l2 3h-4l2-3z"/></svg>
-              <span class="slot-label">Ring L</span><span class="item-name empty">leer</span>
+              <span class="slot-label" data-i18n="slot_ring_l">Ring L</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="glove" data-slot="Gloves">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M6 11V6a1 1 0 012 0v4h1V5a1 1 0 012 0v5h1V6a1 1 0 012 0v6l3 2v5a2 2 0 01-2 2H8a2 2 0 01-2-2v-3l-2-2a1 1 0 011-2l1 1z"/></svg>
-              <span class="slot-label">Handschuhe</span><span class="item-name empty">leer</span>
+              <span class="slot-label" data-i18n="slot_gloves">Handschuhe</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="belt" data-slot="Belt">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M3 9h18v6H3V9zm8 1v4h2v-4h-2z"/></svg>
-              <span class="slot-label">Gürtel</span><span class="item-name empty">leer</span>
+              <span class="slot-label" data-i18n="slot_belt">Gürtel</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="boots" data-slot="Boots">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M7 3v9l-2 2v5a1 1 0 001 1h12a1 1 0 001-1v-1c0-2-1-3-4-4l-4-2V3H7z"/></svg>
-              <span class="slot-label">Stiefel</span><span class="item-name empty">leer</span>
+              <span class="slot-label" data-i18n="slot_boots">Stiefel</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
           </div>
           <div id="consumablesInHud" class="hud-consumables" style="display:none">
@@ -894,7 +896,7 @@
      ============================================================ -->
 <div class="panel" data-panel-id="buildplan">
   <div class="panel-head">
-    <h2>🎯 Build-Planung</h2>
+    <h2 data-i18n="panel_buildplan">🎯 Build-Planung</h2>
     <div class="head-right">
       <span class="status-badge"></span>
       <span class="arrow">▶</span>
@@ -902,16 +904,16 @@
   </div>
   <div class="panel-body">
     <div class="section" id="skillsSection">
-      <h2>Skills &amp; Support-Gems</h2>
+      <h2 data-i18n="skills_section">Skills &amp; Support-Gems</h2>
       <div id="skillsList"></div>
     </div>
 
     <div class="section">
-      <h2>Gewichtung &amp; Build-Import</h2>
+      <h2 data-i18n="weights_section">Gewichtung &amp; Build-Import</h2>
 
       <div id="resCapBox">
         <div class="rc-top">
-          <span class="rc-title">🛡️ Resistenzen (aus deinem Gear)</span>
+          <span class="rc-title" data-i18n="rescap_title">🛡️ Resistenzen (aus deinem Gear)</span>
           <span class="rc-capwrap">
             Cap:
             <select id="resCapSelect" onchange="renderResCap()">
@@ -923,14 +925,14 @@
           </span>
         </div>
         <div id="resCapRows"></div>
-        <div class="rc-note">⚠️ Nur Werte aus deinem <b>getragenen Gear</b>. Passivbaum, Ascendancy &amp; Liga-Strafe sind <b>nicht</b> enthalten.</div>
+        <div class="rc-note" data-i18n-html="rescap_note">⚠️ Nur Werte aus deinem <b>getragenen Gear</b>. Passivbaum, Ascendancy &amp; Liga-Strafe sind <b>nicht</b> enthalten.</div>
       </div>
 
       <div class="weight-presets" id="presets">
-        <button class="preset-btn" data-preset="balanced">Ausgewogen</button>
-        <button class="preset-btn" data-preset="life">Life-Build</button>
-        <button class="preset-btn" data-preset="es">ES-Build</button>
-        <button class="preset-btn" data-preset="resi">Resi-Cap zuerst</button>
+        <button class="preset-btn" data-preset="balanced" data-i18n="preset_balanced">Ausgewogen</button>
+        <button class="preset-btn" data-preset="life" data-i18n="preset_life">Life-Build</button>
+        <button class="preset-btn" data-preset="es" data-i18n="preset_es">ES-Build</button>
+        <button class="preset-btn" data-preset="resi" data-i18n="preset_resi">Resi-Cap zuerst</button>
       </div>
 
       <div id="weightSliders"></div>
@@ -938,12 +940,12 @@
       <div id="activeBuildBar" style="display:none;background:rgba(46,111,176,.12);border:1px solid #2e5a80;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
           <span id="activeBuildName" style="color:#9ab8d8"></span>
-          <button class="btn danger" style="padding:5px 10px;font-size:11px;white-space:nowrap" onclick="clearBuild()">✕ Aktiven Build entfernen</button>
+          <button class="btn danger" style="padding:5px 10px;font-size:11px;white-space:nowrap" data-i18n="active_build_remove" onclick="clearBuild()">✕ Aktiven Build entfernen</button>
         </div>
       </div>
 
       <div id="savedBuildsBar" style="display:none;margin-bottom:12px">
-        <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px">💾 Gespeicherte Builds – umschalten:</label>
+        <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px" data-i18n="saved_builds_lbl">💾 Gespeicherte Builds – umschalten:</label>
         <div style="display:flex;gap:8px">
           <select id="savedBuildsSelect" class="trade-sel" style="flex:1" onchange="switchBuild(this.value)"></select>
           <button class="btn danger" style="padding:7px 11px;font-size:12px;white-space:nowrap" onclick="deleteSavedBuild()">🗑</button>
@@ -951,15 +953,15 @@
       </div>
 
       <div class="build-import">
-        <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:5px">🧠 Build importieren:</label>
+        <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:5px" data-i18n="import_lbl">🧠 Build importieren:</label>
         <input type="file" id="buildFileInput" style="display:none">
-        <button class="btn primary" style="width:100%;margin-bottom:6px" onclick="document.getElementById('buildFileInput').click()">📂 .build-Datei auswählen</button>
-        <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.5">
+        <button class="btn primary" style="width:100%;margin-bottom:6px" data-i18n="import_file_btn" onclick="document.getElementById('buildFileInput').click()">📂 .build-Datei auswählen</button>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.5" data-i18n-html="import_file_hint">
           Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus. ⭐ am genauesten
         </div>
-        <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px">…oder einen Link / Code / Text einfügen:</label>
-        <textarea id="buildCode" placeholder='https://pobb.in/xxxxx • https://maxroll.gg/... • PoB-Code • oder Item-Text'></textarea>
-        <button class="btn primary" style="margin-top:8px" onclick="importBuild()">📥 Build importieren &amp; Gewichtung übernehmen</button>
+        <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px" data-i18n="import_paste_lbl">…oder einen Link / Code / Text einfügen:</label>
+        <textarea id="buildCode" data-i18n-ph="buildcode_ph" placeholder='https://pobb.in/xxxxx • https://maxroll.gg/... • PoB-Code • oder Item-Text'></textarea>
+        <button class="btn primary" style="margin-top:8px" data-i18n="import_btn" onclick="importBuild()">📥 Build importieren &amp; Gewichtung übernehmen</button>
         <div id="buildResult"></div>
       </div>
     </div>
@@ -971,7 +973,7 @@
      ============================================================ -->
 <div class="panel" data-panel-id="settings">
   <div class="panel-head">
-    <h2>⚙️ Einstellungen &amp; Handel</h2>
+    <h2 data-i18n="panel_settings">⚙️ Einstellungen &amp; Handel</h2>
     <div class="head-right">
       <span class="status-badge"></span>
       <span class="arrow">▶</span>
@@ -979,36 +981,36 @@
   </div>
   <div class="panel-body">
     <div class="section">
-      <h2>🛒 Trade-Einstellungen</h2>
+      <h2 data-i18n="trade_section">🛒 Trade-Einstellungen</h2>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div>
-          <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px">Liga</label>
+          <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px" data-i18n="trade_league_lbl">Liga</label>
           <select id="tradeLeague" class="trade-sel">
-            <option value="auto">Vom Charakter</option>
+            <option value="auto" data-i18n="league_auto">Vom Charakter</option>
             <option value="Standard">Standard</option>
             <option value="Hardcore">Hardcore</option>
-            <option value="Fate of the Vaal">Aktuelle Liga</option>
-            <option value="HC Fate of the Vaal">Aktuelle (HC)</option>
+            <option value="Fate of the Vaal" data-i18n="league_current">Aktuelle Liga</option>
+            <option value="HC Fate of the Vaal" data-i18n="league_current_hc">Aktuelle (HC)</option>
           </select>
         </div>
         <div>
-          <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px">Handelsstatus</label>
+          <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px" data-i18n="trade_status_lbl">Handelsstatus</label>
           <select id="tradeStatus" class="trade-sel">
-            <option value="any">Beliebig</option>
-            <option value="buyout">Sofort kaufbar</option>
-            <option value="online">Online-Spieler</option>
+            <option value="any" data-i18n="trade_status_any">Beliebig</option>
+            <option value="buyout" data-i18n="trade_status_buyout">Sofort kaufbar</option>
+            <option value="online" data-i18n="trade_status_online">Online-Spieler</option>
           </select>
         </div>
       </div>
       <div style="margin-top:12px">
         <label style="font-size:11px;color:var(--text-dim);display:flex;justify-content:space-between">
-          <span>Attribut-Toleranz</span>
+          <span data-i18n="tol_lbl">Attribut-Toleranz</span>
           <span id="tolVal" style="color:var(--gold);font-weight:600">0%</span>
         </label>
         <input type="range" id="tradeTolerance" min="0" max="30" step="5" value="0"
                style="width:100%;accent-color:var(--gold);margin-top:4px"
                oninput="document.getElementById('tolVal').textContent='-'+this.value+'%'">
-        <div style="font-size:10px;color:var(--text-dim);margin-top:4px">z.B. -15%: sucht auch Items mit etwas niedrigeren Werten</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:4px" data-i18n="tol_hint">z.B. -15%: sucht auch Items mit etwas niedrigeren Werten</div>
       </div>
     </div>
 
@@ -1017,8 +1019,8 @@
 
 <!-- BUG-REPORT / FEEDBACK (immer sichtbar ganz unten) -->
 <div style="text-align:center;margin:20px 18px 0">
-  <button class="btn" onclick="reportBug()" style="font-size:13px">🐞 Fehler melden / Feedback geben</button>
-  <p style="font-size:11px;color:var(--text-dim);margin-top:6px">Etwas funktioniert nicht? Sag uns Bescheid – öffnet eine vorausgefüllte E-Mail.</p>
+  <button class="btn" data-i18n="bug_btn" onclick="reportBug()" style="font-size:13px">🐞 Fehler melden / Feedback geben</button>
+  <p style="font-size:11px;color:var(--text-dim);margin-top:6px" data-i18n="bug_hint">Etwas funktioniert nicht? Sag uns Bescheid – öffnet eine vorausgefüllte E-Mail.</p>
 </div>
 
 <!-- ITEM-DETAIL POPUP -->
@@ -1028,16 +1030,16 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.7</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.8</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
-    <a href="/impressum" style="color:var(--gold-soft);margin:0 6px">Impressum</a> ·
-    <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px">Datenschutz</a> ·
-    <a href="/nutzungsbedingungen" style="color:var(--gold-soft);margin:0 6px">Nutzungsbedingungen</a>
+    <a href="/impressum" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_impressum">Impressum</a> ·
+    <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_privacy">Datenschutz</a> ·
+    <a href="/nutzungsbedingungen" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_terms">Nutzungsbedingungen</a>
   </span>
 </footer>
 
 <script>
-const APP_VERSION = "v1.7";
+const APP_VERSION = "v1.8";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1092,50 +1094,216 @@ function setPanelStatus(panelId, statusText) {
 //  MEHRSPRACHIGKEIT (DE / EN)
 // ============================================================
 const I18N = {
-  de: { h_character:"Charakter", h_equipment:"Aktuelle Ausrüstung",
-        h_skills:"Skills & Support-Gems", h_weights:"Gewichtung · was ist dir wichtig?",
-        h_trade:"🛒 Trade-Einstellungen", h_scan:"Item scannen",
-        scan_sub:"Foto vom Item-Tooltip machen – Exile Eye liest die Werte aus und vergleicht. Kein Login nötig.",
-        game_lang_lbl:"Spiel-Sprache:", autocrop_lbl:"🤖 Auto-Zuschnitt",
-        login_welcome:"Willkommen, Exile",
-        login_sub:"Melde dich mit deinem Path&nbsp;of&nbsp;Exile&nbsp;Account an,<br>um deine Charaktere und Ausrüstung zu laden.",
-        login_btn:"🔐 Mit GGG anmelden", demo_btn:"🎮 Demo ausprobieren (ohne Login)",
-        logout:"Logout", import_btn:"📥 Build importieren & Gewichtung übernehmen",
-        photo_btn:"📷 Foto aufnehmen / Bild wählen",
-        bug_btn:"🐞 Fehler melden / Feedback geben",
-        bug_hint:"Etwas funktioniert nicht? Sag uns Bescheid – öffnet eine vorausgefüllte E-Mail.",
-        paste_btn:"📋 Screenshot aus Zwischenablage einfügen",
-        paste_hint:"💡 Tipp: Screenshot machen und einfach <b>Strg + V</b> drücken." },
-  en: { h_character:"Character", h_equipment:"Current Equipment",
-        h_skills:"Skills & Support Gems", h_weights:"Weighting · what matters to you?",
-        h_trade:"🛒 Trade Settings", h_scan:"Scan item",
-        scan_sub:"Take a photo of the item tooltip – Exile Eye reads the stats and compares. No login required.",
-        game_lang_lbl:"Game language:", autocrop_lbl:"🤖 Auto-crop",
-        login_welcome:"Welcome, Exile",
-        login_sub:"Sign in with your Path&nbsp;of&nbsp;Exile&nbsp;account<br>to load your characters and equipment.",
-        login_btn:"🔐 Sign in with GGG", demo_btn:"🎮 Try the demo (no login)",
-        logout:"Logout", import_btn:"📥 Import build & apply weighting",
-        photo_btn:"📷 Take photo / choose image",
-        bug_btn:"🐞 Report bug / Send feedback",
-        bug_hint:"Something not working? Let us know – opens a pre-filled email.",
-        paste_btn:"📋 Paste screenshot from clipboard",
-        paste_hint:"💡 Tip: Take a screenshot and just press <b>Ctrl + V</b>." },
+  de: {
+    // (kompatible Alt-Keys)
+    h_character:"Charakter", h_equipment:"Aktuelle Ausrüstung",
+    h_skills:"Skills & Support-Gems", h_weights:"Gewichtung · was ist dir wichtig?",
+    h_trade:"🛒 Trade-Einstellungen", h_scan:"Item scannen",
+    logout:"Logout",
+    ts_tooltip:"Rechnet deine Ausrüstung mit effektiven Werten: (Basiswert + flat-Mods) × (1 + increased%) – so zählt z.B. 85% erhöhte Rüstung auf einer 369er-Basis wie +314 Rüstung. Unique-Effekte, Skill-Synergien und Build-Mechaniken zählen nicht.",
+    ts_count0:"0 Slots gewertet", ts_count:"{n} Slots gewertet",
+    panel_scanner:"📷 Item-Scanner", scan_title:"Item scannen",
+    scan_sub:"Foto vom Item-Tooltip machen – Exile Eye liest die Werte aus und vergleicht. Kein Login nötig.",
+    photo_btn:"📷 Foto aufnehmen / Bild wählen",
+    paste_btn:"📋 Screenshot aus Zwischenablage einfügen",
+    paste_hint:"💡 Tipp: Screenshot machen und einfach <b>Strg + V</b> drücken – kein Suchen auf der Festplatte nötig.",
+    game_lang_lbl:"Spiel-Sprache:", lang_auto:"Automatisch (DE+EN)", lang_de:"Deutsch", lang_en:"English",
+    autocrop_lbl:"🤖 Auto-Zuschnitt (findet das Item-Tooltip selbst)",
+    crop_hint:"🟨 Ziehe den goldenen Rahmen genau um den <b>Item-Text</b> (der Rahmen wurde automatisch vorgeschlagen)",
+    analyze_btn:"🔍 Zugeschnittenes Item analysieren",
+    analyze_btn_auto:"🔍 Item analysieren (Auto-Zuschnitt)",
+    slot_select_lbl:"Mit welchem Slot vergleichen?", slot_choose:"– Slot wählen –",
+    slot_weapon:"Waffe", slot_offhand:"Nebenhand", slot_helm:"Helm", slot_body:"Rüstung",
+    slot_gloves:"Handschuhe", slot_boots:"Stiefel", slot_belt:"Gürtel", slot_amulet:"Amulett",
+    slot_ring_l:"Ring L", slot_ring_r:"Ring R",
+    scan_history_title:"📜 Scan-Verlauf", scan_history_clear:"🗑 Alle löschen",
+    scan_history_hint:"Deine letzten Scans – tippe einen an, um ihn erneut anzusehen.",
+    panel_character:"🎮 Charakter & Ausrüstung",
+    login_welcome:"Willkommen, Exile",
+    login_sub:"Melde dich mit deinem Path&nbsp;of&nbsp;Exile&nbsp;Account an,<br>um deine Charaktere und Ausrüstung zu laden.",
+    login_btn:"🔐 Mit GGG anmelden", demo_btn:"🎮 Demo ausprobieren (ohne Login)",
+    demo_hint:"Probier die App mit Beispiel-Charakter aus – Scanner, Build-Vergleich &amp; HUD live testen!",
+    char_section:"Charakter", char_choose:"– Charakter wählen –",
+    equip_section:"Aktuelle Ausrüstung",
+    bp_label:"🎯 Build-Fortschritt",
+    bp_hint:"Importiere einen Build, um deinen Fortschritt zu sehen",
+    bp_hint_title:"Zählt pro Slot, den dein Build fordert: ✓ = Anforderungen komplett erfüllt · ✗ = fehlt oder zu niedrig",
+    bp_missing_show:"🔍 Was fehlt mir? Liste anzeigen",
+    panel_buildplan:"🎯 Build-Planung",
+    skills_section:"Skills & Support-Gems",
+    weights_section:"Gewichtung & Build-Import",
+    rescap_title:"🛡️ Resistenzen (aus deinem Gear)",
+    rescap_note:"⚠️ Nur Werte aus deinem <b>getragenen Gear</b>. Passivbaum, Ascendancy &amp; Liga-Strafe sind <b>nicht</b> enthalten.",
+    preset_balanced:"Ausgewogen", preset_life:"Life-Build", preset_es:"ES-Build", preset_resi:"Resi-Cap zuerst",
+    active_build_remove:"✕ Aktiven Build entfernen",
+    saved_builds_lbl:"💾 Gespeicherte Builds – umschalten:",
+    import_lbl:"🧠 Build importieren:", import_file_btn:"📂 .build-Datei auswählen",
+    import_file_hint:"Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus. ⭐ am genauesten",
+    import_paste_lbl:"…oder einen Link / Code / Text einfügen:",
+    buildcode_ph:"https://pobb.in/xxxxx • https://maxroll.gg/... • PoB-Code • oder Item-Text",
+    import_btn:"📥 Build importieren & Gewichtung übernehmen",
+    panel_settings:"⚙️ Einstellungen & Handel",
+    trade_section:"🛒 Trade-Einstellungen",
+    trade_league_lbl:"Liga", league_auto:"Vom Charakter", league_current:"Aktuelle Liga", league_current_hc:"Aktuelle (HC)",
+    trade_status_lbl:"Handelsstatus", trade_status_any:"Beliebig", trade_status_buyout:"Sofort kaufbar", trade_status_online:"Online-Spieler",
+    tol_lbl:"Attribut-Toleranz",
+    tol_hint:"z.B. -15%: sucht auch Items mit etwas niedrigeren Werten",
+    bug_btn:"🐞 Fehler melden / Feedback geben",
+    bug_hint:"Etwas funktioniert nicht? Sag uns Bescheid – öffnet eine vorausgefüllte E-Mail.",
+    legal_impressum:"Impressum", legal_privacy:"Datenschutz", legal_terms:"Nutzungsbedingungen",
+    empty_slot:"leer", active_build_prefix:"🧠 Aktiver Build: ", score_prefix:"Score ",
+    auto_detected:"(auto-erkannt: {s})", not_detected:"(nicht erkannt)", loaded_from_history:"(aus Verlauf geladen)",
+    list_hide:"🔼 Liste ausblenden", list_show:"🔍 Was fehlt mir? Liste anzeigen",
+    file_reading:"Lese Datei…", file_empty:"Datei ist leer.", file_read_error:"Datei konnte nicht gelesen werden.",
+    importing:"Importiere…", import_success:"✓ Import erfolgreich", import_failed:"Import fehlgeschlagen: ",
+    updating:"Aktualisiere…",
+    skills_empty:"📚 Skills erscheinen automatisch, sobald du einen Build importierst.<br><span style=\"opacity:.7\">(Mobalytics .build-Datei, pobb.in-Link, oder Maxroll-URL)</span>",
+    cmp_empty:"✓ Slot ist leer – ausrüsten! (Score {s})",
+    cmp_better:"▲ BESSER  (+{d} Score)", cmp_worse:"▼ SCHLECHTER  ({d} Score)", cmp_equal:"= Gleichwertig",
+    tt_required:"Benötigt", tt_unnamed:"(unbenannt)", tt_corrupted:"Korrumpiert",
+    bn_iphone_hint:"Am iPhone: Teilen-Symbol → Zum Home-Bildschirm",
+    bn_analyze_failed:"Analyse fehlgeschlagen: ", bn_analyze_done:"Analyse fertig – Score ",
+    bn_gear_of:"Ausrüstung von ", bn_gear_error:"Ausrüstung-Fehler: ",
+    bn_img_failed:"Bild konnte nicht geladen werden", bn_draw_frame:"Bitte Rahmen ziehen",
+    bn_no_build_input:"Bitte erst Link, Code oder .build-Datei wählen", bn_no_photo:"Bitte erst ein Foto wählen",
+    bn_build_cleared:"Build entfernt", bn_build_deleted:"Build gelöscht: ", bn_build_switched:"Build gewechselt: ",
+    bn_weights_applied:"Build-Gewichtung übernommen", bn_chars_error:"Charaktere-Fehler: ",
+    bn_ctrl_v:"Drück stattdessen Strg + V", bn_scan_first:"Erst ein Item scannen",
+    bn_error:"Fehler: ", bn_no_clipboard:"Kein Bild in Zwischenablage", bn_no_chars:"Keine Charaktere gefunden",
+    bn_login_error:"Login-Fehler: ", bn_ocr_error:"OCR-Fehler: ", bn_price_error:"Preis-Check-Fehler: ",
+    bn_history_cleared:"Scan-Verlauf gelöscht", bn_server_down:"Server nicht erreichbar. Läuft app.py?",
+    bn_status_error:"Status-Fehler: ", bn_trade_error:"Trade-Fehler: ", bn_trade_open:"Trade-Suche geöffnet",
+    bn_demo_active:"🎮 Demo-Modus aktiv", bn_price_open:"💰 Preis-Check geöffnet",
+    bn_paste_done:"📋 Screenshot eingefügt!", bn_history_loaded:"📜 Scan aus Verlauf geladen",
+    cf_build_delete:"Gespeicherten Build „{n}“ löschen?", cf_history_delete:"Wirklich den ganzen Scan-Verlauf löschen?",
+  },
+  en: {
+    h_character:"Character", h_equipment:"Current Equipment",
+    h_skills:"Skills & Support Gems", h_weights:"Weighting · what matters to you?",
+    h_trade:"🛒 Trade Settings", h_scan:"Scan item",
+    logout:"Logout",
+    ts_tooltip:"Scores your gear with effective values: (base + flat mods) × (1 + increased%). E.g. 85% increased Armour on a 369 base counts like +314 Armour. Unique effects, skill synergies and build mechanics are not included.",
+    ts_count0:"0 slots scored", ts_count:"{n} slots scored",
+    panel_scanner:"📷 Item Scanner", scan_title:"Scan item",
+    scan_sub:"Take a photo of the item tooltip – Exile Eye reads the stats and compares. No login needed.",
+    photo_btn:"📷 Take photo / choose image",
+    paste_btn:"📋 Paste screenshot from clipboard",
+    paste_hint:"💡 Tip: Take a screenshot and just press <b>Ctrl + V</b> – no file searching needed.",
+    game_lang_lbl:"Game language:", lang_auto:"Automatic (DE+EN)", lang_de:"German", lang_en:"English",
+    autocrop_lbl:"🤖 Auto-crop (finds the item tooltip itself)",
+    crop_hint:"🟨 Drag the golden frame exactly around the <b>item text</b> (frame was auto-suggested)",
+    analyze_btn:"🔍 Analyze cropped item",
+    analyze_btn_auto:"🔍 Analyze item (auto-crop)",
+    slot_select_lbl:"Compare with which slot?", slot_choose:"– Choose slot –",
+    slot_weapon:"Weapon", slot_offhand:"Offhand", slot_helm:"Helm", slot_body:"Armour",
+    slot_gloves:"Gloves", slot_boots:"Boots", slot_belt:"Belt", slot_amulet:"Amulet",
+    slot_ring_l:"Ring L", slot_ring_r:"Ring R",
+    scan_history_title:"📜 Scan history", scan_history_clear:"🗑 Delete all",
+    scan_history_hint:"Your recent scans – tap one to view it again.",
+    panel_character:"🎮 Character & Equipment",
+    login_welcome:"Welcome, Exile",
+    login_sub:"Sign in with your Path&nbsp;of&nbsp;Exile&nbsp;account<br>to load your characters and equipment.",
+    login_btn:"🔐 Sign in with GGG", demo_btn:"🎮 Try the demo (no login)",
+    demo_hint:"Try the app with a sample character – scanner, build compare &amp; HUD, all live!",
+    char_section:"Character", char_choose:"– Choose character –",
+    equip_section:"Current equipment",
+    bp_label:"🎯 Build progress",
+    bp_hint:"Import a build to see your progress",
+    bp_hint_title:"Counts per slot your build requires: ✓ = fully met · ✗ = missing or too low",
+    bp_missing_show:"🔍 What am I missing? Show list",
+    panel_buildplan:"🎯 Build Planning",
+    skills_section:"Skills & Support Gems",
+    weights_section:"Weighting & Build Import",
+    rescap_title:"🛡️ Resistances (from your gear)",
+    rescap_note:"⚠️ Values from your <b>equipped gear</b> only. Passive tree, ascendancy &amp; league penalty are <b>not</b> included.",
+    preset_balanced:"Balanced", preset_life:"Life Build", preset_es:"ES Build", preset_resi:"Resi-Cap first",
+    active_build_remove:"✕ Remove active build",
+    saved_builds_lbl:"💾 Saved builds – switch:",
+    import_lbl:"🧠 Import build:", import_file_btn:"📂 Choose .build file",
+    import_file_hint:"Download the \u201eBuild Planner Export\u201c <b>.build</b> file from <b>Mobalytics</b> and choose it here. ⭐ most accurate",
+    import_paste_lbl:"…or paste a link / code / text:",
+    buildcode_ph:"https://pobb.in/xxxxx • https://maxroll.gg/... • PoB code • or item text",
+    import_btn:"📥 Import build & apply weighting",
+    panel_settings:"⚙️ Settings & Trade",
+    trade_section:"🛒 Trade Settings",
+    trade_league_lbl:"League", league_auto:"From character", league_current:"Current league", league_current_hc:"Current (HC)",
+    trade_status_lbl:"Trade status", trade_status_any:"Any", trade_status_buyout:"Buyable now", trade_status_online:"Online players",
+    tol_lbl:"Attribute tolerance",
+    tol_hint:"e.g. -15%: also matches items with slightly lower values",
+    bug_btn:"🐞 Report bug / Send feedback",
+    bug_hint:"Something not working? Let us know – opens a pre-filled email.",
+    legal_impressum:"Imprint", legal_privacy:"Privacy Policy", legal_terms:"Terms of Use",
+    empty_slot:"empty", active_build_prefix:"🧠 Active build: ", score_prefix:"Score ",
+    auto_detected:"(auto-detected: {s})", not_detected:"(not detected)", loaded_from_history:"(loaded from history)",
+    list_hide:"🔼 Hide list", list_show:"🔍 What am I missing? Show list",
+    file_reading:"Reading file…", file_empty:"File is empty.", file_read_error:"File could not be read.",
+    importing:"Importing…", import_success:"✓ Import successful", import_failed:"Import failed: ",
+    updating:"Updating…",
+    skills_empty:"📚 Skills appear automatically once you import a build.<br><span style=\"opacity:.7\">(Mobalytics .build file, pobb.in link, or Maxroll URL)</span>",
+    cmp_empty:"✓ Slot is empty – equip it! (Score {s})",
+    cmp_better:"▲ BETTER  (+{d} Score)", cmp_worse:"▼ WORSE  ({d} Score)", cmp_equal:"= Equal",
+    tt_required:"Required", tt_unnamed:"(unnamed)", tt_corrupted:"Corrupted",
+    bn_iphone_hint:"On iPhone: Share icon → Add to Home Screen",
+    bn_analyze_failed:"Analysis failed: ", bn_analyze_done:"Analysis done – Score ",
+    bn_gear_of:"Gear of ", bn_gear_error:"Gear error: ",
+    bn_img_failed:"Image could not be loaded", bn_draw_frame:"Please draw a frame",
+    bn_no_build_input:"Please choose a link, code or .build file first", bn_no_photo:"Please choose a photo first",
+    bn_build_cleared:"Build removed", bn_build_deleted:"Build deleted: ", bn_build_switched:"Build switched: ",
+    bn_weights_applied:"Build weighting applied", bn_chars_error:"Characters error: ",
+    bn_ctrl_v:"Press Ctrl + V instead", bn_scan_first:"Scan an item first",
+    bn_error:"Error: ", bn_no_clipboard:"No image in clipboard", bn_no_chars:"No characters found",
+    bn_login_error:"Login error: ", bn_ocr_error:"OCR error: ", bn_price_error:"Price check error: ",
+    bn_history_cleared:"Scan history cleared", bn_server_down:"Server not reachable. Is app.py running?",
+    bn_status_error:"Status error: ", bn_trade_error:"Trade error: ", bn_trade_open:"Trade search opened",
+    bn_demo_active:"🎮 Demo mode active", bn_price_open:"💰 Price check opened",
+    bn_paste_done:"📋 Screenshot pasted!", bn_history_loaded:"📜 Scan loaded from history",
+    cf_build_delete:"Delete saved build \"{n}\"?", cf_history_delete:"Really delete the entire scan history?",
+  },
 };
-let currentLang = localStorage.getItem("exileEye_lang") || "de";
+// Sprache: gespeichert > Browser-Sprache > EN
+let currentLang = localStorage.getItem("exileEye_lang") ||
+  ((navigator.language || "en").toLowerCase().startsWith("de") ? "de" : "en");
+
+function t(key, vars) {
+  let s = (I18N[currentLang] && I18N[currentLang][key] !== undefined)
+    ? I18N[currentLang][key]
+    : (I18N.de[key] !== undefined ? I18N.de[key] : key);
+  if (vars) for (const [k, v] of Object.entries(vars)) s = s.split("{" + k + "}").join(v);
+  return s;
+}
+
 function applyLang() {
-  const dict = I18N[currentLang] || I18N.de;
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
-    if (dict[key]) el.innerHTML = dict[key];
+    if (I18N.de[key] !== undefined) el.textContent = t(key);
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach(el => {
+    el.innerHTML = t(el.getAttribute("data-i18n-html"));
+  });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => {
+    el.placeholder = t(el.getAttribute("data-i18n-ph"));
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => {
+    el.title = t(el.getAttribute("data-i18n-title"));
   });
   const tog = document.getElementById("langToggle");
   if (tog) tog.textContent = currentLang === "de" ? "🌍 DE" : "🌍 EN";
 }
+
 function toggleLang() {
   currentLang = currentLang === "de" ? "en" : "de";
   localStorage.setItem("exileEye_lang", currentLang);
   applyLang();
+  // dynamische, sprachabhängige Teile neu rendern
+  try {
+    if (typeof buildSliders === "function" && document.getElementById("weightSliders")) buildSliders();
+    if (typeof updateActiveBuildBar === "function") updateActiveBuildBar();
+    if (typeof renderResCap === "function") renderResCap();
+    if (typeof updateBuildStatus === "function") updateBuildStatus();
+    if (typeof renderSkills === "function" && typeof allSkills !== "undefined") renderSkills(allSkills);
+  } catch (e) { /* ignorieren */ }
 }
+applyLang();
 
 const BUG_REPORT_EMAIL = "andreas.bodza@gmail.com";
 function reportBug() {
@@ -1164,7 +1332,7 @@ function showBanner(msg, type = "error") {
 (function checkUrlError() {
   const p = new URLSearchParams(location.search);
   if (p.has("error")) {
-    showBanner("Login-Fehler: " + p.get("error") + (p.get("detail") ? " (" + p.get("detail") + ")" : ""));
+    showBanner(t("bn_login_error") + p.get("error") + (p.get("detail") ? " (" + p.get("detail") + ")" : ""));
     history.replaceState({}, "", location.pathname);
   }
 })();
@@ -1183,9 +1351,9 @@ async function init() {
       updateActiveBuildBar();
       loadCharacters();
     } else {
-      if (data.error) showBanner("Status-Fehler: " + data.error);
+      if (data.error) showBanner(t("bn_status_error") + data.error);
     }
-  } catch (e) { showBanner("Server nicht erreichbar. Läuft app.py?"); }
+  } catch (e) { showBanner(t("bn_server_down")); }
 }
 
 const DEMO_CHARACTERS = {
@@ -1309,7 +1477,7 @@ function loadDemo() {
   const firstKey = Object.keys(DEMO_CHARACTERS)[0];
   loadDemoCharacter(firstKey);
   setPanelStatus("character", "🎮 Demo-Modus");
-  showBanner("🎮 Demo-Modus aktiv", "ok");
+  showBanner(t("bn_demo_active"), "ok");
 }
 function loadDemoCharacter(key) {
   const c = DEMO_CHARACTERS[key];
@@ -1322,9 +1490,9 @@ async function loadCharacters() {
   try {
     const res = await fetch("/api/characters");
     const data = await res.json();
-    if (data.error) { showBanner("Charaktere-Fehler: " + data.error); return; }
+    if (data.error) { showBanner(t("bn_chars_error") + data.error); return; }
     const chars = data.characters || [];
-    if (chars.length === 0) { showBanner("Keine Charaktere gefunden"); return; }
+    if (chars.length === 0) { showBanner(t("bn_no_chars")); return; }
     sel.innerHTML = '<option value="">– Charakter wählen –</option>';
     chars.forEach(c => {
       const opt = document.createElement("option");
@@ -1334,7 +1502,7 @@ async function loadCharacters() {
       sel.appendChild(opt);
     });
     showBanner(chars.length + " Charakter(e) geladen", "ok");
-  } catch (e) { showBanner("Fehler: " + e.message); }
+  } catch (e) { showBanner(t("bn_error") + e.message); }
 }
 
 document.getElementById("charSelect").addEventListener("change", async (e) => {
@@ -1354,10 +1522,10 @@ async function loadGear(name) {
   try {
     const res = await fetch("/api/character-gear?name=" + encodeURIComponent(name));
     const data = await res.json();
-    if (data.error) { showBanner("Ausrüstung-Fehler: " + data.error); return; }
+    if (data.error) { showBanner(t("bn_gear_error") + data.error); return; }
     renderGear(data.items || []);
     setPanelStatus("character", "✓ " + name);
-    showBanner("Ausrüstung von " + name + " geladen", "ok");
+    showBanner(t("bn_gear_of") + name + " geladen", "ok");
   } catch (e) { showBanner("Fehler: " + e.message); }
 }
 
@@ -1368,7 +1536,7 @@ function renderGear(items) {
   document.querySelectorAll(".slot").forEach(slot => {
     slot.classList.remove("filled", "better", "worse", "rar-0","rar-1","rar-2","rar-3");
     const n = slot.querySelector(".item-name");
-    n.textContent = "leer";
+    n.textContent = t("empty_slot");
     n.className = "item-name empty";
     slot.querySelectorAll(".item-score, .item-meta, .item-img, .tap-hint").forEach(el => el.remove());
     const sname = slot.dataset.slot;
@@ -1401,12 +1569,12 @@ function renderGear(items) {
       nameEl.after(meta);
     }
     slotEl.classList.add("rar-" + (it.rarity ?? 0));
-    const sc = scoreFromStats(it.parsed_stats || {});
+    const sc = scoreFromStats(it.effective_stats || it.parsed_stats || {});
     it._score = sc;
     if (sc > 0) {
       const s = document.createElement("span");
       s.className = "item-score";
-      s.textContent = "Score " + sc;
+      s.textContent = t("score_prefix") + sc;
       slotEl.appendChild(s);
       _totalScore += sc; _countedScore++;
     }
@@ -1519,10 +1687,10 @@ function toggleMissingList() {
   if (open) {
     renderMissingList();
     list.style.display = "block";
-    toggle.textContent = "🔼 Liste ausblenden";
+    toggle.textContent = t("list_hide");
   } else {
     list.style.display = "none";
-    toggle.textContent = "🔍 Was fehlt mir? Liste anzeigen";
+    toggle.textContent = t("list_show");
   }
 }
 
@@ -1582,7 +1750,7 @@ function showItem(slot) {
   const r = it.rarity ?? 0;
   let html = `<div class="tt-header r${r}">
     <button class="tt-close" onclick="closeItem()">×</button>
-    <div class="tt-name r${r}">${esc(it.name || it.typeLine || "(unbenannt)")}</div>`;
+    <div class="tt-name r${r}">${esc(it.name || it.typeLine || t("tt_unnamed"))}</div>`;
   if (it.name && it.typeLine && it.name !== it.typeLine) html += `<div class="tt-base">${esc(it.typeLine)}</div>`;
   else if (it.baseType && it.baseType !== it.typeLine) html += `<div class="tt-base">${esc(it.baseType)}</div>`;
   if (it.icon) html += `<img class="tt-img" src="${esc(it.icon)}" onerror="this.remove()">`;
@@ -1597,7 +1765,7 @@ function showItem(slot) {
   if (it.requirements && it.requirements.length) {
     html += `<div class="tt-section">`;
     const reqStr = it.requirements.map(r => `${esc(r.name)} ${esc(r.value)}`).join(", ");
-    html += `<div class="tt-prop"><span class="pn">Benötigt</span><span class="pv">${reqStr}</span></div>`;
+    html += `<div class="tt-prop"><span class="pn">${t("tt_required")}</span><span class="pv">${reqStr}</span></div>`;
     html += `</div>`;
   }
   const m = it.mods || {};
@@ -1614,7 +1782,7 @@ function showItem(slot) {
     exp.forEach(([cls, mod]) => html += `<div class="tt-mod ${cls}">${esc(mod)}</div>`);
     html += `</div>`;
   }
-  if (it.corrupted) html += `<div class="tt-corrupt">Korrumpiert</div>`;
+  if (it.corrupted) html += `<div class="tt-corrupt">${t("tt_corrupted")}</div>`;
   if (it._score > 0) html += `<div class="tt-score">Exile-Eye Score: ${it._score}</div>`;
   html += buildCompareBlock(slot, it);
   const topStats = topWeightedStats(3);
@@ -1670,8 +1838,10 @@ function updateActiveBuildBar() {
   const nameEl = document.getElementById("activeBuildName");
   if (!bar) return;
   const name = localStorage.getItem("exileEye_buildName");
-  const hasBuild = name && (Object.keys(buildSlotStats).length > 0 || Object.keys(buildSlotUniques).length > 0);
-  if (hasBuild) { nameEl.textContent = "🧠 Aktiver Build: " + name; bar.style.display = "block"; setPanelStatus("buildplan", "✓ " + name); }
+  // Build = aktiv, sobald ein Name gesetzt ist – auch reine Gewichts-Builds
+  // ohne Slot-Daten muessen sichtbar sein (sonst kann man sie nicht abwählen).
+  const hasBuild = !!name;
+  if (hasBuild) { nameEl.textContent = t("active_build_prefix") + name; bar.style.display = "block"; setPanelStatus("buildplan", "✓ " + name); }
   else { bar.style.display = "none"; }
   renderSavedBuildsBar();
 }
@@ -1708,7 +1878,7 @@ function switchBuild(name) {
   const b = getSavedBuilds().find(x => x.name === name);
   if (!b) return;
   applyBuildPackage(b);
-  showBanner("Build gewechselt: " + name, "ok");
+  showBanner(t("bn_build_switched") + name, "ok");
 }
 function applyBuildPackage(b) {
   currentWeights = { ...currentWeights, ...(b.weights || {}) };
@@ -1724,19 +1894,20 @@ function applyBuildPackage(b) {
   renderConsumables(b.flasks || [], b.charms || []);
   updateActiveBuildBar();
   updateBuildStatus();
+  scheduleScoreRefresh();   // Stat-Score direkt mit den neuen Gewichten neu rechnen
 }
 function deleteSavedBuild() {
   const sel = document.getElementById("savedBuildsSelect");
   const name = sel.value;
   if (!name) return;
-  if (!confirm(`Gespeicherten Build „${name}“ löschen?`)) return;
+  if (!confirm(t("cf_build_delete", { n: name }))) return;
   let builds = getSavedBuilds().filter(b => b.name !== name);
   setSavedBuilds(builds);
   if (localStorage.getItem("exileEye_buildName") === name) {
     if (builds.length) applyBuildPackage(builds[0]);
     else clearBuild();
   } else renderSavedBuildsBar();
-  showBanner("Build gelöscht: " + name, "ok");
+  showBanner(t("bn_build_deleted") + name, "ok");
 }
 function clearBuild() {
   buildSlotStats = {};
@@ -1752,7 +1923,7 @@ function clearBuild() {
   document.querySelectorAll(".slot").forEach(s => s.classList.remove("better","worse"));
   updateActiveBuildBar();
   updateBuildStatus();
-  showBanner("Build entfernt", "ok");
+  showBanner(t("bn_build_cleared"), "ok");
 }
 
 async function openTrade(slot) {
@@ -1775,9 +1946,9 @@ async function openTrade(slot) {
     if (data.url) {
       window.open(data.url, "_blank");
       setPanelStatus("settings", "🔗 Trade geöffnet");
-      showBanner("Trade-Suche geöffnet", "ok");
+      showBanner(t("bn_trade_open"), "ok");
     }
-  } catch (e) { showBanner("Trade-Fehler: " + e.message); }
+  } catch (e) { showBanner(t("bn_trade_error") + e.message); }
 }
 
 function topWeightedKeys(n) {
@@ -1805,7 +1976,7 @@ function refreshItemScores() {
   let total = 0, counted = 0;
   for (const slotKey in equippedItems) {
     const it = equippedItems[slotKey];
-    const sc = scoreFromStats(it.parsed_stats || {});
+    const sc = scoreFromStats(it.effective_stats || it.parsed_stats || {});
     it._score = sc;
     const slotEl = document.querySelector(`.slot[data-slot="${slotKey}"]`);
     if (!slotEl) continue;
@@ -1816,7 +1987,7 @@ function refreshItemScores() {
         badge.className = "item-score";
         slotEl.appendChild(badge);
       }
-      badge.textContent = "Score " + sc;
+      badge.textContent = t("score_prefix") + sc;
       total += sc; counted++;
     } else if (badge) {
       badge.remove();
@@ -1833,7 +2004,7 @@ function updateTotalScore(total, counted) {
   const valueEl = document.getElementById("tsValue");
   const oldTotal = parseInt(valueEl.textContent) || 0;
   valueEl.textContent = total;
-  document.getElementById("tsCount").textContent = counted + " Slots gewertet";
+  document.getElementById("tsCount").textContent = t("ts_count", { n: counted });
   box.style.display = "flex";
   
   // Reflow erzwingen und Klassen resetten
@@ -1850,13 +2021,13 @@ function updateTotalScore(total, counted) {
   }
 }
 
-const STAT_KEYS = ["life","fire_res","cold_res","lightning_res","chaos_res","energy_shield","crit_chance","spell_damage","movement_speed","armour"];
+const STAT_KEYS = ["life","fire_res","cold_res","lightning_res","chaos_res","energy_shield","crit_chance","spell_damage","fire_damage","cold_damage","lightning_damage","chaos_damage","movement_speed","armour"];
 const WEIGHT_STORAGE = "exileEye_weights";
 const PRESETS = {
-  balanced: { life:1.0, fire_res:0.8, cold_res:0.8, lightning_res:0.8, chaos_res:1.0, energy_shield:0.6, crit_chance:0.5, spell_damage:0.5, movement_speed:0.4, armour:0.4 },
-  life:     { life:1.0, fire_res:0.6, cold_res:0.6, lightning_res:0.6, chaos_res:0.7, energy_shield:0.1, crit_chance:0.3, spell_damage:0.3, movement_speed:0.4, armour:0.5 },
-  es:       { life:0.2, fire_res:0.7, cold_res:0.7, lightning_res:0.7, chaos_res:0.8, energy_shield:1.0, crit_chance:0.4, spell_damage:0.5, movement_speed:0.4, armour:0.2 },
-  resi:     { life:0.7, fire_res:1.0, cold_res:1.0, lightning_res:1.0, chaos_res:1.0, energy_shield:0.4, crit_chance:0.2, spell_damage:0.3, movement_speed:0.3, armour:0.5 },
+  balanced: { life:1.0, fire_res:0.8, cold_res:0.8, lightning_res:0.8, chaos_res:1.0, energy_shield:0.6, crit_chance:0.5, spell_damage:0.5, fire_damage:0.3, cold_damage:0.3, lightning_damage:0.3, chaos_damage:0.3, movement_speed:0.4, armour:0.4 },
+  life:     { life:1.0, fire_res:0.6, cold_res:0.6, lightning_res:0.6, chaos_res:0.7, energy_shield:0.1, crit_chance:0.3, spell_damage:0.3, fire_damage:0.2, cold_damage:0.2, lightning_damage:0.2, chaos_damage:0.2, movement_speed:0.4, armour:0.5 },
+  es:       { life:0.2, fire_res:0.7, cold_res:0.7, lightning_res:0.7, chaos_res:0.8, energy_shield:1.0, crit_chance:0.4, spell_damage:0.5, fire_damage:0.3, cold_damage:0.3, lightning_damage:0.3, chaos_damage:0.3, movement_speed:0.4, armour:0.2 },
+  resi:     { life:0.7, fire_res:1.0, cold_res:1.0, lightning_res:1.0, chaos_res:1.0, energy_shield:0.4, crit_chance:0.2, spell_damage:0.3, fire_damage:0.2, cold_damage:0.2, lightning_damage:0.2, chaos_damage:0.2, movement_speed:0.3, armour:0.5 },
 };
 let currentWeights = {};
 
@@ -1910,7 +2081,7 @@ document.getElementById("buildFileInput").addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (!file) return;
   const out = document.getElementById("buildResult");
-  out.style.display = "block"; out.className = ""; out.textContent = "Lese Datei…";
+  out.style.display = "block"; out.className = ""; out.textContent = t("file_reading");
   if (file.type && file.type.startsWith("image/")) {
     out.className = "err"; out.innerHTML = "Das ist ein Bild. Bitte wähle die .build-Datei."; e.target.value = ""; return;
   }
@@ -1918,11 +2089,11 @@ document.getElementById("buildFileInput").addEventListener("change", (e) => {
   reader.onload = () => {
     let text = String(reader.result || "").trim();
     if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-    if (!text) { out.className = "err"; out.textContent = "Datei ist leer."; return; }
+    if (!text) { out.className = "err"; out.textContent = t("file_empty"); return; }
     document.getElementById("buildCode").value = text;
     importBuild(text);
   };
-  reader.onerror = () => { out.className = "err"; out.textContent = "Datei konnte nicht gelesen werden."; };
+  reader.onerror = () => { out.className = "err"; out.textContent = t("file_read_error"); };
   reader.readAsText(file);
   e.target.value = "";
 });
@@ -1930,17 +2101,22 @@ document.getElementById("buildFileInput").addEventListener("change", (e) => {
 async function importBuild(codeOverride) {
   const code = (typeof codeOverride === "string" ? codeOverride : document.getElementById("buildCode").value).trim();
   const out = document.getElementById("buildResult");
-  if (!code) { showBanner("Bitte erst Link, Code oder .build-Datei wählen"); return; }
-  if (code.includes("mobalytics.gg")) {
+  if (!code) { showBanner(t("bn_no_build_input")); return; }
+  // NUR echte Mobalytics-URLs blocken (Seite ist Cloudflare-geblockt).
+  // .build-JSON-Dateien enthalten "link":"https://mobalytics.gg/..." als
+  // Metadaten -> die DÜRFEN rein!
+  const lc = code.trimStart().toLowerCase();
+  const isUrl = lc.startsWith("http:") || lc.startsWith("https:");
+  if (isUrl && lc.includes("mobalytics.gg")) {
     out.style.display = "block"; out.className = "err";
-    out.innerHTML = "Mobalytics blockiert direkten Zugriff (Cloudflare). Kopiere stattdessen den Gear-Text.";
+    out.innerHTML = "Mobalytics blockiert die Build-SEITE (Cloudflare). Lade stattdessen die .build-Datei (Build Planner Export) oder kopiere den Gear-Text.";
     return;
   }
-  out.style.display = "block"; out.className = ""; out.textContent = "Importiere…";
+  out.style.display = "block"; out.className = ""; out.textContent = t("importing");
   try {
     const res = await fetch("/api/import-build", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) });
     const data = await res.json();
-    if (data.error) { out.className = "err"; out.textContent = "Fehler: " + (data.detail || data.error); return; }
+    if (data.error) { out.className = "err"; out.textContent = t("bn_error") + (data.detail || data.error); return; }
     currentWeights = { ...currentWeights, ...data.weights };
     buildSliders();
     saveWeights();
@@ -1957,14 +2133,15 @@ async function importBuild(codeOverride) {
     renderSkills(data.skills || []);
     renderConsumables(data.flasks || [], data.charms || []);
     updateBuildStatus();
+    scheduleScoreRefresh();   // Stat-Score direkt mit den neuen Gewichten neu rechnen
     const infoStr = [bInfo.class, bInfo.ascendancy, bInfo.level ? "Lvl " + bInfo.level : ""].filter(Boolean).join(" · ");
     const found = Object.entries(data.stat_counts || {}).filter(([k,v]) => v > 0).map(([k,v]) => labelFor(k)).join(", ");
     out.className = "ok";
-    out.innerHTML = `✓ Import erfolgreich` + (bInfo.name ? `<br>Build: ${esc(bInfo.name)}` : "")
+    out.innerHTML = t("import_success") + (bInfo.name ? `<br>Build: ${esc(bInfo.name)}` : "")
       + (infoStr ? `<br>${esc(infoStr)}` : "") + (found ? `<br>Stats: ${esc(found)}` : "")
       + `<br><b>Gewichtung aktualisiert!</b>`;
-    showBanner("Build-Gewichtung übernommen", "ok");
-  } catch (e) { out.className = "err"; out.textContent = "Import fehlgeschlagen: " + e.message; }
+    showBanner(t("bn_weights_applied"), "ok");
+  } catch (e) { out.className = "err"; out.textContent = t("import_failed") + e.message; }
 }
 
 let cropImg = null, cropRect = null;
@@ -1972,7 +2149,7 @@ function loadImageFromFile(file) {
   if (!file) return;
   const img = new Image();
   img.onload = () => { cropImg = img; setupCropper(img); document.querySelector(".scanner-hero")?.scrollIntoView({ behavior: "smooth", block: "start" }); };
-  img.onerror = () => showBanner("Bild konnte nicht geladen werden");
+  img.onerror = () => showBanner(t("bn_img_failed"));
   img.src = URL.createObjectURL(file);
   document.getElementById("scanResult").style.display = "none";
   document.getElementById("previewImg").style.display = "none";
@@ -1980,14 +2157,14 @@ function loadImageFromFile(file) {
 document.getElementById("fileInput").addEventListener("change", (e) => { loadImageFromFile(e.target.files[0]); });
 
 async function pasteFromClipboard() {
-  if (!navigator.clipboard || !navigator.clipboard.read) { showBanner("Drück stattdessen Strg + V", "ok"); return; }
+  if (!navigator.clipboard || !navigator.clipboard.read) { showBanner(t("bn_ctrl_v"), "ok"); return; }
   try {
     const items = await navigator.clipboard.read();
     for (const it of items) {
       const imgType = it.types.find(t => t.startsWith("image/"));
-      if (imgType) { const blob = await it.getType(imgType); loadImageFromFile(blob); showBanner("📋 Screenshot eingefügt!", "ok"); return; }
+      if (imgType) { const blob = await it.getType(imgType); loadImageFromFile(blob); showBanner(t("bn_paste_done"), "ok"); return; }
     }
-    showBanner("Kein Bild in Zwischenablage");
+    showBanner(t("bn_no_clipboard"));
   } catch (err) { showBanner("Drück stattdessen Strg + V", "ok"); }
 }
 
@@ -2019,13 +2196,13 @@ function setupCropper(img) {
     document.getElementById("cropHint").style.display = "none";
     const prev = document.getElementById("previewImg");
     prev.src = img.src; prev.style.display = "block";
-    btn.textContent = "🔍 Item analysieren (Auto-Zuschnitt)";
+    btn.textContent = t("analyze_btn_auto");
     return;
   }
   document.getElementById("previewImg").style.display = "none";
   area.style.display = "block";
   document.getElementById("cropHint").style.display = "block";
-  btn.textContent = "🔍 Zugeschnittenes Item analysieren";
+  btn.textContent = t("analyze_btn");
   const avail = Math.min(600, area.parentElement.clientWidth - 36 || 360);
   const scale = Math.min(1, avail / img.width);
   canvas.width = Math.round(img.width * scale);
@@ -2114,7 +2291,7 @@ function drawCropBox() {
 })();
 
 async function analyzeImage() {
-  if (!cropImg) { showBanner("Bitte erst ein Foto wählen"); return; }
+  if (!cropImg) { showBanner(t("bn_no_photo")); return; }
   const btn = document.getElementById("analyzeBtn");
   const result = document.getElementById("scanResult");
   btn.disabled = true; btn.innerHTML = '<span class="loader"></span> Analysiere…';
@@ -2127,7 +2304,7 @@ async function analyzeImage() {
     blob = await new Promise(res => full.toBlob(res, "image/png"));
     autocropFlag = "1";
   } else {
-    if (!cropRect) { showBanner("Bitte Rahmen ziehen"); btn.disabled=false; return; }
+    if (!cropRect) { showBanner(t("bn_draw_frame")); btn.disabled=false; return; }
     const canvas = document.getElementById("cropCanvas");
     const sx = cropImg.width / canvas.width, sy = cropImg.height / canvas.height;
     const out = document.createElement("canvas");
@@ -2144,7 +2321,7 @@ async function analyzeImage() {
   try {
     const res = await fetch("/api/analyze", { method: "POST", body: fd });
     const data = await res.json();
-    if (data.error) { showBanner("OCR-Fehler: " + data.error); result.style.display = "none"; return; }
+    if (data.error) { showBanner(t("bn_ocr_error") + data.error); result.style.display = "none"; return; }
     lastScan = data; lastScan.stats = { ...(data.stats || {}) };
     renderScanResult();
     const box = document.getElementById("scanSlotBox");
@@ -2153,21 +2330,21 @@ async function analyzeImage() {
     box.style.display = "block";
     if (data.guessed_slot) {
       sel.value = data.guessed_slot;
-      hint.textContent = "(auto-erkannt: " + slotLabel(data.guessed_slot) + ")";
+      hint.textContent = t("auto_detected", { s: slotLabel(data.guessed_slot) });
       hint.style.color = "var(--green)";
       runCompare();
     } else {
-      sel.value = ""; hint.textContent = "(nicht erkannt)"; hint.style.color = "var(--text-dim)";
+      sel.value = ""; hint.textContent = t("not_detected"); hint.style.color = "var(--text-dim)";
       document.getElementById("comparePanel").style.display = "none";
     }
     saveScanToHistory();
     setPanelStatus("scanner", "✓ " + (data.guessed_slot ? slotLabel(data.guessed_slot) : "Analyse"));
-    showBanner("Analyse fertig – Score " + data.score, "ok");
-  } catch (e) { showBanner("Analyse fehlgeschlagen: " + e.message); }
+    showBanner(t("bn_analyze_done") + data.score, "ok");
+  } catch (e) { showBanner(t("bn_analyze_failed") + e.message); }
   finally { btn.disabled = false; btn.innerHTML = "🔍 Analysieren"; }
 }
 
-const SCAN_STAT_KEYS = ["life","mana","energy_shield","spirit","fire_res","cold_res","lightning_res","chaos_res","armour","movement_speed","spell_damage","spell_skills","crit_chance","crit_dmg_bonus","eva_es"];
+const SCAN_STAT_KEYS = ["life","mana","energy_shield","spirit","fire_res","cold_res","lightning_res","chaos_res","armour","movement_speed","spell_damage","fire_damage","cold_damage","lightning_damage","chaos_damage","spell_skills","crit_chance","crit_dmg_bonus","eva_es"];
 
 function renderScanResult() {
   const result = document.getElementById("scanResult");
@@ -2286,10 +2463,10 @@ function loadScanFromHistory(id) {
   const sel = document.getElementById("scanSlotSelect");
   sel.value = e.slot || "";
   const hint = document.getElementById("slotAutoHint");
-  hint.textContent = "(aus Verlauf geladen)"; hint.style.color = "var(--gold-soft)";
+  hint.textContent = t("loaded_from_history"); hint.style.color = "var(--gold-soft)";
   if (e.slot) runCompare();
   document.getElementById("scanResult").scrollIntoView({ behavior: "smooth", block: "center" });
-  showBanner("📜 Scan aus Verlauf geladen", "ok");
+  showBanner(t("bn_history_loaded"), "ok");
 }
 function deleteScanFromHistory(id) {
   scanHistory = scanHistory.filter(x => x.id !== id);
@@ -2298,9 +2475,9 @@ function deleteScanFromHistory(id) {
 }
 function clearScanHistory() {
   if (!scanHistory.length) return;
-  if (!confirm("Wirklich den ganzen Scan-Verlauf löschen?")) return;
+  if (!confirm(t("cf_history_delete"))) return;
   scanHistory = []; currentHistoryId = null; persistScanHistory();
-  showBanner("Scan-Verlauf gelöscht", "ok");
+  showBanner(t("bn_history_cleared"), "ok");
 }
 function timeAgo(ts) {
   const s = Math.floor((Date.now() - ts) / 1000);
@@ -2323,7 +2500,7 @@ function scanStatsToTradeStats(stats) {
 }
 
 async function priceCheckScan() {
-  if (!lastScan || !lastScan.stats) { showBanner("Erst ein Item scannen"); return; }
+  if (!lastScan || !lastScan.stats) { showBanner(t("bn_scan_first")); return; }
   const slot = document.getElementById("scanSlotSelect").value || lastScan.guessed_slot || "";
   const tradeStats = scanStatsToTradeStats(lastScan.stats);
   const leagueSel = document.getElementById("tradeLeague").value;
@@ -2337,9 +2514,9 @@ async function priceCheckScan() {
     if (data.url) {
       window.open(data.url, "_blank");
       setPanelStatus("settings", "💰 Preis-Check geöffnet");
-      showBanner("💰 Preis-Check geöffnet", "ok");
+      showBanner(t("bn_price_open"), "ok");
     }
-  } catch (e) { showBanner("Preis-Check-Fehler: " + e.message); }
+  } catch (e) { showBanner(t("bn_price_error") + e.message); }
 }
 
 function runCompare() {
@@ -2374,10 +2551,10 @@ function runCompare() {
   });
   const scoreDiff = newScore - oldScore;
   let verdict, vclass;
-  if (!oldItem) { verdict = `✓ Slot ist leer – ausrüsten! (Score ${newScore})`; vclass = "better"; }
-  else if (scoreDiff > 0) { verdict = `▲ BESSER  (+${scoreDiff} Score)`; vclass = "better"; }
-  else if (scoreDiff < 0) { verdict = `▼ SCHLECHTER  (${scoreDiff} Score)`; vclass = "worse"; }
-  else { verdict = `= Gleichwertig`; vclass = "equal"; }
+  if (!oldItem) { verdict = t("cmp_empty", { s: newScore }); vclass = "better"; }
+  else if (scoreDiff > 0) { verdict = t("cmp_better", { d: scoreDiff }); vclass = "better"; }
+  else if (scoreDiff < 0) { verdict = t("cmp_worse", { d: scoreDiff }); vclass = "worse"; }
+  else { verdict = t("cmp_equal"); vclass = "equal"; }
   panel.innerHTML = `<div class="cmp-grid">
     <div class="cmp-col old">${oldHtml}</div>
     <div class="cmp-arrow">→</div>
@@ -2414,7 +2591,7 @@ function renderSkills(skills) {
   const sec = document.getElementById("skillsSection");
   const list = document.getElementById("skillsList");
   if (!skills.length) {
-    list.innerHTML = `<div style="text-align:center;padding:18px 12px;color:var(--text-dim);font-size:12px">📚 Skills erscheinen automatisch, sobald du einen Build importierst.<br><span style="opacity:.7">(Mobalytics .build-Datei, pobb.in-Link, oder Maxroll-URL)</span></div>`;
+    list.innerHTML = `<div style="text-align:center;padding:18px 12px;color:var(--text-dim);font-size:12px">${t("skills_empty")}</div>`;
     sec.style.display = "block";
     return;
   }
@@ -2498,18 +2675,35 @@ function renderConsumables(flasks, charms) {
 }
 
 function slotLabel(slot) {
-  const m = { Weapon:"Waffe", Offhand:"Nebenhand", Helm:"Helm", BodyArmour:"Rüstung",
-    Gloves:"Handschuhe", Boots:"Stiefel", Belt:"Gürtel", Amulet:"Amulett",
-    Ring:"Ring L", Ring2:"Ring R" };
+  const m = currentLang === "en"
+    ? { Weapon:"Weapon", Offhand:"Offhand", Helm:"Helm", BodyArmour:"Armour",
+      Gloves:"Gloves", Boots:"Boots", Belt:"Belt", Amulet:"Amulet",
+      Ring:"Ring L", Ring2:"Ring R" }
+    : { Weapon:"Waffe", Offhand:"Nebenhand", Helm:"Helm", BodyArmour:"Rüstung",
+      Gloves:"Handschuhe", Boots:"Stiefel", Belt:"Gürtel", Amulet:"Amulett",
+      Ring:"Ring L", Ring2:"Ring R" };
   return m[slot] || slot;
 }
 
 function labelFor(key) {
+  if (currentLang === "en") {
+    const en = { life:"Life", mana:"Mana", fire_res:"Fire Res", cold_res:"Cold Res",
+      lightning_res:"Lightning Res", chaos_res:"Chaos Res", energy_shield:"Energy Shield",
+      crit_chance:"Crit Chance", spell_damage:"Spell Dmg", fire_damage:"Fire Dmg",
+      cold_damage:"Cold Dmg", lightning_damage:"Lightning Dmg", chaos_damage:"Chaos Dmg",
+      movement_speed:"Move Speed", armour:"Armour", ele_res:"Elem Res (total)",
+      spell_skills:"+Skill Level", spirit:"Spirit", eva_es:"Eva+ES %", crit_dmg_bonus:"Crit Dmg" };
+    if (en[key]) return en[key];
+    return key;
+  }
   const map = {
     life: "Leben", mana: "Mana", fire_res: "Feuer-Res", cold_res: "Kälte-Res",
     lightning_res: "Blitz-Res", chaos_res: "Chaos-Res",
     energy_shield: "Energieschild", crit_chance: "Krit-Chance",
-    spell_damage: "Zauberschaden", movement_speed: "Lauftempo", armour: "Rüstung",
+    spell_damage: "Zauberschaden",
+    fire_damage: "Feuer-Schaden", cold_damage: "Kälte-Schaden",
+    lightning_damage: "Blitz-Schaden", chaos_damage: "Chaos-Schaden",
+    movement_speed: "Lauftempo", armour: "Rüstung",
     ele_res: "Elem-Res (gesamt)", spell_skills: "+Skill-Level", spirit: "Spirit",
     eva_es: "Eva+ES %", crit_dmg_bonus: "Krit-Schaden",
   };
@@ -2542,7 +2736,7 @@ function showUpdateBanner() {
   b.className = "ok"; b.style.display = "block"; b.style.cursor = "pointer";
   b.innerHTML = "🔄 <b>Neue Version verfügbar!</b> Hier tippen, um zu aktualisieren.";
   b.onclick = async () => {
-    b.textContent = "Aktualisiere…";
+    b.textContent = t("updating");
     const reg = await navigator.serviceWorker.getRegistration();
     if (reg && reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
     else location.reload();
@@ -2558,7 +2752,7 @@ window.addEventListener("beforeinstallprompt", (e) => {
 });
 
 function installApp() {
-  if (!deferredInstall) { showBanner("Am iPhone: Teilen-Symbol → Zum Home-Bildschirm", "ok"); return; }
+  if (!deferredInstall) { showBanner(t("bn_iphone_hint"), "ok"); return; }
   deferredInstall.prompt();
   deferredInstall.userChoice.finally(() => { deferredInstall = null; const btn = document.getElementById("installBtn"); if (btn) btn.style.display = "none"; });
 }
@@ -2568,5 +2762,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2e16412de98dbfb',t:'MTc4NzIyODgzMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2e867a6bc4ddca5',t:'MTc4NzMwMjM4MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4102d22c865882b',t:'MTc5MDQwMzc2OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
