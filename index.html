@@ -408,6 +408,7 @@
   .slot .item-name.rarity-3 { color: #d08020; }
   .slot .item-name.empty    { color: #5a513c; font-style: italic; font-weight: 400; }
   .slot .item-meta { font-size: 9px; color: var(--text-dim); word-break: break-word; overflow-wrap: break-word; }
+  .slot .item-gems { display: block; font-size: 10px; color: var(--gold-soft); margin-top: 2px; letter-spacing: 2px; }
   .slot .item-score { font-size: 10px; color: var(--green); margin-top: auto; font-weight: 600; }
   .slot.filled { border-color: var(--gold-soft); box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 4px rgba(200,160,79,.2); }
   .slot.better { border-color: var(--green); box-shadow: 0 0 10px rgba(76,175,106,.4); }
@@ -1030,7 +1031,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.10</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.11</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_impressum">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_privacy">Datenschutz</a> ·
@@ -1039,7 +1040,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.10";
+const APP_VERSION = "v1.11";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1164,6 +1165,8 @@ const I18N = {
     cmp_empty:"✓ Slot ist leer – ausrüsten! (Score {s})",
     cmp_better:"▲ BESSER  (+{d} Score)", cmp_worse:"▼ SCHLECHTER  ({d} Score)", cmp_equal:"= Gleichwertig",
     tt_required:"Benötigt", tt_unnamed:"(unbenannt)", tt_corrupted:"Korrumpiert",
+    tt_gems:"✦ Gesteckte Gems",
+    tt_trade_link:"🔍 Besseres Item auf dem Trade suchen", tt_trade_hint:"Wichtig für deinen Build:",
     bn_iphone_hint:"Am iPhone: Teilen-Symbol → Zum Home-Bildschirm",
     bn_analyze_failed:"Analyse fehlgeschlagen: ", bn_analyze_done:"Analyse fertig – Score ",
     bn_gear_of:"Ausrüstung von ", bn_gear_error:"Ausrüstung-Fehler: ",
@@ -1249,6 +1252,8 @@ const I18N = {
     cmp_empty:"✓ Slot is empty – equip it! (Score {s})",
     cmp_better:"▲ BETTER  (+{d} Score)", cmp_worse:"▼ WORSE  ({d} Score)", cmp_equal:"= Equal",
     tt_required:"Required", tt_unnamed:"(unnamed)", tt_corrupted:"Corrupted",
+    tt_gems:"✦ Socketed Gems",
+    tt_trade_link:"🔍 Find a better item on trade", tt_trade_hint:"Important for your build:",
     bn_iphone_hint:"On iPhone: Share icon → Add to Home Screen",
     bn_analyze_failed:"Analysis failed: ", bn_analyze_done:"Analysis done – Score ",
     bn_gear_of:"Gear of ", bn_gear_error:"Gear error: ",
@@ -1554,7 +1559,7 @@ function renderGear(items) {
     const n = slot.querySelector(".item-name");
     n.textContent = t("empty_slot");
     n.className = "item-name empty";
-    slot.querySelectorAll(".item-score, .item-meta, .item-img, .tap-hint").forEach(el => el.remove());
+    slot.querySelectorAll(".item-score, .item-meta, .item-img, .item-gems, .tap-hint").forEach(el => el.remove());
     const sname = slot.dataset.slot;
     slot.onclick = () => openTrade(sname);
     slot.style.cursor = "pointer";
@@ -1584,6 +1589,13 @@ function renderGear(items) {
       meta.className = "item-meta";
       meta.textContent = it.typeLine;
       nameEl.after(meta);
+    }
+    if (it.socketed_skills && it.socketed_skills.length) {
+      const gems = document.createElement("span");
+      gems.className = "item-gems";
+      gems.title = it.socketed_skills.map(g => g.name).join("\n");
+      gems.textContent = "\u2726".repeat(Math.min(it.socketed_skills.length, 4)) + (it.socketed_skills.length > 4 ? "+" : "");
+      slotEl.appendChild(gems);
     }
     slotEl.classList.add("rar-" + (it.rarity ?? 0));
     const sc = scoreFromStats(it.effective_stats || it.parsed_stats || {});
@@ -1785,6 +1797,12 @@ function showItem(slot) {
     html += `<div class="tt-prop"><span class="pn">${t("tt_required")}</span><span class="pv">${reqStr}</span></div>`;
     html += `</div>`;
   }
+  if (it.socketed_skills && it.socketed_skills.length) {
+    html += `<div class="tt-section">`;
+    html += `<div class="tt-mod" style="color:var(--gold-soft);font-size:11px;margin-bottom:3px">${t("tt_gems")}</div>`;
+    it.socketed_skills.forEach(g => { html += `<div class="tt-mod" style="color:#c9a86a">\u2726 ${esc(g.name)}</div>`; });
+    html += `</div>`;
+  }
   const m = it.mods || {};
   const modBlocks = [];
   if (m.implicit && m.implicit.length) modBlocks.push(["implicit", m.implicit]);
@@ -1803,9 +1821,9 @@ function showItem(slot) {
   if (it._score > 0) html += `<div class="tt-score">Exile-Eye Score: ${it._score}</div>`;
   html += buildCompareBlock(slot, it);
   const topStats = topWeightedStats(3);
-  html += `<a class="tt-trade" href="#" onclick="openTrade('${esc(slot)}');return false;">🔍 Besseres Item auf dem Trade suchen</a>`;
+  html += `<a class="tt-trade" href="#" onclick="openTrade('${esc(slot)}');return false;">${t("tt_trade_link")}</a>`;
   if (topStats.length) {
-    html += `<div class="tt-trade-hint">Wichtig für deinen Build: <b>${topStats.map(esc).join(", ")}</b></div>`;
+    html += `<div class="tt-trade-hint">${t("tt_trade_hint")} <b>${topStats.map(esc).join(", ")}</b></div>`;
   }
   document.getElementById("tooltipBody").innerHTML = html;
   document.getElementById("itemModal").classList.add("show");
@@ -2779,5 +2797,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a410bb96ecedf725',t:'MTc5MDQwOTYwMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a410cc915ef4d266',t:'MTc5MDQxMDI5OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

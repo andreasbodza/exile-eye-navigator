@@ -10,6 +10,10 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.11 (25.09.2026)
+- **Neu: Gesteckte Gems sichtbar!** Die GGG-API liefert pro Item `socketedItems` — wird jetzt angezeigt: im Item-Tooltip als Liste („✦ Gesteckte Gems"/„✦ Socketed Gems") und im HUD als ✦-Anzeige (Hover = Namen). Tabula-Rasa-Charaktere zeigen jetzt ihre Skills.
+- **Fix:** „Besseres Item auf dem Trade suchen" + „Wichtig für deinen Build" waren hartkodiert deutsch → jetzt übersetzt
+
 ## v1.10 (25.09.2026, Hotfix)
 - **Fix:** Nach Sprachwechsel zeigten geladene Item-Namen "leer"/"empty" statt des echten Namens — die Name-Spans behielten das `data-i18n="empty_slot"`-Attribut, und der Sprachwechsel setzte es zurück. Attribut wird jetzt beim Befüllen entfernt.
 - **Fix:** `(unbenannt)`-Fallback im HUD war hartkodiert → jetzt `t("tt_unnamed")`

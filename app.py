@@ -512,6 +512,13 @@ def api_character_gear():
         stats_flat, stats_inc = dict_parse_stats_split("\n".join(all_mods))
         effective = compute_effective_stats(stats_flat, stats_inc, base_stats)
 
+        # Gems in den Sockets (z.B. Tabula Rasa) - GGG liefert sie als Items
+        socketed_skills = []
+        for s in (it.get("socketedItems", []) or []):
+            nm = s.get("name") or s.get("typeLine") or ""
+            if nm:
+                socketed_skills.append({"name": nm, "typeLine": s.get("typeLine") or ""})
+
         # --- Anforderungen (Level, Attribute) ---
         reqs = []
         for r in (it.get("requirements", []) or []):
@@ -556,6 +563,7 @@ def api_character_gear():
             "stats_flat": stats_flat,            # additive Mod-Werte ("+45 zu maximalem ES")
             "stats_inc":  stats_inc,             # Prozent-Multiplikatoren ("40% increased ES")
             "effective_stats": effective,        # (Basis+flat)*(1+inc/100) - fuer den Score
+            "socketed_skills": socketed_skills,  # Gems in den Sockets (Tabula etc.)
         })
 
 
