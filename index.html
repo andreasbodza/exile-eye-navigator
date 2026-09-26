@@ -182,8 +182,6 @@
     box-shadow: 0 4px 12px rgba(0,0,0,.4);
   }
   #totalScore .ts-label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
-  #totalScore .ts-info { cursor: help; opacity: .7; font-size: 11px; margin-left: 5px; letter-spacing: 0; }
-  #totalScore .ts-info:hover { opacity: 1; }
   #totalScore .ts-count { font-size: 11px; color: var(--text-dim); }
   #totalScore .ts-value {
     font-size: 22px; font-weight: 700; color: var(--gold);
@@ -694,7 +692,7 @@
     </div>
   </div>
   <div style="display:flex;gap:8px;align-items:center">
-    <button id="langToggle" class="btn" style="display:none;padding:7px 11px;font-size:12px" onclick="toggleLang()">🌍 DE</button>
+    <button id="langToggle" class="btn" style="padding:7px 11px;font-size:12px" onclick="toggleLang()">🌍 DE</button>
     <button id="installBtn" class="btn" style="display:none" onclick="installApp()">📲 App installieren</button>
     <button id="logoutBtn" class="btn danger hidden" onclick="location.href='/logout'">Logout</button>
   </div>
@@ -704,7 +702,7 @@
 
 <div id="totalScore">
   <div>
-    <div class="ts-label">Stat-Score<span class="ts-info" title="Rechnet deine Ausrüstung mit effektiven Werten: (Basiswert + flat-Mods) × (1 + increased%) – so zählt z.B. 85% erhöhte Rüstung auf einer 369er-Basis wie +314 Rüstung. Unique-Effekte, Skill-Synergien und Build-Mechaniken zählen nicht.">ⓘ</span></div>
+    <div class="ts-label">Gesamt-Score</div>
     <div class="ts-count" id="tsCount">0 Slots gewertet</div>
   </div>
   <div class="ts-value" id="tsValue">0</div>
@@ -1403,7 +1401,7 @@ function renderGear(items) {
       nameEl.after(meta);
     }
     slotEl.classList.add("rar-" + (it.rarity ?? 0));
-    const sc = scoreFromStats(it.effective_stats || it.parsed_stats || {});
+    const sc = scoreFromStats(it.parsed_stats || {});
     it._score = sc;
     if (sc > 0) {
       const s = document.createElement("span");
@@ -1672,9 +1670,7 @@ function updateActiveBuildBar() {
   const nameEl = document.getElementById("activeBuildName");
   if (!bar) return;
   const name = localStorage.getItem("exileEye_buildName");
-  // Build = aktiv, sobald ein Name gesetzt ist – auch reine Gewichts-Builds
-  // ohne Slot-Daten muessen sichtbar sein (sonst kann man sie nicht abwählen).
-  const hasBuild = !!name;
+  const hasBuild = name && (Object.keys(buildSlotStats).length > 0 || Object.keys(buildSlotUniques).length > 0);
   if (hasBuild) { nameEl.textContent = "🧠 Aktiver Build: " + name; bar.style.display = "block"; setPanelStatus("buildplan", "✓ " + name); }
   else { bar.style.display = "none"; }
   renderSavedBuildsBar();
@@ -1728,7 +1724,6 @@ function applyBuildPackage(b) {
   renderConsumables(b.flasks || [], b.charms || []);
   updateActiveBuildBar();
   updateBuildStatus();
-  scheduleScoreRefresh();   // Stat-Score direkt mit den neuen Gewichten neu rechnen
 }
 function deleteSavedBuild() {
   const sel = document.getElementById("savedBuildsSelect");
@@ -1810,7 +1805,7 @@ function refreshItemScores() {
   let total = 0, counted = 0;
   for (const slotKey in equippedItems) {
     const it = equippedItems[slotKey];
-    const sc = scoreFromStats(it.effective_stats || it.parsed_stats || {});
+    const sc = scoreFromStats(it.parsed_stats || {});
     it._score = sc;
     const slotEl = document.querySelector(`.slot[data-slot="${slotKey}"]`);
     if (!slotEl) continue;
@@ -1855,13 +1850,13 @@ function updateTotalScore(total, counted) {
   }
 }
 
-const STAT_KEYS = ["life","fire_res","cold_res","lightning_res","chaos_res","energy_shield","crit_chance","spell_damage","fire_damage","cold_damage","lightning_damage","chaos_damage","movement_speed","armour"];
+const STAT_KEYS = ["life","fire_res","cold_res","lightning_res","chaos_res","energy_shield","crit_chance","spell_damage","movement_speed","armour"];
 const WEIGHT_STORAGE = "exileEye_weights";
 const PRESETS = {
-  balanced: { life:1.0, fire_res:0.8, cold_res:0.8, lightning_res:0.8, chaos_res:1.0, energy_shield:0.6, crit_chance:0.5, spell_damage:0.5, fire_damage:0.3, cold_damage:0.3, lightning_damage:0.3, chaos_damage:0.3, movement_speed:0.4, armour:0.4 },
-  life:     { life:1.0, fire_res:0.6, cold_res:0.6, lightning_res:0.6, chaos_res:0.7, energy_shield:0.1, crit_chance:0.3, spell_damage:0.3, fire_damage:0.2, cold_damage:0.2, lightning_damage:0.2, chaos_damage:0.2, movement_speed:0.4, armour:0.5 },
-  es:       { life:0.2, fire_res:0.7, cold_res:0.7, lightning_res:0.7, chaos_res:0.8, energy_shield:1.0, crit_chance:0.4, spell_damage:0.5, fire_damage:0.3, cold_damage:0.3, lightning_damage:0.3, chaos_damage:0.3, movement_speed:0.4, armour:0.2 },
-  resi:     { life:0.7, fire_res:1.0, cold_res:1.0, lightning_res:1.0, chaos_res:1.0, energy_shield:0.4, crit_chance:0.2, spell_damage:0.3, fire_damage:0.2, cold_damage:0.2, lightning_damage:0.2, chaos_damage:0.2, movement_speed:0.3, armour:0.5 },
+  balanced: { life:1.0, fire_res:0.8, cold_res:0.8, lightning_res:0.8, chaos_res:1.0, energy_shield:0.6, crit_chance:0.5, spell_damage:0.5, movement_speed:0.4, armour:0.4 },
+  life:     { life:1.0, fire_res:0.6, cold_res:0.6, lightning_res:0.6, chaos_res:0.7, energy_shield:0.1, crit_chance:0.3, spell_damage:0.3, movement_speed:0.4, armour:0.5 },
+  es:       { life:0.2, fire_res:0.7, cold_res:0.7, lightning_res:0.7, chaos_res:0.8, energy_shield:1.0, crit_chance:0.4, spell_damage:0.5, movement_speed:0.4, armour:0.2 },
+  resi:     { life:0.7, fire_res:1.0, cold_res:1.0, lightning_res:1.0, chaos_res:1.0, energy_shield:0.4, crit_chance:0.2, spell_damage:0.3, movement_speed:0.3, armour:0.5 },
 };
 let currentWeights = {};
 
@@ -1936,14 +1931,9 @@ async function importBuild(codeOverride) {
   const code = (typeof codeOverride === "string" ? codeOverride : document.getElementById("buildCode").value).trim();
   const out = document.getElementById("buildResult");
   if (!code) { showBanner("Bitte erst Link, Code oder .build-Datei wählen"); return; }
-  // NUR echte Mobalytics-URLs blocken (Seite ist Cloudflare-geblockt).
-  // .build-JSON-Dateien enthalten "link":"https://mobalytics.gg/..." als
-  // Metadaten -> die DÜRFEN rein!
-  const lc = code.trimStart().toLowerCase();
-  const isUrl = lc.startsWith("http:") || lc.startsWith("https:");
-  if (isUrl && lc.includes("mobalytics.gg")) {
+  if (code.includes("mobalytics.gg")) {
     out.style.display = "block"; out.className = "err";
-    out.innerHTML = "Mobalytics blockiert die Build-SEITE (Cloudflare). Lade stattdessen die .build-Datei (Build Planner Export) oder kopiere den Gear-Text.";
+    out.innerHTML = "Mobalytics blockiert direkten Zugriff (Cloudflare). Kopiere stattdessen den Gear-Text.";
     return;
   }
   out.style.display = "block"; out.className = ""; out.textContent = "Importiere…";
@@ -1967,7 +1957,6 @@ async function importBuild(codeOverride) {
     renderSkills(data.skills || []);
     renderConsumables(data.flasks || [], data.charms || []);
     updateBuildStatus();
-    scheduleScoreRefresh();   // Stat-Score direkt mit den neuen Gewichten neu rechnen
     const infoStr = [bInfo.class, bInfo.ascendancy, bInfo.level ? "Lvl " + bInfo.level : ""].filter(Boolean).join(" · ");
     const found = Object.entries(data.stat_counts || {}).filter(([k,v]) => v > 0).map(([k,v]) => labelFor(k)).join(", ");
     out.className = "ok";
@@ -2178,7 +2167,7 @@ async function analyzeImage() {
   finally { btn.disabled = false; btn.innerHTML = "🔍 Analysieren"; }
 }
 
-const SCAN_STAT_KEYS = ["life","mana","energy_shield","spirit","fire_res","cold_res","lightning_res","chaos_res","armour","movement_speed","spell_damage","fire_damage","cold_damage","lightning_damage","chaos_damage","spell_skills","crit_chance","crit_dmg_bonus","eva_es"];
+const SCAN_STAT_KEYS = ["life","mana","energy_shield","spirit","fire_res","cold_res","lightning_res","chaos_res","armour","movement_speed","spell_damage","spell_skills","crit_chance","crit_dmg_bonus","eva_es"];
 
 function renderScanResult() {
   const result = document.getElementById("scanResult");
@@ -2520,10 +2509,7 @@ function labelFor(key) {
     life: "Leben", mana: "Mana", fire_res: "Feuer-Res", cold_res: "Kälte-Res",
     lightning_res: "Blitz-Res", chaos_res: "Chaos-Res",
     energy_shield: "Energieschild", crit_chance: "Krit-Chance",
-    spell_damage: "Zauberschaden",
-    fire_damage: "Feuer-Schaden", cold_damage: "Kälte-Schaden",
-    lightning_damage: "Blitz-Schaden", chaos_damage: "Chaos-Schaden",
-    movement_speed: "Lauftempo", armour: "Rüstung",
+    spell_damage: "Zauberschaden", movement_speed: "Lauftempo", armour: "Rüstung",
     ele_res: "Elem-Res (gesamt)", spell_skills: "+Skill-Level", spirit: "Spirit",
     eva_es: "Eva+ES %", crit_dmg_bonus: "Krit-Schaden",
   };
@@ -2582,5 +2568,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a40b263ef9b61e66',t:'MTc5MDM1MTA1Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2e16412de98dbfb',t:'MTc4NzIyODgzMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2e867a6bc4ddca5',t:'MTc4NzMwMjM4MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4102d22c865882b',t:'MTc5MDQwMzc2OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
