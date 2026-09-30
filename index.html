@@ -410,6 +410,8 @@
   .slot .item-meta { font-size: 9px; color: var(--text-dim); word-break: break-word; overflow-wrap: break-word; }
   .slot .item-gems { display: block; font-size: 10px; color: var(--gold-soft); margin-top: 2px; letter-spacing: 2px; }
   .tt-mod.rune-head { color: var(--gold-soft); font-size: 11px; margin-bottom: 3px; }
+  .tt-mod.hint-head { color: var(--gold-soft); font-size: 11px; margin-bottom: 3px; }
+  .tt-mod.hint-line { color: var(--text-dim); font-size: 11.5px; }
   .slot .item-score { font-size: 10px; color: var(--green); margin-top: auto; font-weight: 600; }
   .slot.filled { border-color: var(--gold-soft); box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 4px rgba(200,160,79,.2); }
   .slot.better { border-color: var(--green); box-shadow: 0 0 10px rgba(76,175,106,.4); }
@@ -1032,7 +1034,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.12</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.13</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_impressum">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_privacy">Datenschutz</a> ·
@@ -1041,7 +1043,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.12";
+const APP_VERSION = "v1.13";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1168,6 +1170,12 @@ const I18N = {
     tt_required:"Benötigt", tt_unnamed:"(unbenannt)", tt_corrupted:"Korrumpiert",
     tt_gems:"✦ Gesteckte Gems",
     tt_runes:"◈ Runen",
+    hint_title:"ℹ Hinweise",
+    hint_res_partial:"{name}: von +{v}% zählen nur ~{e}% (du bist bei {c}% / Cap {cap}%)",
+    hint_allres_partial:"Alle Elementar-Res: von +{v}% zählen nur ~{e}% (am wenigsten Platz frei)",
+    hint_cond_attacks:"{n} Mod(s): gelten nur bei Angriffen",
+    hint_cond_onhit:"{n} Mod(s): gelten nur bei Treffer",
+    hint_cond_local:"{n} Mod(s): gelten nur für dieses Item",
     tt_trade_link:"🔍 Besseres Item auf dem Trade suchen", tt_trade_hint:"Wichtig für deinen Build:",
     bn_iphone_hint:"Am iPhone: Teilen-Symbol → Zum Home-Bildschirm",
     bn_analyze_failed:"Analyse fehlgeschlagen: ", bn_analyze_done:"Analyse fertig – Score ",
@@ -1256,6 +1264,12 @@ const I18N = {
     tt_required:"Required", tt_unnamed:"(unnamed)", tt_corrupted:"Corrupted",
     tt_gems:"✦ Socketed Gems",
     tt_runes:"◈ Runes",
+    hint_title:"ℹ Notes",
+    hint_res_partial:"{name}: only ~{e}% of +{v}% counts (you're at {c}% / {cap}% cap)",
+    hint_allres_partial:"All Elemental Res: only ~{e}% of +{v}% counts (least headroom left)",
+    hint_cond_attacks:"{n} mod(s): only apply to attacks",
+    hint_cond_onhit:"{n} mod(s): only apply on hit",
+    hint_cond_local:"{n} mod(s): only apply to this item",
     tt_trade_link:"🔍 Find a better item on trade", tt_trade_hint:"Important for your build:",
     bn_iphone_hint:"On iPhone: Share icon → Add to Home Screen",
     bn_analyze_failed:"Analysis failed: ", bn_analyze_done:"Analysis done – Score ",
@@ -1623,19 +1637,63 @@ function renderGear(items) {
   updateTotalScore(_totalScore, _countedScore);
 }
 
-function renderResCap() {
-  const box = document.getElementById("resCapBox");
-  const rows = document.getElementById("resCapRows");
-  if (!box || !rows) return;
-  if (!equippedItems || Object.keys(equippedItems).length === 0) { box.style.display = "none"; return; }
+function getResistTotals(excludeSlot) {
   const sum = { fire_res: 0, cold_res: 0, lightning_res: 0, chaos_res: 0 };
-  Object.values(equippedItems).forEach(it => {
+  Object.entries(equippedItems || {}).forEach(([slot, it]) => {
+    if (excludeSlot && slot === excludeSlot) return;
     const p = it.parsed_stats || {};
     sum.fire_res      += p.fire_res      || 0;
     sum.cold_res      += p.cold_res      || 0;
     sum.lightning_res += p.lightning_res || 0;
     sum.chaos_res     += p.chaos_res     || 0;
   });
+  return sum;
+}
+
+function buildHintBlock(it, slot) {
+  const hints = [];
+  const hasGear = Object.keys(equippedItems || {}).length > 0;
+  if (hasGear) {
+    const capEl = document.getElementById("resCapSelect");
+    const cap = capEl ? (parseInt(capEl.value, 10) || 75) : 75;
+    const totals = getResistTotals(slot);
+    const stats = it.parsed_stats || {};
+    ["fire_res","cold_res","lightning_res","chaos_res"].forEach(k => {
+      const v = stats[k] || 0;
+      if (v <= 0) return;
+      const headroom = Math.max(0, cap - totals[k]);
+      const eff = Math.round(Math.min(v, headroom) * 10) / 10;
+      if (eff < v) hints.push(t("hint_res_partial", { name: labelFor(k), v: v, e: eff, c: totals[k], cap: cap }));
+    });
+    const av = stats.all_res || 0;
+    if (av > 0) {
+      const headroom = Math.min.apply(null, ["fire_res","cold_res","lightning_res"].map(k => Math.max(0, cap - totals[k])));
+      const eff = Math.round(Math.min(av, headroom) * 10) / 10;
+      if (eff < av) hints.push(t("hint_allres_partial", { v: av, e: eff }));
+    }
+  }
+  const mods = it.all_mods || [];
+  [
+    { re: /with\s+attacks|mit\s+angriffen|bei\s+angriffen/i, key: "hint_cond_attacks" },
+    { re: /\bon\s+hit\b|beim\s+treffer/i, key: "hint_cond_onhit" },
+    { re: /on\s+this\s+item|auf\s+diesem\s+item|\(local\)|\(lokal\)/i, key: "hint_cond_local" },
+  ].forEach(c => {
+    const n = mods.filter(m => typeof m === "string" && c.re.test(m)).length;
+    if (n > 0) hints.push(t(c.key, { n: n }));
+  });
+  if (!hints.length) return "";
+  return `<div class="tt-section">` +
+    `<div class="tt-mod hint-head">${t("hint_title")}</div>` +
+    hints.map(h => `<div class="tt-mod hint-line">• ${h}</div>`).join("") +
+    `</div>`;
+}
+
+function renderResCap() {
+  const box = document.getElementById("resCapBox");
+  const rows = document.getElementById("resCapRows");
+  if (!box || !rows) return;
+  if (!equippedItems || Object.keys(equippedItems).length === 0) { box.style.display = "none"; return; }
+  const sum = getResistTotals(null);
   const cap = parseInt(document.getElementById("resCapSelect").value, 10) || 75;
   const defs = [
     { key: "fire_res", name: t("rc_fire"), dot: "fire" },
@@ -1828,6 +1886,7 @@ function showItem(slot) {
   }
   if (it.corrupted) html += `<div class="tt-corrupt">${t("tt_corrupted")}</div>`;
   if (it._score > 0) html += `<div class="tt-score">Exile-Eye Score: ${it._score}</div>`;
+  html += buildHintBlock(it, slot);
   html += buildCompareBlock(slot, it);
   const topStats = topWeightedStats(3);
   html += `<a class="tt-trade" href="#" onclick="openTrade('${esc(slot)}');return false;">${t("tt_trade_link")}</a>`;
@@ -2806,5 +2865,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a410f8eccf0da02b',t:'MTc5MDQxMjExNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a434b96c9fb3bb35',t:'MTc5MDc4NzAwMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
