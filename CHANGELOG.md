@@ -10,6 +10,13 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.13 (28.09.2026)
+- **Neu: "Why"-Hints im Item-Tooltip** (Antwort auf die Black-Box-Kritik):
+  - **Cap-Awareness:** Resist-Stats zeigen, wie viel davon bei deinem aktuellen Gear-Stand wirklich zählt ("Fire Res: only ~50% of +60% counts (you're at 25% / 75% cap)")
+  - **Bedingungs-Mods:** Mods wie "with Attacks" / "on Hit" / "on this item" werden als Hinweise markiert ("1 mod(s): only apply to attacks")
+  - Bilingual (DE/EN), nutzt den gewählten Cap-Wert aus dem ResCap-Panel
+- ResCap-Panel und Hints teilen jetzt dieselbe Total-Logik (getResistTotals)
+
 ## v1.12 (25.09.2026)
 - **Neu: Runen als eigene Sektion im Item-Tooltip** („◈ Runen"/„◈ Runes", Tealfarbig) — waren bisher unsichtbar unter den anderen Mods versteckt.
 - Hinweis: Runen-Stats zählen **bereits** in den Score mit (sofern der Stat gewichtet ist), z.B. +35% Fire Res auf einer Rune.
