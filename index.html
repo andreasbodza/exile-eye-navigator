@@ -56,7 +56,7 @@
 
   /* ---------- Buttons ---------- */
   .btn {
-    background: linear-gradient(180deg, #2e3340, #241c12);
+    background: var(--panel-2);
     color: var(--gold);
     border: 1px solid var(--gold-soft);
     border-radius: 6px;
@@ -65,8 +65,9 @@
     cursor: pointer; text-decoration: none; display: inline-block;
     transition: all .15s;
   }
-  .btn:hover { background: linear-gradient(180deg, #4a3c28, #2e2418); }
-  .btn.primary { background: linear-gradient(180deg, var(--gold), var(--gold-soft)); color: #16181d; }
+  .btn:hover { background: #2b303c; }
+  .btn.primary { background: var(--gold); color: #0d1110; }
+  .btn.primary:hover { background: #5eead4; }
   .btn.danger  { border-color: var(--red); color: var(--red); }
   .btn:disabled { opacity: .4; cursor: not-allowed; }
 
@@ -108,26 +109,23 @@
     border-radius: 10px;
     margin: 16px 18px 0;
     overflow: hidden;
+    display: none;
   }
+  .panel.active { display: block; }
   .panel-head {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 16px;
-    cursor: pointer;
+    cursor: default;
     user-select: none;
-    background: linear-gradient(180deg, rgba(200,160,79,.05), transparent);
-    transition: background .15s;
+    background: transparent;
   }
-  .panel-head:hover { background: linear-gradient(180deg, rgba(45,212,191,.10), transparent); }
+  .panel-head:hover { background: transparent; }
   .panel-head h2 {
     font-size: 14px; letter-spacing: 1.5px; text-transform: uppercase;
     color: var(--gold-soft); margin: 0; border: 0; padding: 0;
     display: flex; align-items: center; gap: 8px;
   }
-  .panel-head .arrow {
-    font-size: 14px; color: var(--gold);
-    transition: transform .2s;
-    flex: 0 0 auto;
-  }
+  .panel-head .arrow { display: none; }
   .panel.open .panel-head .arrow { transform: rotate(90deg); }
   .panel-body {
     display: none;
@@ -143,6 +141,52 @@
     font-size: 11px; color: var(--green); margin-right: 10px;
   }
   .panel-head .head-right { display: flex; align-items: center; }
+
+  /* ============================================================
+     TAB-Navigation (Stufe 2a)
+     ============================================================ */
+  .tab-bar {
+    display: flex; gap: 4px;
+    margin: 14px 18px 0;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab-btn { flex-shrink: 0; }
+  .tab-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: none; border: none; border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    color: var(--text-dim); font-size: 13px; font-weight: 600;
+    padding: 9px 14px; cursor: pointer; letter-spacing: .3px;
+    font-family: inherit;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .tab-btn svg { flex: 0 0 auto; }
+  @media (max-width: 560px) {
+    .tab-bar { margin: 10px 12px 0; }
+    .tab-btn { padding: 8px 9px; font-size: 12px; gap: 5px; }
+  }
+
+  .demo-badge {
+    display: none;
+    background: rgba(52,211,153,.12); color: var(--green);
+    border: 1px solid rgba(52,211,153,.45);
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    padding: 2px 8px; border-radius: 4px; margin-left: 10px;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  /* Kompaktes Resist-Grid (2x2) */
+  #resCapRows { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .rc-tile { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .rc-tile-head { display: flex; align-items: center; gap: 7px; font-size: 12px; }
+  .rc-tile-name { font-weight: 600; color: var(--text); }
+  .rc-tile-val { margin-left: auto; font-weight: 700; font-size: 13px; color: var(--text); }
+  .rc-tile-status { font-size: 10.5px; margin-top: 5px; }
+  .rc-bar-sm { height: 5px; margin-top: 8px; }
 
   /* ============================================================
      EQUIPMENT-HUD im echten PoE2 Steinplatten-Look
@@ -261,8 +305,8 @@
   .slot.rar-2 { box-shadow: inset 0 0 14px rgba(240,224,96,.12), inset 0 0 12px rgba(0,0,0,.6); }
   .slot.rar-3 { box-shadow: inset 0 0 16px rgba(208,128,32,.18), inset 0 0 12px rgba(0,0,0,.6); }
   @keyframes slotPulse {
-    0%,100% { box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 6px rgba(200,160,79,.3); }
-    50%     { box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 22px rgba(200,160,79,.9); }
+    0%,100% { box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 6px rgba(45,212,191,.3); }
+    50%     { box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 22px rgba(45,212,191,.9); }
   }
   .slot.pulsing { animation: slotPulse 1s ease-in-out 2; }
   .slot .slot-label {
@@ -413,7 +457,7 @@
   .tt-mod.hint-head { color: var(--gold-soft); font-size: 11px; margin-bottom: 3px; }
   .tt-mod.hint-line { color: var(--text-dim); font-size: 11.5px; }
   .slot .item-score { font-size: 10px; color: var(--green); margin-top: auto; font-weight: 600; }
-  .slot.filled { border-color: var(--gold-soft); box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 4px rgba(200,160,79,.2); }
+  .slot.filled { border-color: var(--gold-soft); box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 4px rgba(45,212,191,.2); }
   .slot.better { border-color: var(--green); box-shadow: 0 0 10px rgba(76,175,106,.4); }
   .slot.worse  { border-color: var(--red);   box-shadow: 0 0 10px rgba(208,88,78,.4); }
   .hud-consumables { margin-top: 12px; padding-top: 12px; border-top: 1px solid #333a47; }
@@ -427,12 +471,12 @@
   .scanner-hero {
     margin: 16px 18px 8px;
     background:
-      radial-gradient(circle at 50% 0%, rgba(200,160,79,.10), transparent 60%),
+      radial-gradient(circle at 50% 0%, rgba(45,212,191,.10), transparent 60%),
       linear-gradient(180deg, #1f1810, #181b21);
     border: 2px solid var(--gold-soft);
     border-radius: 14px;
     padding: 20px 18px;
-    box-shadow: 0 0 24px rgba(200,160,79,.18), inset 0 0 30px rgba(0,0,0,.5);
+    box-shadow: 0 0 24px rgba(45,212,191,.18), inset 0 0 30px rgba(0,0,0,.5);
     position: relative;
   }
   .scanner-hero-head {
@@ -591,7 +635,7 @@
     font-size: 12px; cursor: pointer; transition: all .15s; min-width: 90px;
   }
   .preset-btn:hover { border-color: var(--gold-soft); }
-  .preset-btn.active { background: linear-gradient(180deg, var(--gold), var(--gold-soft)); color: #16181d; border-color: var(--gold); font-weight: 600; }
+  .preset-btn.active { background: var(--gold); color: #0d1110; border-color: var(--gold); font-weight: 600; }
 
   .weight-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
   .weight-row .wlabel { flex: 0 0 110px; font-size: 12px; color: var(--text); }
@@ -693,7 +737,7 @@
       <circle cx="12" cy="12" r="3" fill="#2dd4bf"/>
     </svg>
     <div>
-      <h1>Exile Eye Navigator</h1>
+      <h1>Exile Eye Navigator<span id="demoBadge" class="demo-badge">DEMO</span></h1>
       <span>PoE2 Companion · Item Scanner</span>
     </div>
   </div>
@@ -703,6 +747,25 @@
     <button id="logoutBtn" class="btn danger hidden" onclick="location.href='/logout'">Logout</button>
   </div>
 </header>
+
+<nav class="tab-bar" id="tabBar">
+  <button class="tab-btn active" data-tab="scanner">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg>
+    <span data-i18n="tab_scanner">Scanner</span>
+  </button>
+  <button class="tab-btn" data-tab="character">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span data-i18n="tab_character">Charakter</span>
+  </button>
+  <button class="tab-btn" data-tab="buildplan">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+    <span data-i18n="tab_build">Build</span>
+  </button>
+  <button class="tab-btn" data-tab="settings">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h0a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <span data-i18n="tab_settings">Einstellungen</span>
+  </button>
+</nav>
 
 <div id="banner"></div>
 
@@ -1034,7 +1097,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.14</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.15</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_impressum">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_privacy">Datenschutz</a> ·
@@ -1043,7 +1106,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.14";
+const APP_VERSION = "v1.15";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1066,32 +1129,41 @@ window.addEventListener("load", syncHeaderHeight);
 // ============================================================
 //  ACCORDION-LOGIK (alle 4 Panels)
 // ============================================================
-function initAccordion() {
-  const defaultOpen = ["scanner", "character"];
-  document.querySelectorAll(".panel").forEach(panel => {
-    const id = panel.dataset.panelId;
-    if (defaultOpen.includes(id)) panel.classList.add("open");
-    const head = panel.querySelector(".panel-head");
-    head.addEventListener("click", () => {
-      panel.classList.toggle("open");
-    });
+function switchTab(tabId) {
+  document.querySelectorAll(".panel").forEach(p => {
+    const isActive = p.dataset.panelId === tabId;
+    p.classList.toggle("active", isActive);
+    p.classList.toggle("open", isActive);
+  });
+  document.querySelectorAll(".tab-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.tab === tabId);
   });
 }
-initAccordion();
+function initTabs() {
+  document.querySelectorAll(".tab-btn").forEach(b => {
+    b.addEventListener("click", () => switchTab(b.dataset.tab));
+  });
+  document.querySelectorAll(".panel").forEach(panel => {
+    const head = panel.querySelector(".panel-head");
+    if (head) head.addEventListener("click", () => switchTab(panel.dataset.panelId));
+  });
+  switchTab("scanner");
+}
+initTabs();
 
-// Panel aufklappen + Status-Badge setzen
-function setPanelStatus(panelId, statusText) {
+// Status-Badge setzen (optional: Tab wechseln)
+function setPanelStatus(panelId, statusText, switchTo = true) {
   const panel = document.querySelector(`.panel[data-panel-id="${panelId}"]`);
   if (!panel) return;
-  panel.classList.add("open");
   let badge = panel.querySelector(".status-badge");
   if (!badge) {
     badge = document.createElement("span");
     badge.className = "status-badge";
-    const arrow = panel.querySelector(".arrow");
-    panel.querySelector(".head-right").insertBefore(badge, arrow);
+    const headRight = panel.querySelector(".head-right");
+    if (headRight) headRight.insertBefore(badge, headRight.firstChild);
   }
   badge.textContent = statusText;
+  if (switchTo) switchTab(panelId);
 }
 
 // ============================================================
@@ -1103,6 +1175,7 @@ const I18N = {
     h_character:"Charakter", h_equipment:"Aktuelle Ausrüstung",
     h_skills:"Skills & Support-Gems", h_weights:"Gewichtung · was ist dir wichtig?",
     h_trade:"🛒 Trade-Einstellungen", h_scan:"Item scannen",
+    tab_scanner:"Scanner", tab_character:"Charakter", tab_build:"Build", tab_settings:"Einstellungen",
     logout:"Logout",
     ts_tooltip:"Rechnet deine Ausrüstung mit effektiven Werten: (Basiswert + flat-Mods) × (1 + increased%) – so zählt z.B. 85% erhöhte Rüstung auf einer 369er-Basis wie +314 Rüstung. Unique-Effekte, Skill-Synergien und Build-Mechaniken zählen nicht.",
     ts_count0:"0 Slots gewertet", ts_count:"{n} Slots gewertet",
@@ -1154,7 +1227,7 @@ const I18N = {
     tol_hint:"z.B. -15%: sucht auch Items mit etwas niedrigeren Werten",
     bug_btn:"🐞 Fehler melden / Feedback geben",
     bug_hint:"Etwas funktioniert nicht? Sag uns Bescheid – öffnet eine vorausgefüllte E-Mail.",
-    rc_fire:"Feuer-Resistenz", rc_cold:"Kälte-Resistenz", rc_lightning:"Blitz-Resistenz", rc_chaos:"Chaos-Resistenz",
+    rc_fire:"Feuer-Res", rc_cold:"Kälte-Res", rc_lightning:"Blitz-Res", rc_chaos:"Chaos-Res",
     rc_buffer:"+{d}% Puffer ✓", rc_ok:"Cap erreicht ✓", rc_missing:"noch {d}% bis Cap",
     bn_chars_loaded:"{n} Charakter(e) geladen",
     legal_impressum:"Impressum", legal_privacy:"Datenschutz", legal_terms:"Nutzungsbedingungen",
@@ -1197,6 +1270,7 @@ const I18N = {
     h_character:"Character", h_equipment:"Current Equipment",
     h_skills:"Skills & Support Gems", h_weights:"Weighting · what matters to you?",
     h_trade:"🛒 Trade Settings", h_scan:"Scan item",
+    tab_scanner:"Scanner", tab_character:"Character", tab_build:"Build", tab_settings:"Settings",
     logout:"Logout",
     ts_tooltip:"Scores your gear with effective values: (base + flat mods) × (1 + increased%). E.g. 85% increased Armour on a 369 base counts like +314 Armour. Unique effects, skill synergies and build mechanics are not included.",
     ts_count0:"0 slots scored", ts_count:"{n} slots scored",
@@ -1248,7 +1322,7 @@ const I18N = {
     tol_hint:"e.g. -15%: also matches items with slightly lower values",
     bug_btn:"🐞 Report bug / Send feedback",
     bug_hint:"Something not working? Let us know – opens a pre-filled email.",
-    rc_fire:"Fire Resistance", rc_cold:"Cold Resistance", rc_lightning:"Lightning Resistance", rc_chaos:"Chaos Resistance",
+    rc_fire:"Fire Res", rc_cold:"Cold Res", rc_lightning:"Lightning Res", rc_chaos:"Chaos Res",
     rc_buffer:"+{d}% buffer ✓", rc_ok:"Cap reached ✓", rc_missing:"{d}% to cap",
     bn_chars_loaded:"{n} character(s) loaded",
     legal_impressum:"Imprint", legal_privacy:"Privacy Policy", legal_terms:"Terms of Use",
@@ -1515,7 +1589,8 @@ function loadDemo() {
   const firstKey = Object.keys(DEMO_CHARACTERS)[0];
   loadDemoCharacter(firstKey);
   setPanelStatus("character", "🎮 Demo-Modus");
-  showBanner(t("bn_demo_active"), "ok");
+  const demoBadge = document.getElementById("demoBadge");
+  if (demoBadge) demoBadge.style.display = "inline-block";
 }
 function loadDemoCharacter(key) {
   const c = DEMO_CHARACTERS[key];
@@ -1712,12 +1787,13 @@ function renderResCap() {
     } else {
       fillCls = "under"; status = t("rc_missing", { d: cap - val }); statusCol = "var(--red)";
     }
-    html += `<div class="rc-row">
-      <div class="rc-head">
-        <span class="rc-name"><span class="rc-dot ${d.dot}"></span>${d.name}</span>
-        <span class="rc-val">${val}% <span class="rc-status" style="color:${statusCol}">${status}</span></span>
+    html += `<div class="rc-tile">
+      <div class="rc-tile-head">
+        <span class="rc-dot ${d.dot}"></span><span class="rc-tile-name">${d.name}</span>
+        <span class="rc-tile-val">${val}%</span>
       </div>
-      <div class="rc-bar"><div class="rc-fill ${fillCls}" style="width:${pctOfCap}%"></div></div>
+      <div class="rc-bar rc-bar-sm"><div class="rc-fill ${fillCls}" style="width:${pctOfCap}%"></div></div>
+      <div class="rc-tile-status" style="color:${statusCol}">${status}</div>
     </div>`;
   });
   rows.innerHTML = html;
@@ -2048,7 +2124,7 @@ async function openTrade(slot) {
     const data = await res.json();
     if (data.url) {
       window.open(data.url, "_blank");
-      setPanelStatus("settings", "🔗 Trade geöffnet");
+      setPanelStatus("settings", "🔗 Trade geöffnet", false);
       showBanner(t("bn_trade_open"), "ok");
     }
   } catch (e) { showBanner(t("bn_trade_error") + e.message); }
@@ -2865,5 +2941,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a441d2e93f8e12c4',t:'MTc5MDkyNDM2MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4422d450b699745',t:'MTc5MDkyODA2Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
