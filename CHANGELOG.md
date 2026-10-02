@@ -10,6 +10,11 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.19 (02.10.2026)
+- **Fix: Skill-Namen im Charakter-Tab** — GGG liefert bei Main-Skills offenbar oft keinen Namen (statt „Bear Maul" stand da im schlimmsten Fall die rohe CDN-Icon-URL). Neuer Fallback: der Name wird aus der Icon-URL abgeleitet (`DruidBearMaul.png` → „Bear Maul", `SmithOfKitavaTriggerFireballsSkillIcon` → „Trigger Fireballs"). Unit-getestet mit allen 10 Skills aus dem echten Charakter.
+- **Neu: Support-Gem-Check gegen den aktiven Build** — der Charakter-Tab markiert jetzt direkt: ✓ Support passt zum importierten Build, ✗ der Build will diesen Support, du hast ihn aber nicht gesockelt (rot gestrichelt), und „nicht im Build"-Badge bei Skills, die dein Build gar nicht nutzt. Tier-Suffixe („Overabundance I" vs „Overabundance II") zählen beim Abgleich nicht.
+- **Build-Tab: Reihenfolge getauscht** — Gewichtung & Slider zuerst, Skills & Support-Gems darunter (gleiche Struktur wie Charakter-Tab: Inhalt oben, Gems unten).
+
 ## v1.18 (01.10.2026, Hotfix)
 - **Fix: Skill-Gems-Extraktion laut offizieller GGG-Doku** — `character.skills` ist ein Item-Array; Main-Gems = Skill-Gruppen, Support-Gems kommen aus `socketedItems` oder als eigene Einträge mit `support: true`. Beide Shapes werden verarbeitet (unit-getestet).
 - **Fix: Gem-Modal zweisprachig** — „Skill-Gemme/Support-Gemme", „ab Level X", „UNTERSTÜTZUNGS-GEMMEN", Hinweis-Text sind jetzt i18n (EN: „Skill Gem", „from Level", „SUPPORT GEMS", „in-game hint").
