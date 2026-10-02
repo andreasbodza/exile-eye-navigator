@@ -7,7 +7,7 @@
 
 <!-- ===== PWA (App-Feeling fürs Handy) ===== -->
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0d0b07">
+<meta name="theme-color" content="#14161a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Exile Eye Navigator">
@@ -15,19 +15,19 @@
 <link rel="icon" type="image/png" href="/icons/icon-192.png">
 <style>
   :root {
-    --bg:        #0d0b07;
-    --panel:     #181410;
-    --panel-2:   #221c14;
-    --gold:      #c8a04f;
-    --gold-soft: #9a7d3e;
-    --text:      #d8c8a8;
-    --text-dim:  #a8a089;
-    --green:     #4caf6a;
-    --red:       #d0584e;
-    --border:    #3a2f1f;
-    --stone-1:   #4a4640;
-    --stone-2:   #2e2a25;
-    --stone-3:   #1c1916;
+    --bg:        #14161a;
+    --panel:     #1c1f26;
+    --panel-2:   #232732;
+    --gold:      #2dd4bf;
+    --gold-soft: #5b6472;
+    --text:      #e8eaf0;
+    --text-dim:  #9aa1b2;
+    --green:     #34d399;
+    --red:       #f87171;
+    --border:    #2e3340;
+    --stone-1:   #4a4f5a;
+    --stone-2:   #2b303c;
+    --stone-3:   #22262f;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
@@ -42,7 +42,7 @@
   header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px 18px;
-    background: linear-gradient(180deg, #221c14, #14100b);
+    background: linear-gradient(180deg, #232732, #181b21);
     border-bottom: 2px solid var(--gold-soft);
     position: sticky; top: 0; z-index: 50;
   }
@@ -56,7 +56,7 @@
 
   /* ---------- Buttons ---------- */
   .btn {
-    background: linear-gradient(180deg, #3a2f1f, #241c12);
+    background: linear-gradient(180deg, #2e3340, #241c12);
     color: var(--gold);
     border: 1px solid var(--gold-soft);
     border-radius: 6px;
@@ -66,7 +66,7 @@
     transition: all .15s;
   }
   .btn:hover { background: linear-gradient(180deg, #4a3c28, #2e2418); }
-  .btn.primary { background: linear-gradient(180deg, var(--gold), var(--gold-soft)); color: #1a1208; }
+  .btn.primary { background: linear-gradient(180deg, var(--gold), var(--gold-soft)); color: #16181d; }
   .btn.danger  { border-color: var(--red); color: var(--red); }
   .btn:disabled { opacity: .4; cursor: not-allowed; }
 
@@ -103,7 +103,7 @@
      ACCORDION-PANELS (einklappbare Sektionen)
      ============================================================ */
   .panel {
-    background: linear-gradient(180deg, var(--panel-2), #14100b);
+    background: linear-gradient(180deg, var(--panel-2), #181b21);
     border: 1px solid var(--border);
     border-radius: 10px;
     margin: 16px 18px 0;
@@ -117,7 +117,7 @@
     background: linear-gradient(180deg, rgba(200,160,79,.05), transparent);
     transition: background .15s;
   }
-  .panel-head:hover { background: linear-gradient(180deg, rgba(200,160,79,.12), transparent); }
+  .panel-head:hover { background: linear-gradient(180deg, rgba(45,212,191,.10), transparent); }
   .panel-head h2 {
     font-size: 14px; letter-spacing: 1.5px; text-transform: uppercase;
     color: var(--gold-soft); margin: 0; border: 0; padding: 0;
@@ -153,7 +153,7 @@
       linear-gradient(135deg, rgba(0,0,0,.4), rgba(0,0,0,.1)),
       repeating-linear-gradient(45deg, var(--stone-2) 0 6px, var(--stone-3) 6px 12px),
       radial-gradient(circle at 30% 20%, var(--stone-1), var(--stone-3) 70%);
-    border: 3px solid #6b5a3a;
+    border: 3px solid #3d4353;
     border-radius: 10px;
     box-shadow: inset 0 0 40px rgba(0,0,0,.7), 0 4px 20px rgba(0,0,0,.6);
     padding: 16px;
@@ -170,7 +170,7 @@
   /* Gesamtscore - eigenständige Leiste direkt unter dem Header, außerhalb der Panels */
   #totalScore {
     margin: 10px 18px 0;
-    background: linear-gradient(135deg, #2c2313, #1a140b);
+    background: linear-gradient(135deg, #1e242b, #16181d);
     border: 1px solid var(--gold-soft);
     border-radius: 8px;
     padding: 10px 14px;
@@ -204,7 +204,7 @@
   }
   @keyframes scoreBumpNeutral {
     0%   { transform: scale(1); }
-    45%  { transform: scale(1.20); color: #eede9a; text-shadow: 0 0 14px rgba(238,222,154,.6); }
+    45%  { transform: scale(1.20); color: #99f6e4; text-shadow: 0 0 14px rgba(238,222,154,.6); }
     72%  { transform: scale(0.97); }
     100% { transform: scale(1); }
   }
@@ -240,7 +240,7 @@
   .slot {
     background:
       linear-gradient(180deg, rgba(30,26,20,.85), rgba(12,10,7,.95));
-    border: 1px solid #5a4a2e;
+    border: 1px solid #333a47;
     border-radius: 5px;
     padding: 7px 8px;
     min-height: 64px;
@@ -255,7 +255,7 @@
   .slot.filled { cursor: pointer; }
   .slot.filled:hover {
     border-color: var(--gold);
-    box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 14px rgba(200,160,79,.5);
+    box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 14px rgba(45,212,191,.35);
     transform: translateY(-2px);
   }
   .slot.rar-2 { box-shadow: inset 0 0 14px rgba(240,224,96,.12), inset 0 0 12px rgba(0,0,0,.6); }
@@ -316,7 +316,7 @@
   #buildProgress .bp-label { color: var(--text); font-weight: 600; }
   #buildProgress .bp-count { color: var(--gold); font-weight: 700; font-size: 15px; }
   #buildProgress .bp-bar {
-    height: 10px; background: #14100b; border-radius: 5px; overflow: hidden;
+    height: 10px; background: #181b21; border-radius: 5px; overflow: hidden;
     border: 1px solid var(--border);
   }
   #buildProgress .bp-fill {
@@ -373,7 +373,7 @@
   .rc-row .rc-val { font-weight: 700; font-size: 13px; }
   .rc-row .rc-val .rc-status { font-size: 11px; font-weight: 600; margin-left: 6px; }
   .rc-bar {
-    height: 9px; background: #14100b; border-radius: 5px; overflow: hidden;
+    height: 9px; background: #181b21; border-radius: 5px; overflow: hidden;
     border: 1px solid var(--border); position: relative;
   }
   .rc-fill { height: 100%; border-radius: 5px; transition: width .5s ease; }
@@ -402,11 +402,11 @@
     overflow: hidden; 
     text-overflow: ellipsis;
   }
-  .slot .item-name.rarity-0 { color: #d8c8a8; }
+  .slot .item-name.rarity-0 { color: #e8eaf0; }
   .slot .item-name.rarity-1 { color: #8888f0; }
   .slot .item-name.rarity-2 { color: #f0e060; }
   .slot .item-name.rarity-3 { color: #d08020; }
-  .slot .item-name.empty    { color: #5a513c; font-style: italic; font-weight: 400; }
+  .slot .item-name.empty    { color: #5b6472; font-style: italic; font-weight: 400; }
   .slot .item-meta { font-size: 9px; color: var(--text-dim); word-break: break-word; overflow-wrap: break-word; }
   .slot .item-gems { display: block; font-size: 10px; color: var(--gold-soft); margin-top: 2px; letter-spacing: 2px; }
   .tt-mod.rune-head { color: var(--gold-soft); font-size: 11px; margin-bottom: 3px; }
@@ -416,7 +416,7 @@
   .slot.filled { border-color: var(--gold-soft); box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 4px rgba(200,160,79,.2); }
   .slot.better { border-color: var(--green); box-shadow: 0 0 10px rgba(76,175,106,.4); }
   .slot.worse  { border-color: var(--red);   box-shadow: 0 0 10px rgba(208,88,78,.4); }
-  .hud-consumables { margin-top: 12px; padding-top: 12px; border-top: 1px solid #5a4a2e; }
+  .hud-consumables { margin-top: 12px; padding-top: 12px; border-top: 1px solid #333a47; }
 
   .trade-sel {
     width: 100%; background: var(--panel-2); color: var(--text);
@@ -428,7 +428,7 @@
     margin: 16px 18px 8px;
     background:
       radial-gradient(circle at 50% 0%, rgba(200,160,79,.10), transparent 60%),
-      linear-gradient(180deg, #1f1810, #14100b);
+      linear-gradient(180deg, #1f1810, #181b21);
     border: 2px solid var(--gold-soft);
     border-radius: 14px;
     padding: 20px 18px;
@@ -443,14 +443,14 @@
     flex: 0 0 auto; width: 52px; height: 52px; border-radius: 12px;
     background: linear-gradient(180deg, var(--gold), var(--gold-soft));
     display: flex; align-items: center; justify-content: center; font-size: 26px;
-    box-shadow: 0 0 16px rgba(200,160,79,.5);
+    box-shadow: 0 0 16px rgba(45,212,191,.35);
   }
   .scanner-hero-title {
     font-size: 19px; letter-spacing: 1px; text-transform: uppercase;
     color: var(--gold); font-weight: 700; margin: 0; border: none; padding: 0;
   }
   .scanner-hero-sub { font-size: 12.5px; color: var(--text-dim); margin: 3px 0 0; line-height: 1.4; }
-  .scanner-hero-btn { width: 100%; font-size: 16px; padding: 15px; box-shadow: 0 0 16px rgba(200,160,79,.4); }
+  .scanner-hero-btn { width: 100%; font-size: 16px; padding: 15px; box-shadow: 0 0 16px rgba(45,212,191,.28); }
   .scanner-paste-btn { width: 100%; margin-top: 8px; font-size: 13px; padding: 11px; }
   .scanner-paste-hint { font-size: 11px; color: var(--text-dim); margin: 8px 0 0; line-height: 1.4; }
   .scanner-options { display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: center; align-items: center; margin-top: 14px; }
@@ -473,7 +473,7 @@
   }
   .crop-handle {
     position: absolute; width: 30px; height: 30px; background: var(--gold);
-    border: 3px solid #1a1208; border-radius: 50%; touch-action: none;
+    border: 3px solid #16181d; border-radius: 50%; touch-action: none;
   }
   .crop-handle.nw { top: -15px; left: -15px; cursor: nwse-resize; }
   .crop-handle.ne { top: -15px; right: -15px; cursor: nesw-resize; }
@@ -494,7 +494,7 @@
     border: 1px solid var(--gold-soft); border-radius: 6px; padding: 7px 8px;
     -moz-appearance: textfield;
   }
-  .scan-edit-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 6px rgba(200,160,79,.4); }
+  .scan-edit-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 6px rgba(45,212,191,.28); }
   .scan-edit-del {
     width: 28px; height: 28px; flex: 0 0 auto; border-radius: 6px;
     background: rgba(208,88,78,.12); border: 1px solid var(--red); color: var(--red);
@@ -515,14 +515,14 @@
   .hist-item:hover { border-color: var(--gold-soft); transform: translateY(-1px); }
   .hist-score {
     flex: 0 0 auto; min-width: 42px; height: 42px; border-radius: 8px;
-    background: linear-gradient(180deg, #3a2f1f, #241c12); border: 1px solid var(--gold-soft);
+    background: linear-gradient(180deg, #2e3340, #241c12); border: 1px solid var(--gold-soft);
     display: flex; align-items: center; justify-content: center;
     font-size: 16px; font-weight: 700; color: var(--gold);
   }
   .hist-mid { flex: 1; min-width: 0; }
   .hist-slot { font-size: 13px; font-weight: 600; color: var(--text); }
   .hist-stats { font-size: 11px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .hist-time { font-size: 10px; color: #5a513c; margin-top: 2px; }
+  .hist-time { font-size: 10px; color: #5b6472; margin-top: 2px; }
   .hist-del {
     flex: 0 0 auto; width: 30px; height: 30px; border-radius: 6px;
     background: rgba(208,88,78,.1); border: 1px solid var(--red); color: var(--red);
@@ -541,18 +541,18 @@
   #itemModal.show { display: flex; }
   .tooltip {
     max-width: 380px; width: 100%; max-height: 85vh; overflow-y: auto;
-    background: linear-gradient(180deg, #0a0806, #14100b);
+    background: linear-gradient(180deg, #0a0806, #181b21);
     border: 1px solid var(--gold-soft);
     box-shadow: 0 0 30px rgba(0,0,0,.8);
     border-radius: 4px;
   }
   .tt-header { text-align: center; padding: 12px 10px; position: relative; border-bottom: 1px solid var(--border); }
   .tt-header.r0 { background: linear-gradient(180deg, #2a2620, #1a1510); }
-  .tt-header.r1 { background: linear-gradient(180deg, #1a2440, #14100b); }
-  .tt-header.r2 { background: linear-gradient(180deg, #3a3210, #14100b); }
-  .tt-header.r3 { background: linear-gradient(180deg, #3a2410, #14100b); }
+  .tt-header.r1 { background: linear-gradient(180deg, #1a2440, #181b21); }
+  .tt-header.r2 { background: linear-gradient(180deg, #3a3210, #181b21); }
+  .tt-header.r3 { background: linear-gradient(180deg, #3a2410, #181b21); }
   .tt-name { font-size: 16px; font-weight: 700; line-height: 1.3; }
-  .tt-name.r0 { color: #d8c8a8; } .tt-name.r1 { color: #8888f0; }
+  .tt-name.r0 { color: #e8eaf0; } .tt-name.r1 { color: #8888f0; }
   .tt-name.r2 { color: #f0e060; } .tt-name.r3 { color: #d08020; }
   .tt-base { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
   .tt-img { width: 80px; max-height: 80px; object-fit: contain; margin: 6px auto 0; display: block; }
@@ -564,7 +564,7 @@
   .tt-section:last-child { border-bottom: none; }
   .tt-prop { display: flex; justify-content: space-between; font-size: 12.5px; padding: 2px 0; color: var(--text); }
   .tt-prop .pn { color: var(--text-dim); }
-  .tt-prop .pv { color: #d8c8a8; font-weight: 600; }
+  .tt-prop .pv { color: #e8eaf0; font-weight: 600; }
   .tt-mod { font-size: 12.5px; padding: 3px 0; line-height: 1.35; }
   .tt-mod.implicit { color: #8888c0; }
   .tt-mod.enchant  { color: #b4b4ff; }
@@ -591,7 +591,7 @@
     font-size: 12px; cursor: pointer; transition: all .15s; min-width: 90px;
   }
   .preset-btn:hover { border-color: var(--gold-soft); }
-  .preset-btn.active { background: linear-gradient(180deg, var(--gold), var(--gold-soft)); color: #1a1208; border-color: var(--gold); font-weight: 600; }
+  .preset-btn.active { background: linear-gradient(180deg, var(--gold), var(--gold-soft)); color: #16181d; border-color: var(--gold); font-weight: 600; }
 
   .weight-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
   .weight-row .wlabel { flex: 0 0 110px; font-size: 12px; color: var(--text); }
@@ -601,10 +601,10 @@
   }
   .weight-row input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
-    border-radius: 50%; background: var(--gold); cursor: pointer; border: 2px solid #1a1208;
+    border-radius: 50%; background: var(--gold); cursor: pointer; border: 2px solid #16181d;
   }
   .weight-row input[type=range]::-moz-range-thumb {
-    width: 16px; height: 16px; border-radius: 50%; background: var(--gold); cursor: pointer; border: 2px solid #1a1208;
+    width: 16px; height: 16px; border-radius: 50%; background: var(--gold); cursor: pointer; border: 2px solid #16181d;
   }
   .weight-row .wval { flex: 0 0 36px; text-align: right; font-size: 12px; color: var(--gold); font-weight: 600; }
 
@@ -631,19 +631,19 @@
   .gem-icon.t-cold  { background: radial-gradient(circle at 35% 30%, #7ad0ff, #1d6fa8); }
   .gem-icon.t-light { background: radial-gradient(circle at 35% 30%, #ffe680, #c89a20); }
   .gem-icon.t-chaos { background: radial-gradient(circle at 35% 30%, #c080ff, #6020a0); }
-  .gem-icon.t-phys  { background: radial-gradient(circle at 35% 30%, #d0c0a0, #6b5a3a); }
+  .gem-icon.t-phys  { background: radial-gradient(circle at 35% 30%, #d0c0a0, #3d4353); }
   .gem-icon.t-skill { background: radial-gradient(circle at 35% 30%, #6ad0c0, #1d7a68); }
   .gem-icon.t-support { background: radial-gradient(circle at 35% 30%, #9ab8d8, #2e5a80); }
   .skill-name-wrap { display: flex; flex-direction: column; gap: 2px; flex: 1; }
   .skill-name-wrap .sn { line-height: 1.1; }
   .skill-name-wrap .st { font-size: 9px; color: var(--text-dim); font-weight: 400; letter-spacing: .5px; }
-  .gem-level-badge { font-size: 11px; font-weight: 700; color: var(--gold-soft); background: rgba(200,160,79,.12); border: 1px solid var(--gold-soft); border-radius: 10px; padding: 2px 8px; white-space: nowrap; }
+  .gem-level-badge { font-size: 11px; font-weight: 700; color: var(--gold-soft); background: rgba(45,212,191,.10); border: 1px solid var(--gold-soft); border-radius: 10px; padding: 2px 8px; white-space: nowrap; }
   .skill-info-i { font-size: 12px; opacity: .5; margin-left: 4px; }
   .skill-supports { display: flex; flex-wrap: wrap; gap: 6px; padding-left: 38px; }
   .support-chip { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #9ab8d8; background: rgba(46,111,176,.12); border: 1px solid #2e5a80; border-radius: 14px; padding: 3px 10px 3px 4px; cursor: pointer; }
   .support-chip:hover { background: rgba(46,111,176,.3); }
   .support-chip .mini-gem { width: 16px; height: 16px; border-radius: 50%; flex: 0 0 auto; border: 1px solid rgba(255,255,255,.2); }
-  .gem-tag { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: rgba(200,160,79,.12); border: 1px solid var(--gold-soft); color: var(--text); white-space: nowrap; }
+  .gem-tag { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: rgba(45,212,191,.10); border: 1px solid var(--gold-soft); color: var(--text); white-space: nowrap; }
   .gem-lvl { font-size: 10px; color: var(--text-dim); font-weight: 400; }
   .consum-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
   .consum-row:last-child { margin-bottom: 0; }
@@ -661,7 +661,7 @@
   #comparePanel { display: none; margin-top: 14px; text-align: left; }
   .cmp-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: stretch; }
   .cmp-col { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
-  .cmp-col.old { border-color: #5a4a2e; }
+  .cmp-col.old { border-color: #333a47; }
   .cmp-col.new { border-color: var(--gold-soft); }
   .cmp-col h4 { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; text-align: center; }
   .cmp-col .cmp-name { font-size: 12px; font-weight: 600; margin-bottom: 8px; min-height: 30px; }
@@ -672,7 +672,7 @@
   .cmp-verdict { text-align: center; margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: 700; }
   .cmp-verdict.better { background: rgba(76,175,106,.15); border: 1px solid var(--green); color: var(--green); }
   .cmp-verdict.worse  { background: rgba(208,88,78,.15); border: 1px solid var(--red);   color: var(--red); }
-  .cmp-verdict.equal  { background: rgba(200,160,79,.12); border: 1px solid var(--gold-soft); color: var(--gold); }
+  .cmp-verdict.equal  { background: rgba(45,212,191,.10); border: 1px solid var(--gold-soft); color: var(--gold); }
   .cmp-diff-pos { color: var(--green); }
   .cmp-diff-neg { color: var(--red); }
   .cmp-empty-old { color: var(--text-dim); font-style: italic; font-size: 12px; text-align: center; padding: 20px 0; }
@@ -680,7 +680,7 @@
   .hidden { display: none !important; }
   .loader { width: 22px; height: 22px; border: 3px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin .8s linear infinite; display: inline-block; vertical-align: middle; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .disclaimer { text-align: center; color: #5a513c; font-size: 10px; margin: 18px 18px 0; line-height: 1.4; }
+  .disclaimer { text-align: center; color: #5b6472; font-size: 10px; margin: 18px 18px 0; line-height: 1.4; }
   footer { text-align: center; color: var(--text-dim); font-size: 11px; margin-top: 14px; }
 </style>
 </head>
@@ -688,9 +688,9 @@
 
 <header>
   <div class="logo">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#c8a04f" stroke-width="1.8">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="1.8">
       <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
-      <circle cx="12" cy="12" r="3" fill="#c8a04f"/>
+      <circle cx="12" cy="12" r="3" fill="#2dd4bf"/>
     </svg>
     <div>
       <h1>Exile Eye Navigator</h1>
@@ -809,7 +809,7 @@
 
     <!-- Login-Karte -->
     <div id="loginView" class="login-card">
-      <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#9a7d3e" stroke-width="1.5" style="margin-bottom:10px">
+      <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#5b6472" stroke-width="1.5" style="margin-bottom:10px">
         <path d="M12 2L2 7v6c0 5 4 8 10 9 6-1 10-4 10-9V7L12 2z"/>
       </svg>
       <h2 style="color:var(--gold);letter-spacing:1px" data-i18n="login_welcome">Willkommen, Exile</h2>
@@ -846,43 +846,43 @@
         <div class="hud-frame">
           <div class="hud" id="hud">
             <div class="slot" data-area="weapon" data-slot="Weapon">
-              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M6.92 5L5 6.92l9.06 9.06-1.06 1.06-2.83-2.83-1.41 1.41 2.12 2.12-2.12 2.13 1.41 1.41 2.13-2.12 2.12 2.12 1.41-1.41-2.83-2.83 1.06-1.06L17.08 19 19 17.08 6.92 5z"/></svg>
+              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M6.92 5L5 6.92l9.06 9.06-1.06 1.06-2.83-2.83-1.41 1.41 2.12 2.12-2.12 2.13 1.41 1.41 2.13-2.12 2.12 2.12 1.41-1.41-2.83-2.83 1.06-1.06L17.08 19 19 17.08 6.92 5z"/></svg>
               <span class="slot-label" data-i18n="slot_weapon">Waffe</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="helm" data-slot="Helm">
-              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 2a7 7 0 00-7 7v6h2v-3h10v3h2V9a7 7 0 00-7-7zm-3 8a1 1 0 110-2 1 1 0 010 2zm6 0a1 1 0 110-2 1 1 0 010 2z"/></svg>
+              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2a7 7 0 00-7 7v6h2v-3h10v3h2V9a7 7 0 00-7-7zm-3 8a1 1 0 110-2 1 1 0 010 2zm6 0a1 1 0 110-2 1 1 0 010 2z"/></svg>
               <span class="slot-label" data-i18n="slot_helm">Helm</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="weapon2" data-slot="Offhand">
-              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 2L4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5l-8-3z"/></svg>
+              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2L4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5l-8-3z"/></svg>
               <span class="slot-label" data-i18n="slot_offhand">Nebenhand</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="amulet" data-slot="Amulet">
-              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 3a5 5 0 00-5 5h2a3 3 0 116 0h2a5 5 0 00-5-5zm0 8a3 3 0 100 6 3 3 0 000-6z"/></svg>
+              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 3a5 5 0 00-5 5h2a3 3 0 116 0h2a5 5 0 00-5-5zm0 8a3 3 0 100 6 3 3 0 000-6z"/></svg>
               <span class="slot-label" data-i18n="slot_amulet">Amulett</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="body" data-slot="BodyArmour">
-              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 2l7 3v6c0 5-3 8-7 11-4-3-7-6-7-11V5l7-3z"/></svg>
+              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2l7 3v6c0 5-3 8-7 11-4-3-7-6-7-11V5l7-3z"/></svg>
               <span class="slot-label" data-i18n="slot_body">Rüstung</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="ring2" data-slot="Ring2">
-              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 8a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm0-7l2 3h-4l2-3z"/></svg>
+              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 8a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm0-7l2 3h-4l2-3z"/></svg>
               <span class="slot-label" data-i18n="slot_ring_r">Ring R</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="ring1" data-slot="Ring">
-              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M12 8a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm0-7l2 3h-4l2-3z"/></svg>
+              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 8a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm0-7l2 3h-4l2-3z"/></svg>
               <span class="slot-label" data-i18n="slot_ring_l">Ring L</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="glove" data-slot="Gloves">
-              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M6 11V6a1 1 0 012 0v4h1V5a1 1 0 012 0v5h1V6a1 1 0 012 0v6l3 2v5a2 2 0 01-2 2H8a2 2 0 01-2-2v-3l-2-2a1 1 0 011-2l1 1z"/></svg>
+              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M6 11V6a1 1 0 012 0v4h1V5a1 1 0 012 0v5h1V6a1 1 0 012 0v6l3 2v5a2 2 0 01-2 2H8a2 2 0 01-2-2v-3l-2-2a1 1 0 011-2l1 1z"/></svg>
               <span class="slot-label" data-i18n="slot_gloves">Handschuhe</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="belt" data-slot="Belt">
-              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M3 9h18v6H3V9zm8 1v4h2v-4h-2z"/></svg>
+              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M3 9h18v6H3V9zm8 1v4h2v-4h-2z"/></svg>
               <span class="slot-label" data-i18n="slot_belt">Gürtel</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
             <div class="slot" data-area="boots" data-slot="Boots">
-              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#c8a04f"><path d="M7 3v9l-2 2v5a1 1 0 001 1h12a1 1 0 001-1v-1c0-2-1-3-4-4l-4-2V3H7z"/></svg>
+              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M7 3v9l-2 2v5a1 1 0 001 1h12a1 1 0 001-1v-1c0-2-1-3-4-4l-4-2V3H7z"/></svg>
               <span class="slot-label" data-i18n="slot_boots">Stiefel</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             </div>
           </div>
@@ -1034,7 +1034,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.13</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.14</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_impressum">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_privacy">Datenschutz</a> ·
@@ -1043,7 +1043,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.13";
+const APP_VERSION = "v1.14";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -2865,5 +2865,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a434b96c9fb3bb35',t:'MTc5MDc4NzAwMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a441d2e93f8e12c4',t:'MTc5MDkyNDM2MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
