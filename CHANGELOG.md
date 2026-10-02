@@ -10,6 +10,22 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.17 (01.10.2026, Stufe 2b: Pro-Niveau)
+- **Stat-Score als kompaktes Chip im Header** statt eigener Zeile (immer sichtbar, Bounce-Animation bleibt, auf Mobile nur die Zahl)
+- **Status-Meldungen als Toast** (oben rechts, ploppt auf, verschwindet von selbst: ok 3s / Fehler 5s) statt Vollbreiten-Banner, der die App nach unten schiebt
+- **Leere Slots mit Icon-Silhouetten** (halbtransparente Waffen/Helm/Schild-Umrisse statt kahlen Textkästen)
+- **Gewichts-Slider gruppiert**: Defensiv / Offensiv / Utility, je 2 Spalten (1 auf Mobile)
+- **„.build-Datei auswählen" dezent** (gestrichelte Zone statt dominantem Button)
+- „App installieren"-Button als dezenter Ghost-Button
+
+## v1.16 (30.09.2026)
+- **Neu: Skill-Gems aus der GGG-API** — der Charakter-Tab zeigt jetzt die Skill-Sets deines Charakters mit Main-Gem + Support-Gems (Icons + Namen). Zum Vergleichen, ob die richtigen Gems gesteckt sind, ohne ins Spiel zu müssen.
+- **Neu: Login-Button im Header** — „Mit GGG anmelden" ist jetzt immer sichtbar (war vorher nur im Charakter-Panel).
+- **Fix:** Sprachwechsel sprang in den Build-Tab (Re-Render der Build-Leiste zwang den Tab-Wechsel)
+- **Fix:** Preis-Check/Trade-Link springt nicht mehr in den Settings-Tab
+- **Fix:** Winzige Scrollbar an der Tab-Bar (overflow-y) entfernt
+- **Neu: Tab-Position bleibt über Reloads erhalten** (localStorage)
+
 ## v1.15 (30.09.2026, Stufe 2a: Struktur & Ruhe)
 - **Tab-Navigation statt Vertikal-Stapel:** Scanner / Charakter / Build / Einstellungen als horizontale Tabs, immer nur ein Bereich sichtbar.
 - **Flache Buttons:** Primär-CTAs (Foto, Import) ohne Gradient, solide Tealfarbe.
