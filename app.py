@@ -567,6 +567,45 @@ def api_character_gear():
         })
 
 
+    # Skill-Gems des Charakters (PoE2: character.skills = array of Item).
+    # Main-Gem = Skill-Gruppe; Support-Gems liegen in socketedItems,
+    # alternativ als eigene Eintraege mit support=true direkt im Array.
+    skills_out = []
+    last_main = None
+    for s in (character.get("skills", []) or []):
+        if not isinstance(s, dict):
+            continue
+        name = s.get("name") or s.get("gemSkill") or s.get("typeLine") or ""
+        icon = s.get("icon") or ""
+        level = s.get("itemLevel") or s.get("ilvl") or 0
+        if s.get("support"):
+            # Support-Gem als eigene Eintragung -> zur letzten Skill-Gruppe
+            if last_main is not None:
+                last_main["_sib"].append({"name": name, "icon": icon, "level": level})
+            continue
+        sock = []
+        for sp in (s.get("socketedItems", []) or []):
+            if not isinstance(sp, dict):
+                continue
+            sp_name = sp.get("name") or sp.get("typeLine") or ""
+            sp_icon = sp.get("icon") or ""
+            if sp_name or sp_icon:
+                sock.append({"name": sp_name, "icon": sp_icon,
+                             "level": sp.get("itemLevel") or sp.get("ilvl") or 0})
+        last_main = {
+            "name": name,
+            "main": {"name": name, "icon": icon, "level": level},
+            "supports": sock,
+            "_sib": [],
+        }
+        if name or icon or sock:
+            skills_out.append(last_main)
+    for sm in skills_out:
+        if not sm["supports"]:
+            sm["supports"] = sm.pop("_sib")
+        else:
+            sm.pop("_sib", None)
+
     return jsonify({
         "character": {
             "name":  character.get("name"),
@@ -574,6 +613,7 @@ def api_character_gear():
             "level": character.get("level"),
         },
         "items": items,
+        "skills": skills_out,
     })
 
 
