@@ -10,6 +10,14 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.20 (02.10.2026, Namenskonflikte im Support-Check)
+- **Fuzzy-Gem-Matching:** GGG und Build-Planer nennen dieselben Skills oft anders — jetzt werden sie trotzdem erkannt:
+  - „**Maul**" = „**Bear** Maul", „Fire Spell on Hit" = „**Ascendancy** Fire Spell On Hit" (Flavor-Präfixe Bear/Wolf/Wyvern/Ascendancy werden ignoriert)
+  - „Primal Armament **Two**" = „Primal Armament **II**" (Tier-Wörter & Ziffern werden wie römische Zahlen behandelt)
+  - „Living Bomb **Player**" = „Living Bomb" (Maxroll-Varianten-Suffix)
+- **Support-Overlap-Paarung:** Wenn Namen komplett abweichen (z.B. Maxroll „Bear Rampage" vs. GGG „Furious Slam"), werden Skills über ≥2 gemeinsame Support-Gems gepaart — die ✓/✗-Badges sitzen dann trotz Umbenennung richtig.
+- **Neu: „≈"-Alias-Badge** zeigt an, wie der Skill im Build heißt, wenn der Name vom Gear-Namen abweicht (teal, nicht grau — klar von „nicht im Build" unterscheidbar).
+
 ## v1.19 (02.10.2026)
 - **Fix: Skill-Namen im Charakter-Tab** — GGG liefert bei Main-Skills offenbar oft keinen Namen (statt „Bear Maul" stand da im schlimmsten Fall die rohe CDN-Icon-URL). Neuer Fallback: der Name wird aus der Icon-URL abgeleitet (`DruidBearMaul.png` → „Bear Maul", `SmithOfKitavaTriggerFireballsSkillIcon` → „Trigger Fireballs"). Unit-getestet mit allen 10 Skills aus dem echten Charakter.
 - **Neu: Support-Gem-Check gegen den aktiven Build** — der Charakter-Tab markiert jetzt direkt: ✓ Support passt zum importierten Build, ✗ der Build will diesen Support, du hast ihn aber nicht gesockelt (rot gestrichelt), und „nicht im Build"-Badge bei Skills, die dein Build gar nicht nutzt. Tier-Suffixe („Overabundance I" vs „Overabundance II") zählen beim Abgleich nicht.
