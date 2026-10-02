@@ -73,10 +73,21 @@
 
   /* ---------- Banner / Status ---------- */
   #banner {
-    display: none; margin: 12px 18px; padding: 11px 14px;
-    border-radius: 6px; font-size: 13px; border: 1px solid;
+    display: none;
+    position: fixed;
+    top: calc(var(--header-h, 60px) + 10px);
+    right: 16px;
+    z-index: 60;
+    max-width: min(340px, calc(100vw - 32px));
+    padding: 10px 14px;
+    border-radius: 8px; font-size: 13px; border: 1px solid;
+    box-shadow: 0 6px 20px rgba(0,0,0,.5);
+    animation: toast-in .25s ease-out;
   }
+  @keyframes toast-in { from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   #banner.error { background: #2a1410; border-color: var(--red);   color: #f0a89e; }
+  #installBtn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
+  #installBtn:hover { color: var(--text); border-color: var(--gold-soft); }
   #banner.ok    { background: #122a18; border-color: var(--green); color: #a8e0b8; }
 
   .section { padding: 16px 18px; }
@@ -150,6 +161,7 @@
     margin: 14px 18px 0;
     border-bottom: 1px solid var(--border);
     overflow-x: auto;
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
   }
   .tab-btn { flex-shrink: 0; }
@@ -188,6 +200,14 @@
   .rc-tile-status { font-size: 10.5px; margin-top: 5px; }
   .rc-bar-sm { height: 5px; margin-top: 8px; }
 
+  /* Skill-Gems aus GGG-API (Charakter-Tab) */
+  .gear-skill { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .gear-skill-main { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text); }
+  .gear-skill-main img { width: 28px; height: 28px; }
+  .gear-skill-supports { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+  .gear-skill-sup { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-dim); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 3px 7px; }
+  .gear-skill-sup img { width: 20px; height: 20px; }
+
   /* ============================================================
      EQUIPMENT-HUD im echten PoE2 Steinplatten-Look
      ============================================================ */
@@ -212,21 +232,25 @@
   .hud-frame::after  { bottom: 6px; right: 6px; border-left: none; border-top: none; }
 
   /* Gesamtscore - eigenständige Leiste direkt unter dem Header, außerhalb der Panels */
+  /* Stat-Score als kompaktes Chip im Header */
   #totalScore {
-    margin: 10px 18px 0;
-    background: linear-gradient(135deg, #1e242b, #16181d);
-    border: 1px solid var(--gold-soft);
-    border-radius: 8px;
-    padding: 10px 14px;
-    display: none; align-items: center; justify-content: space-between;
+    display: none; align-items: center;
     gap: 10px;
-    position: sticky;
-    top: 72px; /* Abgestimmt auf Header-Höhe */
-    z-index: 40;
-    box-shadow: 0 4px 12px rgba(0,0,0,.4);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 12px;
+    margin-left: auto;
+    margin-right: 10px;
   }
-  #totalScore .ts-label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
-  #totalScore .ts-info { cursor: help; opacity: .7; font-size: 11px; margin-left: 5px; letter-spacing: 0; }
+  #totalScore .ts-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+  #totalScore .ts-info { cursor: help; opacity: .7; font-size: 10px; margin-left: 4px; letter-spacing: 0; }
+  #totalScore .ts-value { font-size: 18px; }
+  @media (max-width: 640px) {
+    #totalScore { padding: 4px 10px; margin-right: 6px; }
+    #totalScore > div:first-child { display: none; }
+    #totalScore .ts-value { font-size: 16px; }
+  }
   #totalScore .ts-info:hover { opacity: 1; }
   #totalScore .ts-count { font-size: 11px; color: var(--text-dim); }
   #totalScore .ts-value {
@@ -281,6 +305,14 @@
   .slot[data-area="weapon"], .slot[data-area="weapon2"] { min-height: 180px; }
   .slot[data-area="body"] { min-height: 130px; }
 
+  .slot .slot-silhouette {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text); opacity: .08;
+    pointer-events: none;
+  }
+  .slot .slot-silhouette svg { width: 46px; height: 46px; }
+  .slot.filled .slot-silhouette { display: none; }
   .slot {
     background:
       linear-gradient(180deg, rgba(30,26,20,.85), rgba(12,10,7,.95));
@@ -637,8 +669,14 @@
   .preset-btn:hover { border-color: var(--gold-soft); }
   .preset-btn.active { background: var(--gold); color: #0d1110; border-color: var(--gold); font-weight: 600; }
 
+  .weight-group { margin-bottom: 14px; }
+  .weight-group-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
+  .weight-group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 20px; }
+  @media (max-width: 640px) { .weight-group-grid { grid-template-columns: 1fr; } }
   .weight-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
   .weight-row .wlabel { flex: 0 0 110px; font-size: 12px; color: var(--text); }
+  #buildFileBtn { background: transparent; border: 1px dashed var(--border); color: var(--text-dim); font-weight: 500; }
+  #buildFileBtn:hover { border-color: var(--gold-soft); color: var(--text); }
   .weight-row input[type=range] {
     flex: 1; height: 5px; -webkit-appearance: none; appearance: none;
     background: var(--border); border-radius: 3px; outline: none;
@@ -741,8 +779,16 @@
       <span>PoE2 Companion · Item Scanner</span>
     </div>
   </div>
+  <div id="totalScore">
+    <div>
+      <div class="ts-label">Stat-Score<span class="ts-info" data-i18n-title="ts_tooltip">ⓘ</span></div>
+      <div class="ts-count" id="tsCount" data-i18n="ts_count0">0 Slots gewertet</div>
+    </div>
+    <div class="ts-value" id="tsValue">0</div>
+  </div>
   <div style="display:flex;gap:8px;align-items:center">
     <button id="langToggle" class="btn" style="padding:7px 11px;font-size:12px" onclick="toggleLang()">🌍 DE</button>
+    <a id="loginBtn" class="btn primary" data-i18n="login_btn" style="display:none;padding:7px 11px;font-size:12px" href="/login">🔐 Mit GGG anmelden</a>
     <button id="installBtn" class="btn" style="display:none" onclick="installApp()">📲 App installieren</button>
     <button id="logoutBtn" class="btn danger hidden" onclick="location.href='/logout'">Logout</button>
   </div>
@@ -768,14 +814,6 @@
 </nav>
 
 <div id="banner"></div>
-
-<div id="totalScore">
-  <div>
-    <div class="ts-label">Stat-Score<span class="ts-info" data-i18n-title="ts_tooltip">ⓘ</span></div>
-    <div class="ts-count" id="tsCount" data-i18n="ts_count0">0 Slots gewertet</div>
-  </div>
-  <div class="ts-value" id="tsValue">0</div>
-</div>
 
 <!-- ============================================================
      PANEL 1: ITEM-SCANNER (offen)
@@ -911,48 +949,53 @@
             <div class="slot" data-area="weapon" data-slot="Weapon">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M6.92 5L5 6.92l9.06 9.06-1.06 1.06-2.83-2.83-1.41 1.41 2.12 2.12-2.12 2.13 1.41 1.41 2.13-2.12 2.12 2.12 1.41-1.41-2.83-2.83 1.06-1.06L17.08 19 19 17.08 6.92 5z"/></svg>
               <span class="slot-label" data-i18n="slot_weapon">Waffe</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
-            </div>
+            <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M6.92 5L5 6.92l9.06 9.06-1.06 1.06-2.83-2.83-1.41 1.41 2.12 2.12-2.12 2.13 1.41 1.41 2.13-2.12 2.12 2.12 1.41-1.41-2.83-2.83 1.06-1.06L17.08 19 19 17.08 6.92 5z"/></svg></span></div>
             <div class="slot" data-area="helm" data-slot="Helm">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2a7 7 0 00-7 7v6h2v-3h10v3h2V9a7 7 0 00-7-7zm-3 8a1 1 0 110-2 1 1 0 010 2zm6 0a1 1 0 110-2 1 1 0 010 2z"/></svg>
               <span class="slot-label" data-i18n="slot_helm">Helm</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
-            </div>
+            <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2a7 7 0 00-7 7v6h2v-3h10v3h2V9a7 7 0 00-7-7zm-3 8a1 1 0 110-2 1 1 0 010 2zm6 0a1 1 0 110-2 1 1 0 010 2z"/></svg></span></div>
             <div class="slot" data-area="weapon2" data-slot="Offhand">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2L4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5l-8-3z"/></svg>
               <span class="slot-label" data-i18n="slot_offhand">Nebenhand</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
-            </div>
+            <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2L4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5l-8-3z"/></svg></span></div>
             <div class="slot" data-area="amulet" data-slot="Amulet">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 3a5 5 0 00-5 5h2a3 3 0 116 0h2a5 5 0 00-5-5zm0 8a3 3 0 100 6 3 3 0 000-6z"/></svg>
               <span class="slot-label" data-i18n="slot_amulet">Amulett</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
-            </div>
+            <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 3a5 5 0 00-5 5h2a3 3 0 116 0h2a5 5 0 00-5-5zm0 8a3 3 0 100 6 3 3 0 000-6z"/></svg></span></div>
             <div class="slot" data-area="body" data-slot="BodyArmour">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2l7 3v6c0 5-3 8-7 11-4-3-7-6-7-11V5l7-3z"/></svg>
               <span class="slot-label" data-i18n="slot_body">Rüstung</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
-            </div>
+            <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2l7 3v6c0 5-3 8-7 11-4-3-7-6-7-11V5l7-3z"/></svg></span></div>
             <div class="slot" data-area="ring2" data-slot="Ring2">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 8a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm0-7l2 3h-4l2-3z"/></svg>
               <span class="slot-label" data-i18n="slot_ring_r">Ring R</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
-            </div>
+            <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 8a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm0-7l2 3h-4l2-3z"/></svg></span></div>
             <div class="slot" data-area="ring1" data-slot="Ring">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 8a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm0-7l2 3h-4l2-3z"/></svg>
               <span class="slot-label" data-i18n="slot_ring_l">Ring L</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
-            </div>
+            <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 8a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm0-7l2 3h-4l2-3z"/></svg></span></div>
             <div class="slot" data-area="glove" data-slot="Gloves">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M6 11V6a1 1 0 012 0v4h1V5a1 1 0 012 0v5h1V6a1 1 0 012 0v6l3 2v5a2 2 0 01-2 2H8a2 2 0 01-2-2v-3l-2-2a1 1 0 011-2l1 1z"/></svg>
               <span class="slot-label" data-i18n="slot_gloves">Handschuhe</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
-            </div>
+            <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M6 11V6a1 1 0 012 0v4h1V5a1 1 0 012 0v5h1V6a1 1 0 012 0v6l3 2v5a2 2 0 01-2 2H8a2 2 0 01-2-2v-3l-2-2a1 1 0 011-2l1 1z"/></svg></span></div>
             <div class="slot" data-area="belt" data-slot="Belt">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M3 9h18v6H3V9zm8 1v4h2v-4h-2z"/></svg>
               <span class="slot-label" data-i18n="slot_belt">Gürtel</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
-            </div>
+            <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M3 9h18v6H3V9zm8 1v4h2v-4h-2z"/></svg></span></div>
             <div class="slot" data-area="boots" data-slot="Boots">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M7 3v9l-2 2v5a1 1 0 001 1h12a1 1 0 001-1v-1c0-2-1-3-4-4l-4-2V3H7z"/></svg>
               <span class="slot-label" data-i18n="slot_boots">Stiefel</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
-            </div>
+            <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M7 3v9l-2 2v5a1 1 0 001 1h12a1 1 0 001-1v-1c0-2-1-3-4-4l-4-2V3H7z"/></svg></span></div>
           </div>
           <div id="consumablesInHud" class="hud-consumables" style="display:none">
             <div id="consumablesList"></div>
           </div>
         </div>
+      </div>
+
+      <div class="section" id="gearSkillsSection" style="display:none">
+        <h2 data-i18n="skills_gear_title">Skills &amp; Gems (dein Charakter)</h2>
+        <div id="gearSkillsList"></div>
       </div>
     </div>
   </div>
@@ -1022,7 +1065,7 @@
       <div class="build-import">
         <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:5px" data-i18n="import_lbl">🧠 Build importieren:</label>
         <input type="file" id="buildFileInput" style="display:none">
-        <button class="btn primary" style="width:100%;margin-bottom:6px" data-i18n="import_file_btn" onclick="document.getElementById('buildFileInput').click()">📂 .build-Datei auswählen</button>
+        <button id="buildFileBtn" class="btn primary" style="width:100%;margin-bottom:6px" data-i18n="import_file_btn" onclick="document.getElementById('buildFileInput').click()">📂 .build-Datei auswählen</button>
         <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.5" data-i18n-html="import_file_hint">
           Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus. ⭐ am genauesten
         </div>
@@ -1097,7 +1140,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.15</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.17</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_impressum">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_privacy">Datenschutz</a> ·
@@ -1106,7 +1149,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.15";
+const APP_VERSION = "v1.17";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1138,6 +1181,7 @@ function switchTab(tabId) {
   document.querySelectorAll(".tab-btn").forEach(b => {
     b.classList.toggle("active", b.dataset.tab === tabId);
   });
+  try { localStorage.setItem("exileEye_lastTab", tabId); } catch (e) {}
 }
 function initTabs() {
   document.querySelectorAll(".tab-btn").forEach(b => {
@@ -1147,7 +1191,8 @@ function initTabs() {
     const head = panel.querySelector(".panel-head");
     if (head) head.addEventListener("click", () => switchTab(panel.dataset.panelId));
   });
-  switchTab("scanner");
+  const lastTab = (typeof localStorage !== "undefined") ? localStorage.getItem("exileEye_lastTab") : null;
+  switchTab(["scanner","character","buildplan","settings"].includes(lastTab) ? lastTab : "scanner");
 }
 initTabs();
 
@@ -1176,6 +1221,8 @@ const I18N = {
     h_skills:"Skills & Support-Gems", h_weights:"Gewichtung · was ist dir wichtig?",
     h_trade:"🛒 Trade-Einstellungen", h_scan:"Item scannen",
     tab_scanner:"Scanner", tab_character:"Charakter", tab_build:"Build", tab_settings:"Einstellungen",
+    skills_gear_title:"Skills & Gems (dein Charakter)", skills_gear_unknown:"Unbekanntes Gem",
+    wg_defense:"Defensiv", wg_offense:"Offensiv", wg_utility:"Utility",
     logout:"Logout",
     ts_tooltip:"Rechnet deine Ausrüstung mit effektiven Werten: (Basiswert + flat-Mods) × (1 + increased%) – so zählt z.B. 85% erhöhte Rüstung auf einer 369er-Basis wie +314 Rüstung. Unique-Effekte, Skill-Synergien und Build-Mechaniken zählen nicht.",
     ts_count0:"0 Slots gewertet", ts_count:"{n} Slots gewertet",
@@ -1271,6 +1318,8 @@ const I18N = {
     h_skills:"Skills & Support Gems", h_weights:"Weighting · what matters to you?",
     h_trade:"🛒 Trade Settings", h_scan:"Scan item",
     tab_scanner:"Scanner", tab_character:"Character", tab_build:"Build", tab_settings:"Settings",
+    skills_gear_title:"Skills & Gems (your character)", skills_gear_unknown:"Unknown gem",
+    wg_defense:"Defense", wg_offense:"Offense", wg_utility:"Utility",
     logout:"Logout",
     ts_tooltip:"Scores your gear with effective values: (base + flat mods) × (1 + increased%). E.g. 85% increased Armour on a 369 base counts like +314 Armour. Unique effects, skill synergies and build mechanics are not included.",
     ts_count0:"0 slots scored", ts_count:"{n} slots scored",
@@ -1439,7 +1488,8 @@ function showBanner(msg, type = "error") {
   b.textContent = msg;
   b.className = type;
   b.style.display = "block";
-  if (type === "ok") setTimeout(() => { b.style.display = "none"; }, 4000);
+  clearTimeout(b._hideTimer);
+  b._hideTimer = setTimeout(() => { b.style.display = "none"; }, type === "ok" ? 3000 : 5000);
 }
 (function checkUrlError() {
   const p = new URLSearchParams(location.search);
@@ -1457,12 +1507,14 @@ async function init() {
       document.getElementById("loginView").classList.add("hidden");
       document.getElementById("mainView").classList.remove("hidden");
       document.getElementById("logoutBtn").classList.remove("hidden");
+      const lbIn = document.getElementById("loginBtn"); if (lbIn) lbIn.style.display = "none";
       syncHeaderHeight();
       setPanelStatus("character", "✓ " + (data.account || "?"));
       loadWeights();
       updateActiveBuildBar();
       loadCharacters();
     } else {
+      const lbOut = document.getElementById("loginBtn"); if (lbOut) lbOut.style.display = "inline-block";
       if (data.error) showBanner(t("bn_status_error") + data.error);
     }
   } catch (e) { showBanner(t("bn_server_down")); }
@@ -1637,12 +1689,34 @@ async function loadGear(name) {
     const data = await res.json();
     if (data.error) { showBanner(t("bn_gear_error") + data.error); return; }
     renderGear(data.items || []);
+    renderGearSkills(data.skills || []);
     setPanelStatus("character", "✓ " + name);
     showBanner(t("bn_gear_of") + name + " geladen", "ok");
   } catch (e) { showBanner("Fehler: " + e.message); }
 }
 
 let equippedItems = {};
+
+function renderGearSkills(skills) {
+  const sec = document.getElementById("gearSkillsSection");
+  const list = document.getElementById("gearSkillsList");
+  if (!sec || !list) return;
+  if (!skills || !skills.length) { sec.style.display = "none"; return; }
+  let html = "";
+  skills.forEach(s => {
+    const main = s.main || {};
+    const sups = (s.supports || []).filter(x => x && (x.name || x.icon));
+    html += `<div class="gear-skill">
+      <div class="gear-skill-main">
+        ${main.icon ? `<img src="${esc(main.icon)}" alt="" onerror="this.remove()">` : ""}
+        <span>${esc(s.name || main.name || t("skills_gear_unknown"))}</span>
+      </div>
+      ${sups.length ? `<div class="gear-skill-supports">${sups.map(sp => `<span class="gear-skill-sup" title="${esc(sp.name)}">${sp.icon ? `<img src="${esc(sp.icon)}" alt="" onerror="this.remove()">` : ""}${sp.name ? `<span>${esc(sp.name)}</span>` : ""}</span>`).join("")}</div>` : ""}
+    </div>`;
+  });
+  list.innerHTML = html;
+  sec.style.display = "block";
+}
 
 function renderGear(items) {
   equippedItems = {};
@@ -2020,7 +2094,7 @@ function updateActiveBuildBar() {
   // Build = aktiv, sobald ein Name gesetzt ist – auch reine Gewichts-Builds
   // ohne Slot-Daten muessen sichtbar sein (sonst kann man sie nicht abwählen).
   const hasBuild = !!name;
-  if (hasBuild) { nameEl.textContent = t("active_build_prefix") + name; bar.style.display = "block"; setPanelStatus("buildplan", "✓ " + name); }
+  if (hasBuild) { nameEl.textContent = t("active_build_prefix") + name; bar.style.display = "block"; setPanelStatus("buildplan", "✓ " + name, false); }
   else { bar.style.display = "none"; }
   renderSavedBuildsBar();
 }
@@ -2213,13 +2287,27 @@ let currentWeights = {};
 function buildSliders() {
   const c = document.getElementById("weightSliders");
   c.innerHTML = "";
-  STAT_KEYS.forEach(k => {
+  const groups = [
+    { label: t("wg_defense"), keys: ["life","fire_res","cold_res","lightning_res","chaos_res","energy_shield","armour"] },
+    { label: t("wg_offense"), keys: ["crit_chance","spell_damage","fire_damage","cold_damage","lightning_damage","chaos_damage"] },
+    { label: t("wg_utility"), keys: ["movement_speed"] },
+  ];
+  groups.forEach(g => {
+    const gw = document.createElement("div");
+    gw.className = "weight-group";
+    const gl = document.createElement("div");
+    gl.className = "weight-group-label";
+    gl.textContent = g.label;
+    gw.appendChild(gl);
+    const grid = document.createElement("div");
+    grid.className = "weight-group-grid";
+    g.keys.forEach(k => {
     const row = document.createElement("div");
     row.className = "weight-row";
     row.innerHTML = `<span class="wlabel">${labelFor(k)}</span>
       <input type="range" min="0" max="1" step="0.05" value="${currentWeights[k] ?? 0}" data-key="${k}">
       <span class="wval" id="wv_${k}">${(currentWeights[k] ?? 0).toFixed(2)}</span>`;
-    c.appendChild(row);
+    grid.appendChild(row);
     row.querySelector("input").addEventListener("input", (e) => {
       const key = e.target.dataset.key;
       currentWeights[key] = parseFloat(e.target.value);
@@ -2228,6 +2316,9 @@ function buildSliders() {
       clearActivePreset();
       scheduleScoreRefresh();
     });
+    });
+    gw.appendChild(grid);
+    c.appendChild(gw);
   });
 }
 
@@ -2692,7 +2783,7 @@ async function priceCheckScan() {
     const data = await res.json();
     if (data.url) {
       window.open(data.url, "_blank");
-      setPanelStatus("settings", "💰 Preis-Check geöffnet");
+      setPanelStatus("settings", "💰 Preis-Check geöffnet", false);
       showBanner(t("bn_price_open"), "ok");
     }
   } catch (e) { showBanner(t("bn_price_error") + e.message); }
@@ -2941,5 +3032,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4422d450b699745',t:'MTc5MDkyODA2Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a442dae2f81d1010',t:'MTc5MDkzNTE3Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
