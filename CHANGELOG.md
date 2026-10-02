@@ -10,6 +10,20 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.15 (30.09.2026, Stufe 2a: Struktur & Ruhe)
+- **Tab-Navigation statt Vertikal-Stapel:** Scanner / Charakter / Build / Einstellungen als horizontale Tabs, immer nur ein Bereich sichtbar.
+- **Flache Buttons:** Primär-CTAs (Foto, Import) ohne Gradient, solide Tealfarbe.
+- **DEMO-Badge im Header** statt grünem Vollbreiten-Banner (dezent neben dem Titel).
+- **Kompaktes 2×2-Resist-Grid** statt vier Vollbreiten-Balken (Mini-Bars, kurze Labels „Feuer-Res" etc.)
+- Trade-Link öffnet nicht mehr den Settings-Tab (stört nur, ohne Mehrwert)
+- Mobile: Tab-Bar horizontal scrollbar, kein Layout-Overflow
+- Bekannt (vor v1.15, nicht neu): HUD-3.-Spalte auf sehr schmalen Screens leicht beschnitten — wird in der ARPG-Layout-Stufe neu gebaut
+
+## v1.14 (29.09.2026, Design-Skin)
+- **Komplettes neues Design-System:** Charcoal-Grundton + Teal-Akzent statt PoE-Braun/Gold (66 Farb-Umstellungen)
+- Rarity-Farben, Mod-Farben und blaue Build-Leiste bewusst beibehalten (Game-Konvention)
+- Basis für die UI-Überarbeitung nach Community-Feedback
+
 ## v1.13 (28.09.2026)
 - **Neu: "Why"-Hints im Item-Tooltip** (Antwort auf die Black-Box-Kritik):
   - **Cap-Awareness:** Resist-Stats zeigen, wie viel davon bei deinem aktuellen Gear-Stand wirklich zählt ("Fire Res: only ~50% of +60% counts (you're at 25% / 75% cap)")
