@@ -120,6 +120,78 @@ def _extract_mod_texts(mod_list):
         # Andere unerwartete Typen werden ignoriert
     return extracted_texts
 
+# --- Skill-Namen aus der Icon-URL ableiten ---
+# GGG liefert bei Main-Skills im gear-Endpoint oft weder "name" noch
+# "typeLine" - die Icon-URL enthaelt aber den Skill-Slug
+# (z.B. ".../SkillIcons/DruidBearMaul.png" -> "Bear Maul").
+_GEM_SMALL_WORDS = {"of", "the", "and", "to", "a", "an", "on", "with", "from"}
+_GEM_WORD_FIXES = {
+    "ofthe": ("of", "the"),
+    "ofkitava": ("of", "kitava"),
+}
+# Klassen-/Ascendancy-Praefixe, die GGG an Skill-Icons haengt (longest first)
+_GEM_PREFIXES = [
+    ("smith", "of", "kitava"), ("acolyte", "of", "chayula"), ("of", "kitava"),
+    ("blood", "mage"), ("gemling", "legionnaire"),
+    ("druid",), ("warrior",), ("brute",), ("mercenary",), ("witch",),
+    ("sorceress",), ("monk",), ("ranger",), ("huntress",), ("smith",),
+    ("marauder",), ("duelist",), ("templar",), ("shadow",), ("scion",),
+    ("titan",), ("amazon",), ("deadeye",), ("pathfinder",), ("ritualist",),
+    ("witchhunter",), ("chronomancer",), ("stormweaver",), ("infernalist",),
+    ("lich",), ("invoker",), ("warbringer",),
+]
+
+
+def gem_name_from_icon(icon_url):
+    """Leitet einen lesbaren Skill-Namen aus der CDN-Icon-URL ab."""
+    if not icon_url:
+        return ""
+    base = icon_url.rsplit("/", 1)[-1].split("?")[0]
+    base = re.sub(r"\.(png|jpg|jpeg|webp)$", "", base, flags=re.IGNORECASE)
+    # CamelCase -> Wortliste (inkl. Lowercase-Runs wie "ofthe")
+    words = re.findall(r"[A-Z]+(?![a-z])|[A-Z][a-z]*|[a-z]+|[0-9]+", base)
+    # Lowercase-Runs aufbrechen ("ofthe" / "Furyofthe" -> of the)
+    fixed = []
+    for w in words:
+        lw = w.lower()
+        done = False
+        if lw in _GEM_WORD_FIXES:
+            fixed.extend(_GEM_WORD_FIXES[lw]); done = True
+        else:
+            for glued, parts in _GEM_WORD_FIXES.items():
+                if lw.endswith(glued) and len(lw) > len(glued):
+                    fixed.append(w[:len(w) - len(glued)])
+                    fixed.extend(parts)
+                    done = True
+                    break
+        if not done:
+            fixed.append(w)
+    words = fixed
+    # Suffix "SkillIcon"/"Icon" abschneiden
+    while words and words[-1].lower() == "icon":
+        words.pop()
+    if words and words[-1].lower() == "skill":
+        words.pop()
+    # Klassen-/Ascendancy-Praefix streifen (nur wenn danach noch was uebrig)
+    lowered = [w.lower() for w in words]
+    stripped = True
+    while stripped:
+        stripped = False
+        lowered = [w.lower() for w in words]
+        for pre in _GEM_PREFIXES:
+            if len(words) > len(pre) and tuple(lowered[:len(pre)]) == pre:
+                del words[:len(pre)]
+                stripped = True
+                break
+    if not words:
+        return ""
+    out = []
+    for i, w in enumerate(words):
+        lw = w.lower()
+        out.append(lw if (i > 0 and lw in _GEM_SMALL_WORDS) else lw.capitalize())
+    return " ".join(out)
+
+
 def _coerce_display_value(v):
     """
     GGG API kann manchmal Werte als Objekte liefern (z.B. in properties/requirements).
@@ -575,8 +647,12 @@ def api_character_gear():
     for s in (character.get("skills", []) or []):
         if not isinstance(s, dict):
             continue
-        name = s.get("name") or s.get("gemSkill") or s.get("typeLine") or ""
+        raw_name = s.get("name") or s.get("gemSkill") or ""
         icon = s.get("icon") or ""
+        # Roh-Name unbrauchbar (leer oder versehentlich eine URL)?
+        if not raw_name or raw_name.startswith(("http://", "https://")):
+            raw_name = s.get("typeLine") or s.get("baseType") or ""
+        name = raw_name or gem_name_from_icon(icon)
         level = s.get("itemLevel") or s.get("ilvl") or 0
         if s.get("support"):
             # Support-Gem als eigene Eintragung -> zur letzten Skill-Gruppe
@@ -587,8 +663,9 @@ def api_character_gear():
         for sp in (s.get("socketedItems", []) or []):
             if not isinstance(sp, dict):
                 continue
-            sp_name = sp.get("name") or sp.get("typeLine") or ""
             sp_icon = sp.get("icon") or ""
+            sp_name = (sp.get("name") or sp.get("typeLine") or sp.get("baseType")
+                       or gem_name_from_icon(sp_icon))
             if sp_name or sp_icon:
                 sock.append({"name": sp_name, "icon": sp_icon,
                              "level": sp.get("itemLevel") or sp.get("ilvl") or 0})
