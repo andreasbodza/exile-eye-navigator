@@ -1140,7 +1140,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.17</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.18</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_impressum">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_privacy">Datenschutz</a> ·
@@ -1149,7 +1149,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.17";
+const APP_VERSION = "v1.18";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1223,6 +1223,8 @@ const I18N = {
     tab_scanner:"Scanner", tab_character:"Charakter", tab_build:"Build", tab_settings:"Einstellungen",
     skills_gear_title:"Skills & Gems (dein Charakter)", skills_gear_unknown:"Unbekanntes Gem",
     wg_defense:"Defensiv", wg_offense:"Offensiv", wg_utility:"Utility",
+    gem_type_skill:"Skill-Gemme", gem_type_support:"Support-Gemme", gem_level_from:"ab Level {l}",
+    gem_supports_label:"UNTERSTÜTZUNGS-GEMMEN ({n})", gem_desc_hint:"Die vollständige Skill-Beschreibung findest du im Spiel.",
     logout:"Logout",
     ts_tooltip:"Rechnet deine Ausrüstung mit effektiven Werten: (Basiswert + flat-Mods) × (1 + increased%) – so zählt z.B. 85% erhöhte Rüstung auf einer 369er-Basis wie +314 Rüstung. Unique-Effekte, Skill-Synergien und Build-Mechaniken zählen nicht.",
     ts_count0:"0 Slots gewertet", ts_count:"{n} Slots gewertet",
@@ -1320,6 +1322,8 @@ const I18N = {
     tab_scanner:"Scanner", tab_character:"Character", tab_build:"Build", tab_settings:"Settings",
     skills_gear_title:"Skills & Gems (your character)", skills_gear_unknown:"Unknown gem",
     wg_defense:"Defense", wg_offense:"Offense", wg_utility:"Utility",
+    gem_type_skill:"Skill Gem", gem_type_support:"Support Gem", gem_level_from:"from Level {l}",
+    gem_supports_label:"SUPPORT GEMS ({n})", gem_desc_hint:"The full skill description is in-game.",
     logout:"Logout",
     ts_tooltip:"Scores your gear with effective values: (base + flat mods) × (1 + increased%). E.g. 85% increased Armour on a 369 base counts like +314 Armour. Unique effects, skill synergies and build mechanics are not included.",
     ts_count0:"0 slots scored", ts_count:"{n} slots scored",
@@ -1445,6 +1449,7 @@ function toggleLang() {
   currentLang = currentLang === "de" ? "en" : "de";
   localStorage.setItem("exileEye_lang", currentLang);
   applyLang();
+  document.getElementById("itemModal").classList.remove("show");
   // dynamische, sprachabhängige Teile neu rendern
   try {
     if (typeof buildSliders === "function" && document.getElementById("weightSliders")) buildSliders();
@@ -2870,7 +2875,7 @@ function renderSkills(skills) {
     const g = document.createElement("div");
     g.className = "skill-group";
     const [iconCls, sym] = gemIconClass(s.tags, false, s.color);
-    const tagStr = (s.tags || []).join(" · ") || "Skill-Gemme";
+    const tagStr = (s.tags || []).join(" · ") || t("gem_type_skill");
     const lvl = s.level ? `<span class="gem-level-badge">Lvl ${s.level}+</span>` : "";
     let html = `<div class="skill-main" onclick="showGem(${idx},-1)">
         <span class="gem-icon ${iconCls}">${sym}</span>
@@ -2899,14 +2904,14 @@ function showGem(skillIdx, supIdx) {
   if (!s) return;
   const gem = supIdx < 0 ? { name: s.skill, tags: s.tags, level: s.level, is_support: false, color: s.color }
                          : { ...s.supports[supIdx], is_support: true };
-  const typeLabel = gem.is_support ? "Support-Gemme" : "Skill-Gemme";
+  const typeLabel = gem.is_support ? t("gem_type_support") : t("gem_type_skill");
   const typeColor = gem.is_support ? "#9ab8d8" : "#f0c060";
   const [iconCls, sym] = gemIconClass(gem.tags, gem.is_support, gem.color);
   let html = `<div class="tt-header r0" style="border-bottom:1px solid var(--border)">
     <button class="tt-close" onclick="closeItem()">×</button>
     <div class="gem-icon ${iconCls}" style="margin:0 auto 8px;width:42px;height:42px;font-size:20px">${sym}</div>
     <div class="tt-name" style="color:${typeColor}">${esc(gem.name)}</div>
-    <div class="tt-base">${typeLabel}${gem.level ? " · ab Level " + gem.level : ""}</div>
+    <div class="tt-base">${typeLabel}${gem.level ? " · " + t("gem_level_from", { l: gem.level }) : ""}</div>
   </div>`;
   if (gem.tags && gem.tags.length) {
     html += `<div class="tt-section"><div style="font-size:10px;color:var(--text-dim);margin-bottom:6px">TAGS</div><div style="display:flex;flex-wrap:wrap;gap:6px">`;
@@ -2914,14 +2919,14 @@ function showGem(skillIdx, supIdx) {
     html += `</div></div>`;
   }
   if (!gem.is_support && s.supports && s.supports.length) {
-    html += `<div class="tt-section"><div style="font-size:11px;color:var(--text-dim);margin-bottom:5px">UNTERSTÜTZUNGS-GEMMEN (${s.supports.length})</div>`;
+    html += `<div class="tt-section"><div style="font-size:11px;color:var(--text-dim);margin-bottom:5px">${t("gem_supports_label", { n: s.supports.length })}</div>`;
     s.supports.forEach(sup => {
       const [sc] = gemIconClass(sup.tags, true, sup.color);
       html += `<div class="tt-mod" style="color:#9ab8d8;display:flex;align-items:center;gap:6px"><span class="mini-gem ${sc}"></span>${esc(sup.name)}</div>`;
     });
     html += `</div>`;
   }
-  html += `<div class="tt-section"><span style="color:var(--text-dim);font-size:11px">💡 Die vollständige Skill-Beschreibung findest du im Spiel.</span></div>`;
+  html += `<div class="tt-section"><span style="color:var(--text-dim);font-size:11px">💡 ${t("gem_desc_hint")}</span></div>`;
   document.getElementById("tooltipBody").innerHTML = html;
   document.getElementById("itemModal").classList.add("show");
 }
@@ -3032,5 +3037,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a442dae2f81d1010',t:'MTc5MDkzNTE3Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a442fb032f119733',t:'MTc5MDkzNjQ4OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
