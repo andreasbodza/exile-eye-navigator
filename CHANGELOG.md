@@ -10,6 +10,11 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.18 (01.10.2026, Hotfix)
+- **Fix: Skill-Gems-Extraktion laut offizieller GGG-Doku** — `character.skills` ist ein Item-Array; Main-Gems = Skill-Gruppen, Support-Gems kommen aus `socketedItems` oder als eigene Einträge mit `support: true`. Beide Shapes werden verarbeitet (unit-getestet).
+- **Fix: Gem-Modal zweisprachig** — „Skill-Gemme/Support-Gemme", „ab Level X", „UNTERSTÜTZUNGS-GEMMEN", Hinweis-Text sind jetzt i18n (EN: „Skill Gem", „from Level", „SUPPORT GEMS", „in-game hint").
+- **Fix: Modal schließt beim Sprachwechsel** — steht nicht mehr in der alten Sprache im Raum.
+
 ## v1.17 (01.10.2026, Stufe 2b: Pro-Niveau)
 - **Stat-Score als kompaktes Chip im Header** statt eigener Zeile (immer sichtbar, Bounce-Animation bleibt, auf Mobile nur die Zahl)
 - **Status-Meldungen als Toast** (oben rechts, ploppt auf, verschwindet von selbst: ok 3s / Fehler 5s) statt Vollbreiten-Banner, der die App nach unten schiebt
