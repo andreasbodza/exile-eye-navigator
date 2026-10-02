@@ -207,6 +207,11 @@
   .gear-skill-supports { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-left: auto; }
   .gear-skill-sup { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-dim); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 3px 7px; }
   .gear-skill-sup img { width: 20px; height: 20px; }
+  .gear-skill-sup.ok { border-color: rgba(45,212,191,.55); color: #7dd8c8; background: rgba(45,212,191,.07); }
+  .gear-skill-sup.ok::after { content: "✓"; font-size: 10px; margin-left: 1px; }
+  .gear-skill-sup.miss { border-style: dashed; border-color: rgba(248,113,113,.6); color: #fca5a5; background: rgba(248,113,113,.06); }
+  .gear-skill-sup.miss::after { content: "✗"; font-size: 10px; margin-left: 1px; }
+  .gear-nib { font-size: 10px; font-weight: 400; color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; padding: 1px 7px; margin-left: 2px; }
 
   /* ============================================================
      EQUIPMENT-HUD im echten PoE2 Steinplatten-Look
@@ -1013,11 +1018,6 @@
     </div>
   </div>
   <div class="panel-body">
-    <div class="section" id="skillsSection">
-      <h2 data-i18n="skills_section">Skills &amp; Support-Gems</h2>
-      <div id="skillsList"></div>
-    </div>
-
     <div class="section">
       <h2 data-i18n="weights_section">Gewichtung &amp; Build-Import</h2>
 
@@ -1074,6 +1074,11 @@
         <button class="btn primary" style="margin-top:8px" data-i18n="import_btn" onclick="importBuild()">📥 Build importieren &amp; Gewichtung übernehmen</button>
         <div id="buildResult"></div>
       </div>
+    </div>
+
+    <div class="section" id="skillsSection">
+      <h2 data-i18n="skills_section">Skills &amp; Support-Gems</h2>
+      <div id="skillsList"></div>
     </div>
   </div>
 </div>
@@ -1149,7 +1154,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.18";
+const APP_VERSION = "v1.19";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1222,6 +1227,9 @@ const I18N = {
     h_trade:"🛒 Trade-Einstellungen", h_scan:"Item scannen",
     tab_scanner:"Scanner", tab_character:"Charakter", tab_build:"Build", tab_settings:"Einstellungen",
     skills_gear_title:"Skills & Gems (dein Charakter)", skills_gear_unknown:"Unbekanntes Gem",
+    gem_notinbuild:"nicht im Build", gem_notinbuild_hint:"Dieser Skill kommt im aktiven Build nicht vor.",
+    gem_missing_hint:"Im Build vorgesehen – bei dir nicht gesockelt",
+    gem_match_hint:"Passt zum aktiven Build",
     wg_defense:"Defensiv", wg_offense:"Offensiv", wg_utility:"Utility",
     gem_type_skill:"Skill-Gemme", gem_type_support:"Support-Gemme", gem_level_from:"ab Level {l}",
     gem_supports_label:"UNTERSTÜTZUNGS-GEMMEN ({n})", gem_desc_hint:"Die vollständige Skill-Beschreibung findest du im Spiel.",
@@ -1321,6 +1329,9 @@ const I18N = {
     h_trade:"🛒 Trade Settings", h_scan:"Scan item",
     tab_scanner:"Scanner", tab_character:"Character", tab_build:"Build", tab_settings:"Settings",
     skills_gear_title:"Skills & Gems (your character)", skills_gear_unknown:"Unknown gem",
+    gem_notinbuild:"not in build", gem_notinbuild_hint:"This skill doesn't appear in the active build.",
+    gem_missing_hint:"Planned in build – not socketed on your gear",
+    gem_match_hint:"Matches the active build",
     wg_defense:"Defense", wg_offense:"Offense", wg_utility:"Utility",
     gem_type_skill:"Skill Gem", gem_type_support:"Support Gem", gem_level_from:"from Level {l}",
     gem_supports_label:"SUPPORT GEMS ({n})", gem_desc_hint:"The full skill description is in-game.",
@@ -1701,22 +1712,68 @@ async function loadGear(name) {
 }
 
 let equippedItems = {};
+let lastGearSkills = null;
+
+// Rohe URLs nie als Gem-Namen anzeigen (Fallback, falls Backend-String leer/URL)
+function gemDispName(n) {
+  const s = String(n || "").trim();
+  return (s && !/^https?:\/\//i.test(s)) ? s : "";
+}
+// Gem-Namen zum Vergleichen normalisieren (Groß/Klein + Tier-Suffix "I"-"VI" ignorieren)
+function normGemName(n) {
+  let s = String(n || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+  s = s.replace(/ (?:i|ii|iii|iv|v|vi)$/, "");
+  return s;
+}
+// Lookup der Build-Skills (nur wenn ein Build aktiv ist)
+function getBuildSkillLookup() {
+  if (!localStorage.getItem("exileEye_buildName")) return null;
+  if (typeof allSkills === "undefined" || !allSkills || !allSkills.length) return null;
+  const m = {};
+  allSkills.forEach(s => { m[normGemName(s.skill)] = s; });
+  return Object.keys(m).length ? m : null;
+}
 
 function renderGearSkills(skills) {
   const sec = document.getElementById("gearSkillsSection");
   const list = document.getElementById("gearSkillsList");
   if (!sec || !list) return;
+  if (skills) lastGearSkills = skills; else skills = lastGearSkills;
   if (!skills || !skills.length) { sec.style.display = "none"; return; }
+  const build = getBuildSkillLookup();
   let html = "";
   skills.forEach(s => {
     const main = s.main || {};
-    const sups = (s.supports || []).filter(x => x && (x.name || x.icon));
+    const mainName = gemDispName(s.name || main.name) || t("skills_gear_unknown");
+    const sups = (s.supports || []).map(sp => ({ name: gemDispName(sp.name), icon: sp.icon }))
+                                    .filter(x => x.name || x.icon);
+    // Support-Check gegen den aktiven Build
+    let bEntry = null, badge = "";
+    if (build && mainName !== t("skills_gear_unknown")) {
+      bEntry = build[normGemName(mainName)] || null;
+      if (!bEntry) badge = `<span class="gear-nib" title="${esc(t("gem_notinbuild_hint"))}">${t("gem_notinbuild")}</span>`;
+    }
+    let supHtml = sups.map(sp => {
+      let cls = "gear-skill-sup", tt = sp.name;
+      if (bEntry && (bEntry.supports || []).some(w => normGemName(w.name) === normGemName(sp.name))) {
+        cls += " ok"; tt = t("gem_match_hint") + ": " + sp.name;
+      }
+      return `<span class="${cls}" title="${esc(tt)}">${sp.icon ? `<img src="${esc(sp.icon)}" alt="" onerror="this.remove()">` : ""}${sp.name ? `<span>${esc(sp.name)}</span>` : ""}</span>`;
+    });
+    if (bEntry) {
+      const have = new Set(sups.map(sp => normGemName(sp.name)));
+      (bEntry.supports || []).forEach(w => {
+        if (!have.has(normGemName(w.name))) {
+          supHtml.push(`<span class="gear-skill-sup miss" title="${esc(t("gem_missing_hint"))}"><span>${esc(w.name)}</span></span>`);
+        }
+      });
+    }
     html += `<div class="gear-skill">
       <div class="gear-skill-main">
         ${main.icon ? `<img src="${esc(main.icon)}" alt="" onerror="this.remove()">` : ""}
-        <span>${esc(s.name || main.name || t("skills_gear_unknown"))}</span>
+        <span>${esc(mainName)}</span>${badge}
       </div>
-      ${sups.length ? `<div class="gear-skill-supports">${sups.map(sp => `<span class="gear-skill-sup" title="${esc(sp.name)}">${sp.icon ? `<img src="${esc(sp.icon)}" alt="" onerror="this.remove()">` : ""}${sp.name ? `<span>${esc(sp.name)}</span>` : ""}</span>`).join("")}</div>` : ""}
+      ${supHtml.length ? `<div class="gear-skill-supports">${supHtml.join("")}</div>` : ""}
     </div>`;
   });
   list.innerHTML = html;
@@ -2181,6 +2238,7 @@ function clearBuild() {
   document.querySelectorAll(".slot").forEach(s => s.classList.remove("better","worse"));
   updateActiveBuildBar();
   updateBuildStatus();
+  if (typeof renderGearSkills === "function") renderGearSkills();   // Support-Check-Badges entfernen
   showBanner(t("bn_build_cleared"), "ok");
 }
 
@@ -2897,6 +2955,8 @@ function renderSkills(skills) {
     list.appendChild(g);
   });
   sec.style.display = "block";
+  // Support-Check im Charakter-Tab an den neuen Build anpassen
+  if (typeof renderGearSkills === "function") renderGearSkills();
 }
 
 function showGem(skillIdx, supIdx) {
@@ -3037,5 +3097,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a442fb032f119733',t:'MTc5MDkzNjQ4OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a44368f5ac8e3673',t:'MTc5MDk0MDk5Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
