@@ -212,6 +212,7 @@
   .gear-skill-sup.miss { border-style: dashed; border-color: rgba(248,113,113,.6); color: #fca5a5; background: rgba(248,113,113,.06); }
   .gear-skill-sup.miss::after { content: "✗"; font-size: 10px; margin-left: 1px; }
   .gear-nib { font-size: 10px; font-weight: 400; color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; padding: 1px 7px; margin-left: 2px; }
+  .gear-alias { font-size: 10px; font-weight: 400; color: #7dd8c8; border: 1px solid rgba(45,212,191,.4); background: rgba(45,212,191,.06); border-radius: 8px; padding: 1px 7px; margin-left: 2px; }
 
   /* ============================================================
      EQUIPMENT-HUD im echten PoE2 Steinplatten-Look
@@ -1154,7 +1155,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.19";
+const APP_VERSION = "v1.20";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1230,6 +1231,7 @@ const I18N = {
     gem_notinbuild:"nicht im Build", gem_notinbuild_hint:"Dieser Skill kommt im aktiven Build nicht vor.",
     gem_missing_hint:"Im Build vorgesehen – bei dir nicht gesockelt",
     gem_match_hint:"Passt zum aktiven Build",
+    gem_alias_hint:"Im Build heißt dieser Skill „{n}“",
     wg_defense:"Defensiv", wg_offense:"Offensiv", wg_utility:"Utility",
     gem_type_skill:"Skill-Gemme", gem_type_support:"Support-Gemme", gem_level_from:"ab Level {l}",
     gem_supports_label:"UNTERSTÜTZUNGS-GEMMEN ({n})", gem_desc_hint:"Die vollständige Skill-Beschreibung findest du im Spiel.",
@@ -1332,6 +1334,7 @@ const I18N = {
     gem_notinbuild:"not in build", gem_notinbuild_hint:"This skill doesn't appear in the active build.",
     gem_missing_hint:"Planned in build – not socketed on your gear",
     gem_match_hint:"Matches the active build",
+    gem_alias_hint:"In the build this skill is called \"{n}\"",
     wg_defense:"Defense", wg_offense:"Offense", wg_utility:"Utility",
     gem_type_skill:"Skill Gem", gem_type_support:"Support Gem", gem_level_from:"from Level {l}",
     gem_supports_label:"SUPPORT GEMS ({n})", gem_desc_hint:"The full skill description is in-game.",
@@ -1720,18 +1723,68 @@ function gemDispName(n) {
   return (s && !/^https?:\/\//i.test(s)) ? s : "";
 }
 // Gem-Namen zum Vergleichen normalisieren (Groß/Klein + Tier-Suffix "I"-"VI" ignorieren)
+// Gem-Namen zum Vergleichen normalisieren: Kleinbuchstaben, Tier-Suffixe
+// ("I"-"VI", "One"-"Six", Ziffern) und Maxroll-"Player"-Variante ignorieren
 function normGemName(n) {
   let s = String(n || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
-  s = s.replace(/ (?:i|ii|iii|iv|v|vi)$/, "");
+  s = s.replace(/ (?:i|ii|iii|iv|v|vi|one|two|three|four|five|six|[0-9]+)$/, "");
+  s = s.replace(/ player$/, "");
+  return s.trim();
+}
+// Flavor-Praefixe, die Planer (Maxroll/Mobalytics) an Skill-Namen haengen:
+// "Bear Maul" vs. GGG "Maul", "Ascendancy Fire Spell On Hit" vs. "Fire Spell on Hit"
+const GEM_FLAVOR_PREFIXES = ["ascendancy", "bear", "wolf", "wyvern"];
+function normGemNameFuzzy(n) {
+  let s = normGemName(n), changed = true;
+  while (changed) {
+    changed = false;
+    for (const p of GEM_FLAVOR_PREFIXES) {
+      if (s.startsWith(p + " ") && s.length > p.length + 1) { s = s.slice(p.length + 1).trim(); changed = true; }
+    }
+  }
   return s;
 }
-// Lookup der Build-Skills (nur wenn ein Build aktiv ist)
-function getBuildSkillLookup() {
+// Build-Skills als Liste (nur wenn ein Build aktiv ist), mit vorberechneten Keys
+function getBuildSkillList() {
   if (!localStorage.getItem("exileEye_buildName")) return null;
   if (typeof allSkills === "undefined" || !allSkills || !allSkills.length) return null;
-  const m = {};
-  allSkills.forEach(s => { m[normGemName(s.skill)] = s; });
-  return Object.keys(m).length ? m : null;
+  const list = allSkills.map(s => ({
+    ...s,
+    _key: normGemNameFuzzy(s.skill),
+    _sups: (s.supports || []).map(w => normGemName(w.name)),
+  }));
+  return list.length ? list : null;
+}
+// Paarung Gear-Skills <-> Build-Skills:
+// Phase 1: Name (fuzzy) gleich. Phase 2: ungepaarte Reste per Support-Overlap
+// (>=2 gemeinsame Supports) zuordnen - faengt Umbenennungen wie
+// Maxroll "Bear Rampage" vs. GGG "Furious Slam".
+function pairGearWithBuild(gearSkills, buildList) {
+  const pairs = new Array(gearSkills.length).fill(null);
+  if (!buildList || !buildList.length) return pairs;
+  const used = new Set();
+  gearSkills.forEach((s, i) => {
+    const key = normGemNameFuzzy(gemDispName(s.name || (s.main || {}).name));
+    if (!key) return;
+    const j = buildList.findIndex((b, jx) => !used.has(jx) && b._key === key);
+    if (j >= 0) { used.add(j); pairs[i] = buildList[j]; }
+  });
+  const cand = [];
+  gearSkills.forEach((s, i) => {
+    if (pairs[i]) return;
+    const have = new Set((s.supports || []).map(sp => normGemName(gemDispName(sp.name))));
+    buildList.forEach((b, j) => {
+      if (used.has(j)) return;
+      const ov = b._sups.filter(w => have.has(w)).length;
+      if (ov >= 2) cand.push([ov, i, j]);
+    });
+  });
+  cand.sort((a, b) => b[0] - a[0]);
+  for (const [, i, j] of cand) {
+    if (pairs[i] || used.has(j)) continue;
+    used.add(j); pairs[i] = buildList[j];
+  }
+  return pairs;
 }
 
 function renderGearSkills(skills) {
@@ -1740,27 +1793,33 @@ function renderGearSkills(skills) {
   if (!sec || !list) return;
   if (skills) lastGearSkills = skills; else skills = lastGearSkills;
   if (!skills || !skills.length) { sec.style.display = "none"; return; }
-  const build = getBuildSkillLookup();
+  const buildList = getBuildSkillList();
+  const pairs = pairGearWithBuild(skills, buildList);
   let html = "";
-  skills.forEach(s => {
+  skills.forEach((s, gi) => {
     const main = s.main || {};
     const mainName = gemDispName(s.name || main.name) || t("skills_gear_unknown");
     const sups = (s.supports || []).map(sp => ({ name: gemDispName(sp.name), icon: sp.icon }))
                                     .filter(x => x.name || x.icon);
-    // Support-Check gegen den aktiven Build
-    let bEntry = null, badge = "";
-    if (build && mainName !== t("skills_gear_unknown")) {
-      bEntry = build[normGemName(mainName)] || null;
-      if (!bEntry) badge = `<span class="gear-nib" title="${esc(t("gem_notinbuild_hint"))}">${t("gem_notinbuild")}</span>`;
+    // Support-Check gegen den aktiven Build (mit Paarung)
+    const bEntry = pairs[gi];
+    let badge = "";
+    if (buildList && !bEntry && mainName !== t("skills_gear_unknown")) {
+      badge = `<span class="gear-nib" title="${esc(t("gem_notinbuild_hint"))}">${t("gem_notinbuild")}</span>`;
     }
     let supHtml = sups.map(sp => {
       let cls = "gear-skill-sup", tt = sp.name;
-      if (bEntry && (bEntry.supports || []).some(w => normGemName(w.name) === normGemName(sp.name))) {
+      if (bEntry && bEntry._sups.includes(normGemName(sp.name))) {
         cls += " ok"; tt = t("gem_match_hint") + ": " + sp.name;
       }
       return `<span class="${cls}" title="${esc(tt)}">${sp.icon ? `<img src="${esc(sp.icon)}" alt="" onerror="this.remove()">` : ""}${sp.name ? `<span>${esc(sp.name)}</span>` : ""}</span>`;
     });
     if (bEntry) {
+      const buildName = gemDispName(bEntry.skill);
+      if (buildName && normGemName(buildName) !== normGemName(mainName)) {
+        // Planner nennt den Skill anders (z.B. Maxroll "Bear Rampage" vs. "Furious Slam")
+        badge = `<span class="gear-alias" title="${esc(t("gem_alias_hint", { n: buildName }))}">≈ ${esc(buildName)}</span>`;
+      }
       const have = new Set(sups.map(sp => normGemName(sp.name)));
       (bEntry.supports || []).forEach(w => {
         if (!have.has(normGemName(w.name))) {
@@ -3097,5 +3156,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a44368f5ac8e3673',t:'MTc5MDk0MDk5Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4438e605c88d282',t:'MTc5MDk0MjUyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
