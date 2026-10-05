@@ -10,6 +10,11 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.25 (05.10.2026, Build-Import sichtbar gemacht)
+- **Import-Sektion ganz nach OBEN im Build-Tab** — der natürliche Lesefluss: erst Build importieren, dann Gewichtung/Slider eichen, dann Skills checken
+- **📥-Import-Button im globalen Switcher** (neben dem Build-Dropdown): springt in den Build-Tab, scrollt den Import an, lässt ihn kurz aufpulsen und fokussiert das Textfeld
+- **Neue Nutzer werden nicht mehr im Dunkeln gelassen:** ist noch gar kein Build gespeichert, wird die Leiste unter den Tabs zur Einladung „📥 Build importieren…" statt unsichtbar — der Einstiegspunkt der App ist jetzt auf den ersten Blick zu sehen
+
 ## v1.24 (05.10.2026, Polish-Trio)
 - **Fix: Layout springt nicht mehr** — die Scrollbar reserviert jetzt permanent ihren Platz (`scrollbar-gutter: stable`), kein seitliches Einrücken/Springen mehr, wenn Seiten länger werden oder man Tabs wechselt
 - **Fix: DEMO-Badge bleib nach Login hängen** — der Badge verschwindet jetzt zuverlässig, sobald man eingeloggt ist / echte Charaktere lädt / einen echten Char wählt (war vorher nach Demo→Login klebrig sichtbar)
