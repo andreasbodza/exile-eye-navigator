@@ -398,6 +398,16 @@
     position: absolute; bottom: 4px; right: 6px;
     font-size: 8px; color: var(--gold-soft); opacity: .6;
   }
+  /* Tippbar-Affordanz (v1.29): Reihen wie Menueeintraege + Einmal-Hinweis */
+  .tt-mod.clickable { padding: 3px 6px; border-radius: 6px; transition: background .12s; }
+  .tt-mod.clickable:hover { background: rgba(240,192,96,.08); }
+  .tt-mod .chevron { margin-left: auto; opacity: .45; font-weight: 700; }
+  .tap-tip {
+    font-size: 10.5px; color: var(--gold-soft); text-align: center;
+    padding: 4px 6px; margin-top: 5px; border: 1px dashed rgba(240,192,96,.35);
+    border-radius: 8px; animation: tapTipPulse 2s ease-in-out infinite;
+  }
+  @keyframes tapTipPulse { 0%,100% { opacity: .9; } 50% { opacity: .45; } }
   .slot .build-badge {
     position: absolute; top: 5px; left: 5px;
     width: 18px; height: 18px; border-radius: 50%;
@@ -1257,7 +1267,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.28";
+const APP_VERSION = "v1.29";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1410,6 +1420,7 @@ const I18N = {
     tt_gems:"✦ Gesteckte Gems",
     tt_runes:"◈ Runen",
     tt_socketed:"◈ Sockel-Inhalt", socket_type_rune:"Rune", socket_type_soulcore:"Seelenkern",
+    tap_hint:"Antippen für Beschreibung & Details",
     hint_title:"ℹ Hinweise",
     hint_res_partial:"{name}: von +{v}% zählen nur ~{e}% (du bist bei {c}% / Cap {cap}%)",
     hint_allres_partial:"Alle Elementar-Res: von +{v}% zählen nur ~{e}% (am wenigsten Platz frei)",
@@ -1519,6 +1530,7 @@ const I18N = {
     tt_gems:"✦ Socketed Gems",
     tt_runes:"◈ Runes",
     tt_socketed:"◈ Socket Contents", socket_type_rune:"Rune", socket_type_soulcore:"Soul Core",
+    tap_hint:"Tap for description & details",
     hint_title:"ℹ Notes",
     hint_res_partial:"{name}: only ~{e}% of +{v}% counts (you're at {c}% / {cap}% cap)",
     hint_allres_partial:"All Elemental Res: only ~{e}% of +{v}% counts (least headroom left)",
@@ -2016,7 +2028,7 @@ function renderGearSkills(skills) {
       ${supHtml.length ? `<div class="gear-skill-supports">${supHtml.join("")}</div>` : ""}
     </div>`;
   });
-  list.innerHTML = html;
+  list.innerHTML = html + tapHintHtml();
   sec.style.display = "block";
 }
 
@@ -2332,8 +2344,9 @@ function showItem(slot) {
       const isRune = runeTest(g);
       const sym = isRune ? "\u25C8" : "\u2726";
       const col = isRune ? "#6fd3c8" : "#c9a86a";
-      html += `<div class="tt-mod clickable" style="color:${col}" onclick="showSocketed(${si})" title="${esc(t("gem_info_title"))}">${sym} ${esc(g.name)}</div>`;
+      html += `<div class="tt-mod clickable" style="color:${col};display:flex;align-items:center;gap:6px" onclick="showSocketed(${si})" title="${esc(t("gem_info_title"))}">${sym} <span>${esc(g.name)}</span><span class="chevron">›</span></div>`;
     });
+    html += tapHintHtml();
     html += `</div>`;
   }
   const m = it.mods || {};
@@ -3249,12 +3262,14 @@ function renderSkills(skills) {
     g.innerHTML = html;
     list.appendChild(g);
   });
+  list.insertAdjacentHTML("beforeend", tapHintHtml());
   sec.style.display = "block";
   // Support-Check im Charakter-Tab an den neuen Build anpassen
   if (typeof renderGearSkills === "function") renderGearSkills();
 }
 
 function showGem(skillIdx, supIdx) {
+  markTapSeen();
   const s = allSkills[skillIdx];
   if (!s) return;
   const gem = supIdx < 0 ? { name: s.skill, tags: s.tags, level: s.level, is_support: false, color: s.color }
@@ -3277,7 +3292,7 @@ function showGem(skillIdx, supIdx) {
     html += `<div class="tt-section"><div style="font-size:11px;color:var(--text-dim);margin-bottom:5px">${t("gem_supports_label", { n: s.supports.length })}</div>`;
     s.supports.forEach((sup, supSi) => {
       const [sc] = gemIconClass(sup.tags, true, sup.color);
-      html += `<div class="tt-mod clickable" style="color:#9ab8d8;display:flex;align-items:center;gap:6px" onclick="showGem(${skillIdx},${supSi})" title="${esc(t("gem_info_title"))}"><span class="mini-gem ${sc}"></span>${esc(gemPlannerDisplay(sup.name))}</div>`;
+      html += `<div class="tt-mod clickable" style="color:#9ab8d8;display:flex;align-items:center;gap:6px" onclick="showGem(${skillIdx},${supSi})" title="${esc(t("gem_info_title"))}"><span class="mini-gem ${sc}"></span>${esc(gemPlannerDisplay(sup.name))}<span class="chevron">›</span></div>`;
     });
     html += `</div>`;
   }
@@ -3303,6 +3318,14 @@ function showGearMissing(gi, mi) {
 }
 
 let curTooltipSockets = null;
+// Einmaliger 👆-Hinweis fuer neue Nutzer: verschwindet fuer immer, sobald das
+// erste Mal irgendein Gem/Rune angetippt wurde (markTapSeen in showGem/showGemInfo).
+function tapHintHtml() {
+  if (localStorage.getItem("exileEye_tapHintSeen")) return "";
+  return `<div class="tap-tip">👆 ${t("tap_hint")}</div>`;
+}
+function markTapSeen() { localStorage.setItem("exileEye_tapHintSeen", "1"); }
+
 // Angeklickte Rune / Soul Core / Gem aus dem Item-Tooltip
 function showSocketed(si) {
   const g = (curTooltipSockets || [])[si];
@@ -3312,6 +3335,7 @@ function showSocketed(si) {
 }
 
 function showGemInfo(name, isSupport, kind) {
+  markTapSeen();
   let typeLabel, typeColor;
   if (kind === "rune" || /\brune\b|soul core/i.test(String(name))) {
     typeLabel = /soul core/i.test(String(name)) ? t("socket_type_soulcore") : t("socket_type_rune");

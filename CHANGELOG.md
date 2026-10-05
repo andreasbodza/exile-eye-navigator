@@ -10,6 +10,13 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.29 (05.10.2026, Entdeckbarkeit)
+- **👆 Einmal-Hinweis** „Antippen für Beschreibung & Details" im Build-, Char-Skills- und Sockel-Bereich — verschwindet dauerhaft, sobald der Nutzer das erste Mal erfolgreich ein Gem/Rune angetippt hat (LocalStorage-Flag).
+- **Chevron „›"** auf allen tippbaren Reihen (Sockel-Items, Support-Liste im Gem-Modal) — sieht aus wie Menueeintraege, liest sich sofort klickbar.
+- Dezentes Hover-Highlight auf tippbaren Tooltip-Reihen.
+
+---
+
 ## v1.28 (05.10.2026, Runen & Soul Cores)
 - **Beschreibungen fuer Runen & Soul Cores**: gesockelte Runen/Seelenkerne im Item-Tooltip sind klickbar und zeigen ihren Effekt (live von poe2db, aus den Effekt-Zeilen extrahiert — die Seiten haben kein og:description).
 - **Erkennung neuer Inhalte ohne Pflege**: Backend klassifiziert Sockel-Inhalte automatisch als Rune/Soul Core vs. Gem — kein Nachdoktern pro Patch noetig.
