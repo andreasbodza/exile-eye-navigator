@@ -238,7 +238,7 @@ def gem_name_from_icon(icon_url):
 GEM_INFO_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gem_cache.json")
 GEM_INFO_TTL_HIT  = 7 * 24 * 3600   # Treffer 7 Tage cachen
 GEM_INFO_TTL_MISS = 24 * 3600       # 404s 1 Tag cachen
-_GEM_UA = "ExileEyeNavigator/1.33 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
+_GEM_UA = "ExileEyeNavigator/1.34 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
 _gem_cache = None
 
 
@@ -1868,6 +1868,42 @@ SLOT_TRADE_CATEGORY = {
 }
 
 
+# Frontend-Gewichtung nutzt fire_res/cold_res/... — Trade kennt die nicht
+# einzeln (ausser chaos_res). Wir klappen sie auf verifizierte IDs zusammen.
+# Scanner macht dasselbe in scanStatsToTradeStats().
+_TRADE_KEY_ALIAS = {
+    "fire_res": "ele_res",
+    "cold_res": "ele_res",
+    "lightning_res": "ele_res",
+    "all_res": "ele_res",
+    "crit_chance": "crit_dmg_bonus",
+}
+
+
+def _collapse_trade_want(want):
+    """fire_res+cold_res -> ele_res (Summe), unbekannte Keys droppen."""
+    out = {}
+    ele_sum, ele_seen, ele_has_min = 0.0, False, False
+    for key, minval in (want or {}).items():
+        canon = _TRADE_KEY_ALIAS.get(key, key)
+        if canon == "ele_res":
+            ele_seen = True
+            if minval is not None:
+                try:
+                    ele_sum += float(minval)
+                    ele_has_min = True
+                except (ValueError, TypeError):
+                    pass
+            continue
+        if canon not in TRADE_STAT_IDS:
+            continue
+        if canon not in out or (out[canon] is None and minval is not None):
+            out[canon] = minval
+    if ele_seen:
+        out["ele_res"] = ele_sum if ele_has_min else None
+    return out
+
+
 # Bekannte PoE2-Trade Stat-IDs (explicit) fuer die Auto-Filter.
 # Quelle: ECHTE Trade-Links (vom User verifiziert!).
 TRADE_STAT_IDS = {
@@ -1995,6 +2031,7 @@ def api_trade_link():
         applied = ["unique:" + unique_name]
     else:
         # --- Rare/Magic: nach Kategorie + Stats suchen ---
+        want = _collapse_trade_want(want)
         stat_filters = []
         for key, minval in want.items():
             sid = TRADE_STAT_IDS.get(key)

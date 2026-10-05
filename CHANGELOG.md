@@ -10,6 +10,13 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.34 (05.10.2026, Trade-Suche filtert wieder)
+- Bug: „Besseres Item suchen“ hat nur die Slot-Kategorie geschickt (alle Helme), weil `fire_res`/`Fire Dmg` keine Trade-IDs hatten.
+- Resistenzen werden wie im Scanner auf **Elem-Res (gesamt)** zusammengelegt; Mindestwerte kommen vom Build-Slot oder vom aktuell getragenen Item (Upgrade-Suche).
+- Banner zeigt, mit welchen Stats gesucht wird.
+
+---
+
 ## v1.33 (05.10.2026, GGG-Markup weg)
 - Item-Tooltips: `[Strength]Str`, `[Attack]Speed`, `[ItemRarity]Rarity of Items` werden zu lesbarem Text (Str / Attack Speed / Rarity of Items).
 - Backend räumt Mods, Requirements und Properties schon beim API-Import auf (Score-Parser sieht den sauberen Text). Frontend macht dasselbe beim Anzeigen (alte Cache-Daten).

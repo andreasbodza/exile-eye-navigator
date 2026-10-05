@@ -1333,7 +1333,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.33";
+const APP_VERSION = "v1.34";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1506,6 +1506,7 @@ const I18N = {
     bn_login_error:"Login-Fehler: ", bn_ocr_error:"OCR-Fehler: ", bn_price_error:"Preis-Check-Fehler: ",
     bn_history_cleared:"Scan-Verlauf gelöscht", bn_server_down:"Server nicht erreichbar. Läuft app.py?",
     bn_status_error:"Status-Fehler: ", bn_trade_error:"Trade-Fehler: ", bn_trade_open:"Trade-Suche geöffnet",
+    bn_trade_filtered:"Trade-Suche mit {s}",
     bn_demo_active:"Demo-Modus aktiv", bn_price_open:"Preis-Check geöffnet",
     bn_paste_done:"Screenshot eingefügt!", bn_history_loaded:"Scan aus Verlauf geladen",
     cf_build_delete:"Gespeicherten Build „{n}“ löschen?", cf_history_delete:"Wirklich den ganzen Scan-Verlauf löschen?",
@@ -1616,6 +1617,7 @@ const I18N = {
     bn_login_error:"Login error: ", bn_ocr_error:"OCR error: ", bn_price_error:"Price check error: ",
     bn_history_cleared:"Scan history cleared", bn_server_down:"Server not reachable. Is app.py running?",
     bn_status_error:"Status error: ", bn_trade_error:"Trade error: ", bn_trade_open:"Trade search opened",
+    bn_trade_filtered:"Trade search with {s}",
     bn_demo_active:"Demo mode active", bn_price_open:"Price check opened",
     bn_paste_done:"Screenshot pasted!", bn_history_loaded:"Scan loaded from history",
     cf_build_delete:"Delete saved build \"{n}\"?", cf_history_delete:"Really delete the entire scan history?",
@@ -2641,8 +2643,22 @@ async function openTrade(slot) {
     else {
       let statsObj = buildSlotStats[slot];
       if (!statsObj || Object.keys(statsObj).length === 0) {
+        // Kein Slot-Soll aus dem Build: Stats die du brauchst (Gewichtung)
+        // mit Mindestwerten vom aktuell getragenen Item (= Upgrade-Suche).
+        const have = (equippedItems[slot] && (equippedItems[slot].effective_stats || equippedItems[slot].parsed_stats)) || {};
         statsObj = {};
-        topWeightedKeys(3).forEach(k => statsObj[k] = null);
+        const keys = topWeightedKeys(5);
+        if (keys.length) {
+          keys.forEach(k => {
+            const v = parseFloat(have[k]);
+            statsObj[k] = (!isNaN(v) && v > 0) ? v : null;
+          });
+        } else {
+          Object.entries(have).forEach(([k, v]) => {
+            const n = parseFloat(v);
+            if (!isNaN(n) && n > 0) statsObj[k] = n;
+          });
+        }
       }
       payload.stats = statsObj;
     }
@@ -2650,8 +2666,10 @@ async function openTrade(slot) {
     const data = await res.json();
     if (data.url) {
       window.open(data.url, "_blank");
-      setPanelStatus("settings", t("bn_trade_open"), false);
-      showBanner(t("bn_trade_open"), "ok");
+      const labs = (data.applied_stats || []).filter(s => !String(s).startsWith("unique:")).map(labelFor);
+      const msg = labs.length ? t("bn_trade_filtered", { s: labs.join(", ") }) : t("bn_trade_open");
+      setPanelStatus("settings", msg, false);
+      showBanner(msg, "ok");
     }
   } catch (e) { showBanner(t("bn_trade_error") + e.message); }
 }
