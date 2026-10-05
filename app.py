@@ -201,7 +201,7 @@ def gem_name_from_icon(icon_url):
 GEM_INFO_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gem_cache.json")
 GEM_INFO_TTL_HIT  = 7 * 24 * 3600   # Treffer 7 Tage cachen
 GEM_INFO_TTL_MISS = 24 * 3600       # 404s 1 Tag cachen
-_GEM_UA = "ExileEyeNavigator/1.27 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
+_GEM_UA = "ExileEyeNavigator/1.28 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
 _gem_cache = None
 
 
@@ -333,11 +333,23 @@ def gem_info_lookup(name):
             continue
         title = re.search(r'og:title" content="([^"]*)"', r.text)
         desc = re.search(r'og:description" content="([^"]*)"', r.text)
-        if title and desc:
+        desc_text = desc.group(1) if desc else ""
+        if title and not desc_text:
+            # Runen & Soul Cores haben kein og:description - Effekt aus den
+            # implicitMod-Zeilen des Item-Popups auf der Seite extrahieren.
+            mods = re.findall(r'<div class="implicitMod">(.*?)</div>', r.text, re.DOTALL)
+            lines = []
+            for mtext in mods:
+                clean = re.sub(r"<[^>]+>", "", mtext)
+                clean = re.sub(r"\s+", " ", clean).strip()
+                if clean and clean not in lines:
+                    lines.append(clean)
+            desc_text = " · ".join(lines[:3])
+        if title and desc_text:
             result = {
                 "found": True,
                 "name": re.sub(r"&amp;", "&", title.group(1)) or slug.replace("_", " "),
-                "description": _shorten_gem_desc(re.sub(r"&amp;", "&", desc.group(1))),
+                "description": _shorten_gem_desc(re.sub(r"&amp;", "&", desc_text)),
                 "url": url,
                 "source": "poe2db.tw",
             }
@@ -752,12 +764,14 @@ def api_character_gear():
         stats_flat, stats_inc = dict_parse_stats_split("\n".join(all_mods))
         effective = compute_effective_stats(stats_flat, stats_inc, base_stats)
 
-        # Gems in den Sockets (z.B. Tabula Rasa) - GGG liefert sie als Items
+        # Gesockelte Items (Runen/Soul Cores, ggf. Gems) - GGG liefert Items.
+        # kind markiert Runen/Soul Cores fuer Symbol/Farbwahl im Frontend.
         socketed_skills = []
         for s in (it.get("socketedItems", []) or []):
             nm = s.get("name") or s.get("typeLine") or ""
             if nm:
-                socketed_skills.append({"name": nm, "typeLine": s.get("typeLine") or ""})
+                kind = "rune" if re.search(r"\brune\b|soul core", nm, re.IGNORECASE) else "gem"
+                socketed_skills.append({"name": nm, "typeLine": s.get("typeLine") or "", "kind": kind})
 
         # --- Anforderungen (Level, Attribute) ---
         reqs = []

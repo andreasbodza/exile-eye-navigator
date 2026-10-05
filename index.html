@@ -1257,7 +1257,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.27";
+const APP_VERSION = "v1.28";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1409,6 +1409,7 @@ const I18N = {
     tt_required:"Benötigt", tt_unnamed:"(unbenannt)", tt_corrupted:"Korrumpiert",
     tt_gems:"✦ Gesteckte Gems",
     tt_runes:"◈ Runen",
+    tt_socketed:"◈ Sockel-Inhalt", socket_type_rune:"Rune", socket_type_soulcore:"Seelenkern",
     hint_title:"ℹ Hinweise",
     hint_res_partial:"{name}: von +{v}% zählen nur ~{e}% (du bist bei {c}% / Cap {cap}%)",
     hint_allres_partial:"Alle Elementar-Res: von +{v}% zählen nur ~{e}% (am wenigsten Platz frei)",
@@ -1517,6 +1518,7 @@ const I18N = {
     tt_required:"Required", tt_unnamed:"(unnamed)", tt_corrupted:"Corrupted",
     tt_gems:"✦ Socketed Gems",
     tt_runes:"◈ Runes",
+    tt_socketed:"◈ Socket Contents", socket_type_rune:"Rune", socket_type_soulcore:"Soul Core",
     hint_title:"ℹ Notes",
     hint_res_partial:"{name}: only ~{e}% of +{v}% counts (you're at {c}% / {cap}% cap)",
     hint_allres_partial:"All Elemental Res: only ~{e}% of +{v}% counts (least headroom left)",
@@ -2319,9 +2321,19 @@ function showItem(slot) {
     html += `</div>`;
   }
   if (it.socketed_skills && it.socketed_skills.length) {
+    const socks = it.socketed_skills;
+    const runeTest = g => g.kind === "rune" || /\brune\b|soul core/i.test(g.name || "");
+    const nRunes = socks.filter(runeTest).length;
+    const hdr = (nRunes && nRunes < socks.length) ? t("tt_socketed") : (nRunes ? t("tt_runes") : t("tt_gems"));
+    curTooltipSockets = socks;
     html += `<div class="tt-section">`;
-    html += `<div class="tt-mod" style="color:var(--gold-soft);font-size:11px;margin-bottom:3px">${t("tt_gems")}</div>`;
-    it.socketed_skills.forEach(g => { html += `<div class="tt-mod" style="color:#c9a86a">\u2726 ${esc(g.name)}</div>`; });
+    html += `<div class="tt-mod" style="color:var(--gold-soft);font-size:11px;margin-bottom:3px">${hdr}</div>`;
+    socks.forEach((g, si) => {
+      const isRune = runeTest(g);
+      const sym = isRune ? "\u25C8" : "\u2726";
+      const col = isRune ? "#6fd3c8" : "#c9a86a";
+      html += `<div class="tt-mod clickable" style="color:${col}" onclick="showSocketed(${si})" title="${esc(t("gem_info_title"))}">${sym} ${esc(g.name)}</div>`;
+    });
     html += `</div>`;
   }
   const m = it.mods || {};
@@ -3290,9 +3302,24 @@ function showGearMissing(gi, mi) {
   if (raw) showGemInfo(raw, true);
 }
 
-function showGemInfo(name, isSupport) {
-  const typeLabel = isSupport ? t("gem_type_support") : t("gem_type_skill");
-  const typeColor = isSupport ? "#9ab8d8" : "#f0c060";
+let curTooltipSockets = null;
+// Angeklickte Rune / Soul Core / Gem aus dem Item-Tooltip
+function showSocketed(si) {
+  const g = (curTooltipSockets || [])[si];
+  if (!g) return;
+  const kind = (g.kind === "rune" || /\brune\b|soul core/i.test(g.name || "")) ? "rune" : "gem";
+  showGemInfo(g.name, false, kind);
+}
+
+function showGemInfo(name, isSupport, kind) {
+  let typeLabel, typeColor;
+  if (kind === "rune" || /\brune\b|soul core/i.test(String(name))) {
+    typeLabel = /soul core/i.test(String(name)) ? t("socket_type_soulcore") : t("socket_type_rune");
+    typeColor = "#6fd3c8";
+  } else {
+    typeLabel = isSupport ? t("gem_type_support") : t("gem_type_skill");
+    typeColor = isSupport ? "#9ab8d8" : "#f0c060";
+  }
   const html = `<div class="tt-header r0" style="border-bottom:1px solid var(--border)">
     <button class="tt-close" onclick="closeItem()">×</button>
     <div class="tt-name" style="color:${typeColor}">${esc(gemPlannerDisplay(name))}</div>

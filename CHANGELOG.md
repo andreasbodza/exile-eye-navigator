@@ -10,6 +10,13 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.28 (05.10.2026, Runen & Soul Cores)
+- **Beschreibungen fuer Runen & Soul Cores**: gesockelte Runen/Seelenkerne im Item-Tooltip sind klickbar und zeigen ihren Effekt (live von poe2db, aus den Effekt-Zeilen extrahiert — die Seiten haben kein og:description).
+- **Erkennung neuer Inhalte ohne Pflege**: Backend klassifiziert Sockel-Inhalte automatisch als Rune/Soul Core vs. Gem — kein Nachdoktern pro Patch noetig.
+- **Optik**: Runen ◈ teal, Gems ✦ gold; Ueberschrift passt sich an (Runen / Gems / Sockel-Inhalt).
+
+---
+
 ## v1.27 (05.10.2026, Planer-Namen & klickbare Gems)
 - **Geister-Aliase**: Maxroll-Namen, die es im Spiel nicht gibt, werden auf den GGG-Namen gemappt — verifiziert via poe2db: *Primal Armament → Elemental Armament*, *Ancestral Urgency → Urgent Totems*, *Magnified Effect → Magnified Area*. Fixt falsche ✗-Chips im Support-Check (der Char hatte die Gems längst gesockelt!).
 - **Tier-Chaos gebändigt**: „Two"/„2" werden in der Anzeige zu „II" usw. — alles in römischen Ziffern wie im Spiel.
