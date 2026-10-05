@@ -418,6 +418,18 @@
     background: rgba(45,212,191,.14); border: 1px solid rgba(45,212,191,.35);
     border-radius: 4px; padding: 1px 6px; white-space: nowrap;
   }
+  #globalBuildBar .gb-import {
+    background: rgba(45,212,191,.1); border: 1px solid rgba(45,212,191,.4);
+    color: var(--gold); border-radius: 6px; padding: 4px 9px; font-size: 12px;
+    cursor: pointer; white-space: nowrap; font-weight: 600;
+  }
+  #globalBuildBar .gb-import:hover { background: rgba(45,212,191,.22); }
+  /* Scroll-Fokus: Sektion kurz pulsieren lassen (z.B. Build-Import) */
+  @keyframes flashTarget {
+    0%, 100% { box-shadow: 0 0 0 rgba(45,212,191,0); border-color: var(--border); }
+    50%      { box-shadow: 0 0 22px rgba(45,212,191,.5); border-color: var(--gold); }
+  }
+  .flash-target { animation: flashTarget 1s ease-in-out 2; border-radius: 8px; }
 
   /* Build-Fortschritts-Leiste über dem HUD */
   #buildProgress {
@@ -888,6 +900,7 @@
   <span class="gb-label" data-i18n="gb_label">◆ Build</span>
   <select id="globalBuildSelect" class="trade-sel" onchange="globalBuildSwitch(this.value)"></select>
   <span class="gb-count" id="gbCount" style="display:none"></span>
+  <button class="gb-import" id="gbImportBtn" onclick="goImportBuild()" data-i18n-title="gb_import_title" aria-label="Build importieren">📥</button>
 </div>
 
 <div id="banner"></div>
@@ -1100,6 +1113,31 @@
     </div>
   </div>
   <div class="panel-body">
+    <div class="section" id="buildImportSection">
+      <h2 data-i18n="import_section">🧠 Build importieren</h2>
+      <div id="activeBuildBar" style="display:none;background:rgba(46,111,176,.12);border:1px solid #2e5a80;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <span id="activeBuildName" style="color:#9ab8d8"></span>
+          <span style="display:flex;gap:6px">
+            <button class="btn danger" style="padding:5px 10px;font-size:11px;white-space:nowrap" data-i18n="active_build_remove" onclick="clearBuild()">✕ Aktiven Build entfernen</button>
+            <button class="btn danger" style="padding:5px 9px;font-size:11px;white-space:nowrap" data-i18n-title="ab_delete_title" onclick="deleteActiveBuild()">🗑</button>
+          </span>
+        </div>
+      </div>
+
+      <div class="build-import">
+        <input type="file" id="buildFileInput" style="display:none">
+        <button id="buildFileBtn" class="btn primary" style="width:100%;margin-bottom:6px" data-i18n="import_file_btn" onclick="document.getElementById('buildFileInput').click()">📂 .build-Datei auswählen</button>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.5" data-i18n-html="import_file_hint">
+          Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus. ⭐ am genauesten
+        </div>
+        <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px" data-i18n="import_paste_lbl">…oder einen Link / Code / Text einfügen:</label>
+        <textarea id="buildCode" data-i18n-ph="buildcode_ph" placeholder='https://pobb.in/xxxxx • https://maxroll.gg/... • PoB-Code • oder Item-Text'></textarea>
+        <button class="btn primary" style="margin-top:8px" data-i18n="import_btn" onclick="importBuild()">📥 Build importieren &amp; Gewichtung übernehmen</button>
+        <div id="buildResult"></div>
+      </div>
+    </div>
+
     <div class="section">
       <h2 data-i18n="weights_section">Gewichtung &amp; Build-Import</h2>
 
@@ -1129,28 +1167,9 @@
 
       <div id="weightSliders"></div>
 
-      <div id="activeBuildBar" style="display:none;background:rgba(46,111,176,.12);border:1px solid #2e5a80;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-          <span id="activeBuildName" style="color:#9ab8d8"></span>
-          <span style="display:flex;gap:6px">
-            <button class="btn danger" style="padding:5px 10px;font-size:11px;white-space:nowrap" data-i18n="active_build_remove" onclick="clearBuild()">✕ Aktiven Build entfernen</button>
-            <button class="btn danger" style="padding:5px 9px;font-size:11px;white-space:nowrap" data-i18n-title="ab_delete_title" onclick="deleteActiveBuild()">🗑</button>
-          </span>
-        </div>
-      </div>
 
-      <div class="build-import">
-        <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:5px" data-i18n="import_lbl">🧠 Build importieren:</label>
-        <input type="file" id="buildFileInput" style="display:none">
-        <button id="buildFileBtn" class="btn primary" style="width:100%;margin-bottom:6px" data-i18n="import_file_btn" onclick="document.getElementById('buildFileInput').click()">📂 .build-Datei auswählen</button>
-        <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.5" data-i18n-html="import_file_hint">
-          Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus. ⭐ am genauesten
-        </div>
-        <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px" data-i18n="import_paste_lbl">…oder einen Link / Code / Text einfügen:</label>
-        <textarea id="buildCode" data-i18n-ph="buildcode_ph" placeholder='https://pobb.in/xxxxx • https://maxroll.gg/... • PoB-Code • oder Item-Text'></textarea>
-        <button class="btn primary" style="margin-top:8px" data-i18n="import_btn" onclick="importBuild()">📥 Build importieren &amp; Gewichtung übernehmen</button>
-        <div id="buildResult"></div>
-      </div>
+
+
     </div>
 
     <div class="section" id="skillsSection">
@@ -1231,7 +1250,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.24";
+const APP_VERSION = "v1.25";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1328,6 +1347,7 @@ const I18N = {
     slot_weapon:"Waffe", slot_offhand:"Nebenhand", slot_helm:"Helm", slot_body:"Rüstung",
     slot_weapon2:"Waffe 2", slot_offhand2:"Nebenhand 2",
     gb_label:"◆ Build", gb_none:"– kein Build –",
+    gb_import_btn:"Build importieren…", gb_import_title:"Build aus Mobalytics / Maxroll / PoB importieren (Gewichtung, Vergleiche & Gem-Check freischalten)",
     slot_gloves:"Handschuhe", slot_boots:"Stiefel", slot_belt:"Gürtel", slot_amulet:"Amulett",
     slot_ring_l:"Ring L", slot_ring_r:"Ring R",
     scan_history_title:"📜 Scan-Verlauf", scan_history_clear:"🗑 Alle löschen",
@@ -1345,13 +1365,13 @@ const I18N = {
     bp_missing_show:"🔍 Was fehlt mir? Liste anzeigen",
     panel_buildplan:"🎯 Build-Planung",
     skills_section:"Skills & Support-Gems",
-    weights_section:"Gewichtung & Build-Import",
+    weights_section:"⚖️ Gewichtung", import_section:"🧠 Build importieren",
     rescap_title:"🛡️ Resistenzen (aus deinem Gear)",
     rescap_note:"⚠️ Nur Werte aus deinem <b>getragenen Gear</b>. Passivbaum, Ascendancy &amp; Liga-Strafe sind <b>nicht</b> enthalten.",
     preset_balanced:"Ausgewogen", preset_life:"Life-Build", preset_es:"ES-Build", preset_resi:"Resi-Cap zuerst",
     active_build_remove:"✕ Aktiven Build entfernen",
     ab_delete_title:"Aktiven Build endgültig aus der Liste löschen", bn_no_active_build:"Kein aktiver Build zum Löschen.",
-    import_lbl:"🧠 Build importieren:", import_file_btn:"📂 .build-Datei auswählen",
+    import_file_btn:"📂 .build-Datei auswählen",
     import_file_hint:"Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus. ⭐ am genauesten",
     import_paste_lbl:"…oder einen Link / Code / Text einfügen:",
     buildcode_ph:"https://pobb.in/xxxxx • https://maxroll.gg/... • PoB-Code • oder Item-Text",
@@ -1433,6 +1453,7 @@ const I18N = {
     slot_weapon:"Weapon", slot_offhand:"Offhand", slot_helm:"Helm", slot_body:"Armour",
     slot_weapon2:"Weapon 2", slot_offhand2:"Offhand 2",
     gb_label:"◆ Build", gb_none:"– no build –",
+    gb_import_btn:"Import build…", gb_import_title:"Import a build from Mobalytics / Maxroll / PoB (unlocks weighting, compare & gem check)",
     slot_gloves:"Gloves", slot_boots:"Boots", slot_belt:"Belt", slot_amulet:"Amulet",
     slot_ring_l:"Ring L", slot_ring_r:"Ring R",
     scan_history_title:"📜 Scan history", scan_history_clear:"🗑 Delete all",
@@ -1450,13 +1471,13 @@ const I18N = {
     bp_missing_show:"🔍 What am I missing? Show list",
     panel_buildplan:"🎯 Build Planning",
     skills_section:"Skills & Support Gems",
-    weights_section:"Weighting & Build Import",
+    weights_section:"⚖️ Weighting", import_section:"🧠 Import build",
     rescap_title:"🛡️ Resistances (from your gear)",
     rescap_note:"⚠️ Values from your <b>equipped gear</b> only. Passive tree, ascendancy &amp; league penalty are <b>not</b> included.",
     preset_balanced:"Balanced", preset_life:"Life Build", preset_es:"ES Build", preset_resi:"Resi-Cap first",
     active_build_remove:"✕ Remove active build",
     ab_delete_title:"Permanently delete the active build from the list", bn_no_active_build:"No active build to delete.",
-    import_lbl:"🧠 Import build:", import_file_btn:"📂 Choose .build file",
+    import_file_btn:"📂 Choose .build file",
     import_file_hint:"Download the \u201eBuild Planner Export\u201c <b>.build</b> file from <b>Mobalytics</b> and choose it here. ⭐ most accurate",
     import_paste_lbl:"…or paste a link / code / text:",
     buildcode_ph:"https://pobb.in/xxxxx • https://maxroll.gg/... • PoB code • or item text",
@@ -2333,10 +2354,21 @@ function updateActiveBuildBar() {
 function renderGlobalBuildBar() {
   const bar = document.getElementById("globalBuildBar");
   const sel = document.getElementById("globalBuildSelect");
+  const btn = document.getElementById("gbImportBtn");
+  const cnt = document.getElementById("gbCount");
   if (!bar || !sel) return;
   const builds = getSavedBuilds();
   const activeName = localStorage.getItem("exileEye_buildName") || "";
-  if (!builds.length) { bar.style.display = "none"; return; }
+  if (!builds.length) {
+    // CTA-Modus: kein Build vorhanden -> Einladung zum Importieren zeigen
+    sel.style.display = "none";
+    if (cnt) cnt.style.display = "none";
+    if (btn) { btn.textContent = "📥 " + t("gb_import_btn"); btn.style.flex = "1"; }
+    bar.style.display = "flex";
+    return;
+  }
+  sel.style.display = "";
+  if (btn) { btn.textContent = "📥"; btn.style.flex = "0 0 auto"; }
   sel.innerHTML = "";
   const none = document.createElement("option");
   none.value = ""; none.textContent = t("gb_none");
@@ -2350,6 +2382,20 @@ function renderGlobalBuildBar() {
   });
   sel.value = (activeName && builds.some(b => b.name === activeName)) ? activeName : "";
   bar.style.display = "flex";
+}
+
+// Springt zur Build-Import-Sektion: Tab wechseln, huscrollen, pulsieren, fokussieren
+function goImportBuild() {
+  switchTab("buildplan");
+  const sec = document.getElementById("buildImportSection");
+  if (sec) {
+    sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    sec.classList.remove("flash-target"); void sec.offsetWidth;   // Animation neu triggern
+    sec.classList.add("flash-target");
+    setTimeout(() => sec.classList.remove("flash-target"), 2300);
+  }
+  const ta = document.getElementById("buildCode");
+  if (ta) setTimeout(() => ta.focus({ preventScroll: true }), 450);
 }
 
 function globalBuildSwitch(name) {
@@ -3274,8 +3320,10 @@ function installApp() {
 
 // Start
 applyLang();
+// Globale Build-Leiste sofort rendern (auch ausgeloggt sichtbar: CTA oder Switcher)
+if (typeof updateActiveBuildBar === "function") updateActiveBuildBar();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a45c0605aa821c26',t:'MTc5MTE5OTA4NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a45c2d23bfa00686',t:'MTc5MTIwMDY4Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
