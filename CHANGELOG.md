@@ -10,6 +10,12 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.23 (05.10.2026, Globaler Build-Switcher)
+- **Neu: Build-Dropdown direkt unter der Tab-Leiste** — den aktiven Build jetzt von überall wechseln, ohne erst in den Build-Tab zu müssen (sichtbar, sobald ≥1 Build gespeichert ist; „kein Build" zum Abwählen)
+- **Fortschritts-Chip direkt daneben:** `7/13 ✓` zeigt sofort, wie viele Build-Slots dein Gear erfüllt — grün wenn komplett, amber wenn noch was fehlt (gleiche Logik wie die Fortschritts-Leiste im Charakter-Tab)
+- Wechsel wirkt sofort auf alles: Gewichtung, Support-Gem-Badges, ✓/✗-Slot-Markierungen, Stat-Score, Trade-Links — egal in welchem Tab du gerade bist
+- Bleibt mit dem Build-Dropdown im Build-Tab synchronisiert; Sprachwechsel übersetzt „kein Build" mit
+
 ## v1.22 (05.10.2026, Waffenset 2 im HUD)
 - **Neu: Weapon-Swap-Slots** — das HUD zeigt jetzt auch das zweite Waffenset (GGG liefert es als `Weapon2`/`Offhand2`, siehe offizielle API/PoB-Import). Die beiden Flanken sind geteilt: oben Haupt-Set (Waffe/Nebenhand), unten Set 2 — mit eigenen Silhouetten. Vorher wurden Swap-Items aus der API still verworfen!
 - Swap-Set fließt mit in Stat-Score, Tooltips und Tap-Details ein; Trade-Kategorien dafür gab es schon (`Weapon2`→weapon, `Offhand2`→shield)
