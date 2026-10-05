@@ -10,6 +10,11 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.24 (05.10.2026, Polish-Trio)
+- **Fix: Layout springt nicht mehr** — die Scrollbar reserviert jetzt permanent ihren Platz (`scrollbar-gutter: stable`), kein seitliches Einrücken/Springen mehr, wenn Seiten länger werden oder man Tabs wechselt
+- **Fix: DEMO-Badge bleib nach Login hängen** — der Badge verschwindet jetzt zuverlässig, sobald man eingeloggt ist / echte Charaktere lädt / einen echten Char wählt (war vorher nach Demo→Login klebrig sichtbar)
+- **Aufgeräumt: doppelte Build-Auswahl im Build-Tab entfernt** — der globale Switcher unter den Tabs übernimmt komplett. Der 🗑-Löschen-Knopf bleibt erhalten: direkt neben „Aktiven Build entfernen" (löscht den AKTIVEN Build endgültig aus der Liste; danach springt der nächste gespeicherte nach)
+
 ## v1.23 (05.10.2026, Globaler Build-Switcher)
 - **Neu: Build-Dropdown direkt unter der Tab-Leiste** — den aktiven Build jetzt von überall wechseln, ohne erst in den Build-Tab zu müssen (sichtbar, sobald ≥1 Build gespeichert ist; „kein Build" zum Abwählen)
 - **Fortschritts-Chip direkt daneben:** `7/13 ✓` zeigt sofort, wie viele Build-Slots dein Gear erfüllt — grün wenn komplett, amber wenn noch was fehlt (gleiche Logik wie die Fortschritts-Leiste im Charakter-Tab)
