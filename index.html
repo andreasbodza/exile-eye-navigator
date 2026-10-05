@@ -1333,7 +1333,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.32";
+const APP_VERSION = "v1.33";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1628,6 +1628,20 @@ let currentLang = localStorage.getItem("exileEye_lang") ||
 function ico(name, px) {
   const sz = px ? ` style="width:${px}px;height:${px}px"` : "";
   return `<svg class="ico"${sz} aria-hidden="true"><use href="#i-${name}"></use></svg>`;
+}
+// GGG-PoE2-Markup: [Strength]Str -> Str, [Attack]Speed -> Attack Speed
+function cleanPoeText(s) {
+  s = String(s == null ? "" : s);
+  s = s.replace(/\[([^\]|]+)\|([^\]]+)\]/g, "$2");
+  s = s.replace(/\[([A-Za-z][A-Za-z0-9]*)\]([A-Za-z][A-Za-z']*)?/g, (_, key, nxt) => {
+    nxt = nxt || "";
+    if (!nxt) return /[a-z][A-Z]/.test(key) || key === key.toUpperCase() ? "" : key;
+    const kl = key.toLowerCase(), nl = nxt.toLowerCase();
+    if (/[a-z][A-Z]/.test(key)) return nxt;
+    if (nl.startsWith(kl) || kl.startsWith(nl)) return nxt;
+    return key + " " + nxt;
+  });
+  return s.replace(/ {2,}/g, " ").trim();
 }
 
 function t(key, vars) {
@@ -2389,13 +2403,13 @@ function showItem(slot) {
   if (it.properties && it.properties.length) {
     html += `<div class="tt-section">`;
     it.properties.forEach(p => {
-      html += `<div class="tt-prop"><span class="pn">${esc(p.name)}</span><span class="pv">${esc(p.value)}</span></div>`;
+      html += `<div class="tt-prop"><span class="pn">${esc(cleanPoeText(p.name))}</span><span class="pv">${esc(cleanPoeText(p.value))}</span></div>`;
     });
     html += `</div>`;
   }
   if (it.requirements && it.requirements.length) {
     html += `<div class="tt-section">`;
-    const reqStr = it.requirements.map(r => `${esc(r.name)} ${esc(r.value)}`).join(", ");
+    const reqStr = it.requirements.map(r => `${esc(cleanPoeText(r.name))} ${esc(cleanPoeText(r.value))}`).join(", ");
     html += `<div class="tt-prop"><span class="pn">${t("tt_required")}</span><span class="pv">${reqStr}</span></div>`;
     html += `</div>`;
   }
@@ -2425,15 +2439,15 @@ function showItem(slot) {
   });
   if (modBlocks.length || exp.length) {
     html += `<div class="tt-section">`;
-    modBlocks.forEach(([cls, arr]) => { arr.forEach(mod => html += `<div class="tt-mod ${cls}">${esc(mod)}</div>`); });
+    modBlocks.forEach(([cls, arr]) => { arr.forEach(mod => html += `<div class="tt-mod ${cls}">${esc(cleanPoeText(mod))}</div>`); });
     if (modBlocks.length && exp.length) html += `<div class="tt-sep"></div>`;
-    exp.forEach(([cls, mod]) => html += `<div class="tt-mod ${cls}">${esc(mod)}</div>`);
+    exp.forEach(([cls, mod]) => html += `<div class="tt-mod ${cls}">${esc(cleanPoeText(mod))}</div>`);
     html += `</div>`;
   }
   if (m.rune && m.rune.length) {
     html += `<div class="tt-section">`;
     html += `<div class="tt-mod rune-head">${t("tt_runes")}</div>`;
-    m.rune.forEach(mod => html += `<div class="tt-mod rune">${esc(mod)}</div>`);
+    m.rune.forEach(mod => html += `<div class="tt-mod rune">${esc(cleanPoeText(mod))}</div>`);
     html += `</div>`;
   }
   if (it.corrupted) html += `<div class="tt-corrupt">${t("tt_corrupted")}</div>`;

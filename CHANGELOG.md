@@ -10,6 +10,12 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.33 (05.10.2026, GGG-Markup weg)
+- Item-Tooltips: `[Strength]Str`, `[Attack]Speed`, `[ItemRarity]Rarity of Items` werden zu lesbarem Text (Str / Attack Speed / Rarity of Items).
+- Backend räumt Mods, Requirements und Properties schon beim API-Import auf (Score-Parser sieht den sauberen Text). Frontend macht dasselbe beim Anzeigen (alte Cache-Daten).
+
+---
+
 ## v1.32 (05.10.2026, Cursor-Fix)
 - **Kein aufgemalter Finger mehr.** Die weiße Hand auf den Slots war ein Missverständnis – das war einfach Andreas’ Windows-Mauszeiger.
 - Klickbare Gems/Runen im Tooltip: dezentes **ℹ** statt Finger-Icon.

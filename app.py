@@ -106,6 +106,43 @@ def make_pkce_pair():
 
 # --- HILFSFUNKTIONEN fuer Datenverarbeitung (auf Modulebene verschoben) ---
 
+def _clean_poe_text(text):
+    """
+    GGG-PoE2-Markup aus Itemtext entfernen.
+
+    Beispiele:
+      [Strength]Str            -> Str
+      [Attack]Speed            -> Attack Speed
+      [Accuracy]Accuracy Rating -> Accuracy Rating
+      [ItemRarity]Rarity of …  -> Rarity of …
+      [Physical|Physical]      -> Physical
+    """
+    if text is None:
+        return text
+    if not isinstance(text, str):
+        return text
+    s = text
+    # [Key|Display] -> Display
+    s = re.sub(r"\[([^\]|]+)\|([^\]]+)\]", r"\2", s)
+
+    def _repl(m):
+        key, nxt = m.group(1), m.group(2) or ""
+        if not nxt:
+            # intern. Id ([DNT], [ItemRarity]) stillschweigend droppen
+            if re.search(r"[a-z][A-Z]", key) or key.isupper():
+                return ""
+            return key
+        kl, nl = key.lower(), nxt.lower()
+        if re.search(r"[a-z][A-Z]", key):
+            return nxt
+        if nl.startswith(kl) or kl.startswith(nl):
+            return nxt
+        return key + " " + nxt
+
+    s = re.sub(r"\[([A-Za-z][A-Za-z0-9]*)\]([A-Za-z][A-Za-z']*)?", _repl, s)
+    return re.sub(r" {2,}", " ", s).strip()
+
+
 def _extract_mod_texts(mod_list):
     """
     Extrahiert den Text aus Mod-Einträgen, die von der GGG API kommen.
@@ -114,9 +151,9 @@ def _extract_mod_texts(mod_list):
     extracted_texts = []
     for mod_entry in mod_list:
         if isinstance(mod_entry, dict) and "description" in mod_entry:
-            extracted_texts.append(mod_entry["description"])
+            extracted_texts.append(_clean_poe_text(mod_entry["description"]))
         elif isinstance(mod_entry, str):
-            extracted_texts.append(mod_entry)
+            extracted_texts.append(_clean_poe_text(mod_entry))
         # Andere unerwartete Typen werden ignoriert
     return extracted_texts
 
@@ -201,7 +238,7 @@ def gem_name_from_icon(icon_url):
 GEM_INFO_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gem_cache.json")
 GEM_INFO_TTL_HIT  = 7 * 24 * 3600   # Treffer 7 Tage cachen
 GEM_INFO_TTL_MISS = 24 * 3600       # 404s 1 Tag cachen
-_GEM_UA = "ExileEyeNavigator/1.28 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
+_GEM_UA = "ExileEyeNavigator/1.33 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
 _gem_cache = None
 
 
@@ -746,8 +783,8 @@ def api_character_gear():
                     val_raw = first[0]
                 else:
                     val_raw = first
-            val_str = _coerce_display_value(val_raw)
-            props.append({"name": p.get("name", ""), "value": val_str})
+            val_str = _clean_poe_text(_coerce_display_value(val_raw))
+            props.append({"name": _clean_poe_text(p.get("name", "")), "value": val_str})
 
         # Basiswerte aus den Properties (z.B. {"Armour": "369"})
         base_stats = {}
@@ -784,8 +821,8 @@ def api_character_gear():
                     val_raw = first[0]
                 else:
                     val_raw = first
-            val_str = _coerce_display_value(val_raw)
-            reqs.append({"name": r.get("name", ""), "value": val_str})
+            val_str = _clean_poe_text(_coerce_display_value(val_raw))
+            reqs.append({"name": _clean_poe_text(r.get("name", "")), "value": val_str})
 
         # --- Raritaet bestimmen (frameTypeId neu, frameType alt) ---
         rarity_map = {"Normal": 0, "Magic": 1, "Rare": 2, "Unique": 3}
