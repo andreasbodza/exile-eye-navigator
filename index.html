@@ -30,6 +30,9 @@
     --stone-3:   #22262f;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  /* Scrollbar-Platz permanent reservieren: kein Layout-Springen mehr,
+     wenn Inhalte laengere Seiten brauchen (Tabs/Wechsel) */
+  html { scrollbar-gutter: stable; }
   body {
     background: radial-gradient(circle at 50% 0%, #1a1510 0%, var(--bg) 70%);
     color: var(--text);
@@ -1129,15 +1132,10 @@
       <div id="activeBuildBar" style="display:none;background:rgba(46,111,176,.12);border:1px solid #2e5a80;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
           <span id="activeBuildName" style="color:#9ab8d8"></span>
-          <button class="btn danger" style="padding:5px 10px;font-size:11px;white-space:nowrap" data-i18n="active_build_remove" onclick="clearBuild()">✕ Aktiven Build entfernen</button>
-        </div>
-      </div>
-
-      <div id="savedBuildsBar" style="display:none;margin-bottom:12px">
-        <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px" data-i18n="saved_builds_lbl">💾 Gespeicherte Builds – umschalten:</label>
-        <div style="display:flex;gap:8px">
-          <select id="savedBuildsSelect" class="trade-sel" style="flex:1" onchange="switchBuild(this.value)"></select>
-          <button class="btn danger" style="padding:7px 11px;font-size:12px;white-space:nowrap" onclick="deleteSavedBuild()">🗑</button>
+          <span style="display:flex;gap:6px">
+            <button class="btn danger" style="padding:5px 10px;font-size:11px;white-space:nowrap" data-i18n="active_build_remove" onclick="clearBuild()">✕ Aktiven Build entfernen</button>
+            <button class="btn danger" style="padding:5px 9px;font-size:11px;white-space:nowrap" data-i18n-title="ab_delete_title" onclick="deleteActiveBuild()">🗑</button>
+          </span>
         </div>
       </div>
 
@@ -1233,7 +1231,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.23";
+const APP_VERSION = "v1.24";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1352,7 +1350,7 @@ const I18N = {
     rescap_note:"⚠️ Nur Werte aus deinem <b>getragenen Gear</b>. Passivbaum, Ascendancy &amp; Liga-Strafe sind <b>nicht</b> enthalten.",
     preset_balanced:"Ausgewogen", preset_life:"Life-Build", preset_es:"ES-Build", preset_resi:"Resi-Cap zuerst",
     active_build_remove:"✕ Aktiven Build entfernen",
-    saved_builds_lbl:"💾 Gespeicherte Builds – umschalten:",
+    ab_delete_title:"Aktiven Build endgültig aus der Liste löschen", bn_no_active_build:"Kein aktiver Build zum Löschen.",
     import_lbl:"🧠 Build importieren:", import_file_btn:"📂 .build-Datei auswählen",
     import_file_hint:"Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus. ⭐ am genauesten",
     import_paste_lbl:"…oder einen Link / Code / Text einfügen:",
@@ -1457,7 +1455,7 @@ const I18N = {
     rescap_note:"⚠️ Values from your <b>equipped gear</b> only. Passive tree, ascendancy &amp; league penalty are <b>not</b> included.",
     preset_balanced:"Balanced", preset_life:"Life Build", preset_es:"ES Build", preset_resi:"Resi-Cap first",
     active_build_remove:"✕ Remove active build",
-    saved_builds_lbl:"💾 Saved builds – switch:",
+    ab_delete_title:"Permanently delete the active build from the list", bn_no_active_build:"No active build to delete.",
     import_lbl:"🧠 Import build:", import_file_btn:"📂 Choose .build file",
     import_file_hint:"Download the \u201eBuild Planner Export\u201c <b>.build</b> file from <b>Mobalytics</b> and choose it here. ⭐ most accurate",
     import_paste_lbl:"…or paste a link / code / text:",
@@ -1600,6 +1598,11 @@ function showBanner(msg, type = "error") {
   }
 })();
 
+function hideDemoBadge() {
+  const b = document.getElementById("demoBadge");
+  if (b) b.style.display = "none";
+}
+
 async function init() {
   try {
     const res = await fetch("/api/status");
@@ -1609,6 +1612,7 @@ async function init() {
       document.getElementById("mainView").classList.remove("hidden");
       document.getElementById("logoutBtn").classList.remove("hidden");
       const lbIn = document.getElementById("loginBtn"); if (lbIn) lbIn.style.display = "none";
+      hideDemoBadge();   // echter Login -> DEMO-Banner raus
       syncHeaderHeight();
       setPanelStatus("character", "✓ " + (data.account || "?"));
       loadWeights();
@@ -1778,6 +1782,7 @@ async function loadCharacters() {
       opt.textContent = `${c.name}  (Lvl ${c.level} ${c.class})`;
       sel.appendChild(opt);
     });
+    hideDemoBadge();   // echte Chars geladen -> kein Demo-Zustand mehr
     showBanner(t("bn_chars_loaded", { n: chars.length }), "ok");
   } catch (e) { showBanner(t("bn_error") + e.message); }
 }
@@ -1792,6 +1797,7 @@ document.getElementById("charSelect").addEventListener("change", async (e) => {
   }
   const opt = e.target.options[e.target.selectedIndex];
   currentLeague = opt?.dataset?.league || "Standard";
+  hideDemoBadge();   // echter Char gewählt -> DEMO-Badge weg
   await loadGear(name);
 });
 
@@ -2320,7 +2326,6 @@ function updateActiveBuildBar() {
   const hasBuild = !!name;
   if (hasBuild) { nameEl.textContent = t("active_build_prefix") + name; bar.style.display = "block"; setPanelStatus("buildplan", "✓ " + name, false); }
   else { bar.style.display = "none"; }
-  renderSavedBuildsBar();
   renderGlobalBuildBar();
 }
 
@@ -2364,24 +2369,6 @@ function saveBuild(pkg) {
   if (builds.length > 10) builds = builds.slice(0, 10);
   setSavedBuilds(builds);
 }
-function renderSavedBuildsBar() {
-  const bar = document.getElementById("savedBuildsBar");
-  const sel = document.getElementById("savedBuildsSelect");
-  if (!bar || !sel) return;
-  const builds = getSavedBuilds();
-  const activeName = localStorage.getItem("exileEye_buildName") || "";
-  if (builds.length < 2) { bar.style.display = "none"; return; }
-  sel.innerHTML = "";
-  builds.forEach(b => {
-    const opt = document.createElement("option");
-    opt.value = b.name;
-    const sub = [b.info?.class, b.info?.ascendancy].filter(Boolean).join(" ");
-    opt.textContent = b.name + (sub ? `  (${sub})` : "");
-    if (b.name === activeName) opt.selected = true;
-    sel.appendChild(opt);
-  });
-  bar.style.display = "block";
-}
 function switchBuild(name) {
   const b = getSavedBuilds().find(x => x.name === name);
   if (!b) return;
@@ -2404,17 +2391,15 @@ function applyBuildPackage(b) {
   updateBuildStatus();
   scheduleScoreRefresh();   // Stat-Score direkt mit den neuen Gewichten neu rechnen
 }
-function deleteSavedBuild() {
-  const sel = document.getElementById("savedBuildsSelect");
-  const name = sel.value;
-  if (!name) return;
+// Aktiven Build endgueltig aus der gespeicherten Liste loeschen
+function deleteActiveBuild() {
+  const name = localStorage.getItem("exileEye_buildName");
+  if (!name) { showBanner(t("bn_no_active_build")); return; }
   if (!confirm(t("cf_build_delete", { n: name }))) return;
   let builds = getSavedBuilds().filter(b => b.name !== name);
   setSavedBuilds(builds);
-  if (localStorage.getItem("exileEye_buildName") === name) {
-    if (builds.length) applyBuildPackage(builds[0]);
-    else clearBuild();
-  } else renderSavedBuildsBar();
+  if (builds.length) applyBuildPackage(builds[0]);
+  else clearBuild();
   showBanner(t("bn_build_deleted") + name, "ok");
 }
 function clearBuild() {
@@ -3292,5 +3277,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a45be836efe2d298',t:'MTc5MTE5Nzg2Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a45c0605aa821c26',t:'MTc5MTE5OTA4NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
