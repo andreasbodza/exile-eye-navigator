@@ -10,6 +10,13 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.35 (05.10.2026, Trade-Mins vom Item)
+- Trade-Filter ohne Mindestwert fliegen raus (leeres „Total Ele Res“ hat quasi alles gefunden).
+- Upgrade-Suche nimmt die **echten Mods** des getragenen Items (Life, Resistenzen, …) als Min — nicht die Gewichtung ohne Werte und nicht die Basis-Rüstung.
+- Helm-Beispiel: Life ≥ 66 und Ele-Res ≥ 33 (13 Fire + 20 Cold), nicht mehr nur ein leerer Pseudo-Filter.
+
+---
+
 ## v1.34 (05.10.2026, Trade-Suche filtert wieder)
 - Bug: „Besseres Item suchen“ hat nur die Slot-Kategorie geschickt (alle Helme), weil `fire_res`/`Fire Dmg` keine Trade-IDs hatten.
 - Resistenzen werden wie im Scanner auf **Elem-Res (gesamt)** zusammengelegt; Mindestwerte kommen vom Build-Slot oder vom aktuell getragenen Item (Upgrade-Suche).

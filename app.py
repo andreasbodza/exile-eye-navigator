@@ -238,7 +238,7 @@ def gem_name_from_icon(icon_url):
 GEM_INFO_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gem_cache.json")
 GEM_INFO_TTL_HIT  = 7 * 24 * 3600   # Treffer 7 Tage cachen
 GEM_INFO_TTL_MISS = 24 * 3600       # 404s 1 Tag cachen
-_GEM_UA = "ExileEyeNavigator/1.34 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
+_GEM_UA = "ExileEyeNavigator/1.35 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
 _gem_cache = None
 
 
@@ -2038,13 +2038,16 @@ def api_trade_link():
             if not sid:
                 continue
             f = {"id": sid, "disabled": False}
-            if minval is not None:
-                try:
-                    # Toleranz abziehen (z.B. -15% -> mehr Treffer)
-                    mv = float(minval) * (1.0 - tol)
-                    f["value"] = {"min": int(mv)}
-                except (ValueError, TypeError):
-                    pass
+            if minval is None:
+                # Filter ohne Min sucht quasi alles (besonders Ele-Res) — weglassen
+                continue
+            try:
+                mv = float(minval) * (1.0 - tol)
+                if mv <= 0:
+                    continue
+                f["value"] = {"min": int(round(mv))}
+            except (ValueError, TypeError):
+                continue
             stat_filters.append(f)
             applied.append(key)
         query["query"]["stats"] = [{"type": "and", "filters": stat_filters}]

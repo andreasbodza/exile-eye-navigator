@@ -1333,7 +1333,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.34";
+const APP_VERSION = "v1.35";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -2643,22 +2643,15 @@ async function openTrade(slot) {
     else {
       let statsObj = buildSlotStats[slot];
       if (!statsObj || Object.keys(statsObj).length === 0) {
-        // Kein Slot-Soll aus dem Build: Stats die du brauchst (Gewichtung)
-        // mit Mindestwerten vom aktuell getragenen Item (= Upgrade-Suche).
-        const have = (equippedItems[slot] && (equippedItems[slot].effective_stats || equippedItems[slot].parsed_stats)) || {};
+        // Kein Slot-Soll aus dem Build: Upgrade-Suche mit den echten
+        // Mod-Werten des getragenen Items (parsed_stats, NICHT effective/
+        // Basis-Ruestung — die wuerde als % Armour-Min Quatsch erzeugen).
+        const have = (equippedItems[slot] && equippedItems[slot].parsed_stats) || {};
         statsObj = {};
-        const keys = topWeightedKeys(5);
-        if (keys.length) {
-          keys.forEach(k => {
-            const v = parseFloat(have[k]);
-            statsObj[k] = (!isNaN(v) && v > 0) ? v : null;
-          });
-        } else {
-          Object.entries(have).forEach(([k, v]) => {
-            const n = parseFloat(v);
-            if (!isNaN(n) && n > 0) statsObj[k] = n;
-          });
-        }
+        Object.entries(have).forEach(([k, v]) => {
+          const n = parseFloat(v);
+          if (!isNaN(n) && n > 0) statsObj[k] = n;
+        });
       }
       payload.stats = statsObj;
     }
