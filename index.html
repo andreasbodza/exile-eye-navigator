@@ -399,6 +399,23 @@
   .slot.build-ok   { border-color: var(--green); }
   .slot.build-miss { border-color: var(--red); }
 
+  /* Globaler Build-Switcher direkt unter den Tabs */
+  #globalBuildBar {
+    align-items: center; gap: 8px;
+    max-width: 560px; margin: 8px auto 4px; padding: 6px 10px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+  }
+  #globalBuildBar .gb-label {
+    font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--gold-soft); font-weight: 700; white-space: nowrap;
+  }
+  #globalBuildBar select { flex: 1; padding: 6px 8px; font-size: 12px; min-width: 0; }
+  #globalBuildBar .gb-count {
+    font-size: 11px; font-weight: 700; color: #a7f3d0;
+    background: rgba(45,212,191,.14); border: 1px solid rgba(45,212,191,.35);
+    border-radius: 4px; padding: 1px 6px; white-space: nowrap;
+  }
+
   /* Build-Fortschritts-Leiste über dem HUD */
   #buildProgress {
     display: none; max-width: 560px; margin: 0 auto 12px;
@@ -863,6 +880,13 @@
   </button>
 </nav>
 
+<!-- Globaler Build-Switcher: aktiven Build ueberall wechseln -->
+<div id="globalBuildBar" style="display:none">
+  <span class="gb-label" data-i18n="gb_label">◆ Build</span>
+  <select id="globalBuildSelect" class="trade-sel" onchange="globalBuildSwitch(this.value)"></select>
+  <span class="gb-count" id="gbCount" style="display:none"></span>
+</div>
+
 <div id="banner"></div>
 
 <!-- ============================================================
@@ -1209,7 +1233,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.22";
+const APP_VERSION = "v1.23";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1305,6 +1329,7 @@ const I18N = {
     slot_select_lbl:"Mit welchem Slot vergleichen?", slot_choose:"– Slot wählen –",
     slot_weapon:"Waffe", slot_offhand:"Nebenhand", slot_helm:"Helm", slot_body:"Rüstung",
     slot_weapon2:"Waffe 2", slot_offhand2:"Nebenhand 2",
+    gb_label:"◆ Build", gb_none:"– kein Build –",
     slot_gloves:"Handschuhe", slot_boots:"Stiefel", slot_belt:"Gürtel", slot_amulet:"Amulett",
     slot_ring_l:"Ring L", slot_ring_r:"Ring R",
     scan_history_title:"📜 Scan-Verlauf", scan_history_clear:"🗑 Alle löschen",
@@ -1409,6 +1434,7 @@ const I18N = {
     slot_select_lbl:"Compare with which slot?", slot_choose:"– Choose slot –",
     slot_weapon:"Weapon", slot_offhand:"Offhand", slot_helm:"Helm", slot_body:"Armour",
     slot_weapon2:"Weapon 2", slot_offhand2:"Offhand 2",
+    gb_label:"◆ Build", gb_none:"– no build –",
     slot_gloves:"Gloves", slot_boots:"Boots", slot_belt:"Belt", slot_amulet:"Amulet",
     slot_ring_l:"Ring L", slot_ring_r:"Ring R",
     scan_history_title:"📜 Scan history", scan_history_clear:"🗑 Delete all",
@@ -2071,8 +2097,10 @@ function updateBuildStatus() {
   });
   const hasBuild = Object.keys(buildSlotStats).length > 0 || Object.keys(buildSlotUniques).length > 0;
   const hasGear = Object.keys(equippedItems).length > 0;
+  const gbCount = document.getElementById("gbCount");
   if (!hasBuild || !hasGear) {
     progress.style.display = "none";
+    if (gbCount) gbCount.style.display = "none";
     document.getElementById("bpMissingToggle").style.display = "none";
     document.getElementById("bpMissingList").style.display = "none";
     return;
@@ -2095,6 +2123,14 @@ function updateBuildStatus() {
   const pct = total ? Math.round((fulfilled / total) * 100) : 0;
   document.getElementById("bpCount").textContent = `${fulfilled} / ${total}`;
   document.getElementById("bpFill").style.width = pct + "%";
+  if (gbCount) {
+    gbCount.textContent = `${fulfilled}/${total} ✓`;
+    gbCount.style.display = "inline-block";
+    const done = total > 0 && fulfilled === total;
+    gbCount.style.color = done ? "#a7f3d0" : "#f4d08a";
+    gbCount.style.borderColor = done ? "rgba(45,212,191,.35)" : "rgba(244,194,96,.4)";
+    gbCount.style.background = done ? "rgba(45,212,191,.14)" : "rgba(244,194,96,.08)";
+  }
   const missing = total - fulfilled;
   document.getElementById("bpHint").textContent = missing === 0
     ? "🎉 Perfekt! Alle Build-Slots erfüllt!" : `Noch ${missing} Slot${missing > 1 ? "s" : ""} zu verbessern`;
@@ -2285,6 +2321,37 @@ function updateActiveBuildBar() {
   if (hasBuild) { nameEl.textContent = t("active_build_prefix") + name; bar.style.display = "block"; setPanelStatus("buildplan", "✓ " + name, false); }
   else { bar.style.display = "none"; }
   renderSavedBuildsBar();
+  renderGlobalBuildBar();
+}
+
+// Globaler Build-Switcher (unter den Tabs): aktiven Build ueberall wechseln
+function renderGlobalBuildBar() {
+  const bar = document.getElementById("globalBuildBar");
+  const sel = document.getElementById("globalBuildSelect");
+  if (!bar || !sel) return;
+  const builds = getSavedBuilds();
+  const activeName = localStorage.getItem("exileEye_buildName") || "";
+  if (!builds.length) { bar.style.display = "none"; return; }
+  sel.innerHTML = "";
+  const none = document.createElement("option");
+  none.value = ""; none.textContent = t("gb_none");
+  sel.appendChild(none);
+  builds.forEach(b => {
+    const opt = document.createElement("option");
+    opt.value = b.name;
+    const sub = [b.info?.class, b.info?.ascendancy].filter(Boolean).join(" ");
+    opt.textContent = b.name + (sub ? ` (${sub})` : "");
+    sel.appendChild(opt);
+  });
+  sel.value = (activeName && builds.some(b => b.name === activeName)) ? activeName : "";
+  bar.style.display = "flex";
+}
+
+function globalBuildSwitch(name) {
+  const cur = localStorage.getItem("exileEye_buildName") || "";
+  if (name === cur) return;
+  if (!name) { if (cur) clearBuild(); return; }
+  switchBuild(name);
 }
 
 const SAVED_BUILDS_KEY = "exileEye_savedBuilds";
@@ -3225,5 +3292,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a45b8f27ec62d3bd',t:'MTc5MTE5NDIxNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a45be836efe2d298',t:'MTc5MTE5Nzg2Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
