@@ -10,6 +10,15 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.27 (05.10.2026, Planer-Namen & klickbare Gems)
+- **Geister-Aliase**: Maxroll-Namen, die es im Spiel nicht gibt, werden auf den GGG-Namen gemappt — verifiziert via poe2db: *Primal Armament → Elemental Armament*, *Ancestral Urgency → Urgent Totems*, *Magnified Effect → Magnified Area*. Fixt falsche ✗-Chips im Support-Check (der Char hatte die Gems längst gesockelt!).
+- **Tier-Chaos gebändigt**: „Two"/„2" werden in der Anzeige zu „II" usw. — alles in römischen Ziffern wie im Spiel.
+- **Beschreibungen für Build-Gems**: Flavor-Präfixe (Bear/Ascendancy/Wolf/Wyvern) werden bei der poe2db-Suche ignoriert → „Bear Maul" findet jetzt die Beschreibung von „Maul".
+- **Wiki-Fallback** nutzt ebenfalls den normalisierten Namen (statt 404-Links auf Planner-Namen).
+- **Alles klickbar**: Support-Liste im Gem-Modal und die roten „fehlt noch"-Chips im Charakter-Tab öffnen jetzt ebenfalls die Beschreibung.
+
+---
+
 ## v1.26 (05.10.2026, Gem-Beschreibungen)
 - **Neu: „Was macht das Gem?" direkt im Gem-Modal** — Kurzbeschreibung + 📖-Quellenlink. Keine statische Datenbank: das Backend schaut **live auf poe2db.tw** nach (Community-gepflegt, jede Liga aktuell!) und cached Treffer 7 Tage (404s 1 Tag) in `gem_cache.json` → null Liga-Wartung
 - **Killer-Detail:** die Namensauflösung versteht alle Schreibweisen — GGG-Tiers („Aftershock II"), Maxroll-Wort-Tiers („… Two") und Maxroll-Varianten („… Player") werden aufgelöst; Support-Gems werden ggf. mit `_I`-Suffix probiert

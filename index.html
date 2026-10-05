@@ -1257,7 +1257,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.26";
+const APP_VERSION = "v1.27";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1856,11 +1856,56 @@ function gemDispName(n) {
 // Gem-Namen zum Vergleichen normalisieren (Groß/Klein + Tier-Suffix "I"-"VI" ignorieren)
 // Gem-Namen zum Vergleichen normalisieren: Kleinbuchstaben, Tier-Suffixe
 // ("I"-"VI", "One"-"Six", Ziffern) und Maxroll-"Player"-Variante ignorieren
+// Planner-"Geisternamen" (Maxroll/Mobalytics) -> GGG-Name (via poe2db verifiziert:
+// linkes existiert nicht im Spiel, rechtes schon). Fixt falsche ✗ im Support-Check,
+// wenn der Planer andere Namen nutzt als das Spiel.
+const GEM_ALIASES = {
+  "primal armament": "elemental armament",
+  "ancestral urgency": "urgent totems",
+  "magnified effect": "magnified area",
+};
+const GEM_ALIAS_DISPLAY = {
+  "primal armament": "Elemental Armament",
+  "ancestral urgency": "Urgent Totems",
+  "magnified effect": "Magnified Area",
+};
+const GEM_TIER_WORD_MAP = { one:"I", two:"II", three:"III", four:"IV", five:"V", six:"VI",
+                            1:"I", 2:"II", 3:"III", 4:"IV", 5:"V", 6:"VI" };
 function normGemName(n) {
   let s = String(n || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
   s = s.replace(/ (?:i|ii|iii|iv|v|vi|one|two|three|four|five|six|[0-9]+)$/, "");
   s = s.replace(/ player$/, "");
+  s = GEM_ALIASES[s] || s;
   return s.trim();
+}
+// Anzeige-Normalisierung fuer Planer-Namen: Geister-Aliase durch GGG-Namen ersetzen,
+// Tier-Woerter/Ziffern ("Two", "2") in roemische Ziffern wandeln, " Player" abschneiden.
+// Rein kosmetisch - die Logik laeuft ueber normGemName.
+function gemPlannerDisplay(name) {
+  let s = String(name || "").trim();
+  if (!s) return s;
+  s = s.replace(/\s+Player$/i, "");
+  let base = s, tier = "";
+  const m = s.match(/^(.*?)\s+(one|two|three|four|five|six|[1-6])$/i);
+  if (m) { base = m[1]; tier = " " + (GEM_TIER_WORD_MAP[m[2].toLowerCase()] || ""); }
+  const alias = GEM_ALIAS_DISPLAY[base.toLowerCase()];
+  if (alias) base = alias;
+  return (base + tier).trim();
+}
+// Name fuer poe2db/Wiki-Suche: Anzeige-Normalisierung + Flavor-Praefixe abwerfen
+// ("Ascendancy Fire Spell On Hit" -> "Fire Spell On Hit", "Bear Maul" -> "Maul").
+function gemSearchName(name) {
+  let s = gemPlannerDisplay(name);
+  let low = s.toLowerCase(), stripped = true;
+  while (stripped) {
+    stripped = false;
+    for (const p of GEM_FLAVOR_PREFIXES) {
+      if (low.startsWith(p + " ") && s.length > p.length + 1) {
+        s = s.slice(p.length + 1).trim(); low = s.toLowerCase(); stripped = true;
+      }
+    }
+  }
+  return s;
 }
 // Flavor-Praefixe, die Planer (Maxroll/Mobalytics) an Skill-Namen haengen:
 // "Bear Maul" vs. GGG "Maul", "Ascendancy Fire Spell On Hit" vs. "Fire Spell on Hit"
@@ -1952,9 +1997,12 @@ function renderGearSkills(skills) {
         badge = `<span class="gear-alias" title="${esc(t("gem_alias_hint", { n: buildName }))}">≈ ${esc(buildName)}</span>`;
       }
       const have = new Set(sups.map(sp => normGemName(sp.name)));
+      s._missing = [];
       (bEntry.supports || []).forEach(w => {
         if (!have.has(normGemName(w.name))) {
-          supHtml.push(`<span class="gear-skill-sup miss" title="${esc(t("gem_missing_hint"))}"><span>${esc(w.name)}</span></span>`);
+          const mi = s._missing.length;
+          s._missing.push(w.name);
+          supHtml.push(`<span class="gear-skill-sup miss clickable" title="${esc(t("gem_missing_hint"))} · ${esc(t("gem_info_title"))}" onclick="showGearMissing(${gi},${mi})"><span>${esc(gemPlannerDisplay(w.name))}</span></span>`);
         }
       });
     }
@@ -3182,7 +3230,7 @@ function renderSkills(skills) {
       html += `<div class="skill-supports">`;
       s.supports.forEach((sup, si) => {
         const [sc] = gemIconClass(sup.tags, true, sup.color);
-        html += `<span class="support-chip" onclick="showGem(${idx},${si})"><span class="mini-gem ${sc}"></span>${esc(sup.name)}</span>`;
+        html += `<span class="support-chip" onclick="showGem(${idx},${si})"><span class="mini-gem ${sc}"></span>${esc(gemPlannerDisplay(sup.name))}</span>`;
       });
       html += `</div>`;
     }
@@ -3205,7 +3253,7 @@ function showGem(skillIdx, supIdx) {
   let html = `<div class="tt-header r0" style="border-bottom:1px solid var(--border)">
     <button class="tt-close" onclick="closeItem()">×</button>
     <div class="gem-icon ${iconCls}" style="margin:0 auto 8px;width:42px;height:42px;font-size:20px">${sym}</div>
-    <div class="tt-name" style="color:${typeColor}">${esc(gem.name)}</div>
+    <div class="tt-name" style="color:${typeColor}">${esc(gemPlannerDisplay(gem.name))}</div>
     <div class="tt-base">${typeLabel}${gem.level ? " · " + t("gem_level_from", { l: gem.level }) : ""}</div>
   </div>`;
   if (gem.tags && gem.tags.length) {
@@ -3215,9 +3263,9 @@ function showGem(skillIdx, supIdx) {
   }
   if (!gem.is_support && s.supports && s.supports.length) {
     html += `<div class="tt-section"><div style="font-size:11px;color:var(--text-dim);margin-bottom:5px">${t("gem_supports_label", { n: s.supports.length })}</div>`;
-    s.supports.forEach(sup => {
+    s.supports.forEach((sup, supSi) => {
       const [sc] = gemIconClass(sup.tags, true, sup.color);
-      html += `<div class="tt-mod" style="color:#9ab8d8;display:flex;align-items:center;gap:6px"><span class="mini-gem ${sc}"></span>${esc(sup.name)}</div>`;
+      html += `<div class="tt-mod clickable" style="color:#9ab8d8;display:flex;align-items:center;gap:6px" onclick="showGem(${skillIdx},${supSi})" title="${esc(t("gem_info_title"))}"><span class="mini-gem ${sc}"></span>${esc(gemPlannerDisplay(sup.name))}</div>`;
     });
     html += `</div>`;
   }
@@ -3235,12 +3283,19 @@ function showGearGem(gi, si) {
   showGemInfo(gemDispName(raw) || t("skills_gear_unknown"), si >= 0);
 }
 
+// Angeklickter roter "fehlt noch"-Chip (Name kommt aus dem Build/Planer)
+function showGearMissing(gi, mi) {
+  const s = (lastGearSkills || [])[gi];
+  const raw = s && (s._missing || [])[mi];
+  if (raw) showGemInfo(raw, true);
+}
+
 function showGemInfo(name, isSupport) {
   const typeLabel = isSupport ? t("gem_type_support") : t("gem_type_skill");
   const typeColor = isSupport ? "#9ab8d8" : "#f0c060";
   const html = `<div class="tt-header r0" style="border-bottom:1px solid var(--border)">
     <button class="tt-close" onclick="closeItem()">×</button>
-    <div class="tt-name" style="color:${typeColor}">${esc(name)}</div>
+    <div class="tt-name" style="color:${typeColor}">${esc(gemPlannerDisplay(name))}</div>
     <div class="tt-base">${typeLabel}</div>
   </div>
   <div class="tt-section" id="gemInfoBox"></div>`;
@@ -3255,7 +3310,9 @@ function fetchGemInfoInto(boxId, name) {
   const box = document.getElementById(boxId);
   if (!box) return;
   const fallback = () => {
-    box.innerHTML = `<a class="gem-src" href="https://www.poe2wiki.net/wiki/${encodeURIComponent(String(name).replace(/ /g, "_"))}" target="_blank" rel="noopener">📖 ${t("gem_wiki_link")} ↗</a>`;
+    // Fallback-Link: normalisierten Namen nutzen (Alias, ohne "Player"/Flavor-Praefix)
+    const wikiName = gemSearchName(name);
+    box.innerHTML = `<a class="gem-src" href="https://www.poe2wiki.net/wiki/${encodeURIComponent(wikiName.replace(/ /g, "_"))}" target="_blank" rel="noopener">📖 ${t("gem_wiki_link")} ↗</a>`;
   };
   box.innerHTML = `<div class="gem-desc" style="color:var(--text-dim)">💡 ${t("gem_loading")}</div>`;
   fetch("/api/gem-info?name=" + encodeURIComponent(name))

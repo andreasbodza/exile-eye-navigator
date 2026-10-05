@@ -201,7 +201,7 @@ def gem_name_from_icon(icon_url):
 GEM_INFO_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gem_cache.json")
 GEM_INFO_TTL_HIT  = 7 * 24 * 3600   # Treffer 7 Tage cachen
 GEM_INFO_TTL_MISS = 24 * 3600       # 404s 1 Tag cachen
-_GEM_UA = "ExileEyeNavigator/1.26 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
+_GEM_UA = "ExileEyeNavigator/1.27 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
 _gem_cache = None
 
 
@@ -226,6 +226,18 @@ def _save_gem_cache():
 _GEM_TIER_WORDS = {"one": "I", "two": "II", "three": "III",
                    "four": "IV", "five": "V", "six": "VI",
                    "1": "I", "2": "II", "3": "III"}
+
+# Planner-"Geisternamen" (Maxroll/Mobalytics) -> GGG-kanonischer Name.
+# Via poe2db verifiziert: linkes existiert dort nicht, rechtes schon.
+# Wichtig fuer Beschreibungen UND den Support-Check (s. normGemName in index.html).
+_GEM_NAME_ALIASES = {
+    "primal armament": "elemental armament",
+    "ancestral urgency": "urgent totems",
+    "magnified effect": "magnified area",
+}
+# Flavor-Praefixe der Planer ("Bear Maul" vs. GGG "Maul",
+# "Ascendancy Fire Spell On Hit" vs. "Fire Spell on Hit").
+_GEM_FLAVOR_PREFIXES = ("ascendancy", "bear", "wolf", "wyvern")
 
 
 def _gem_slug_candidates(raw_name):
@@ -255,17 +267,31 @@ def _gem_slug_candidates(raw_name):
             lw = w.lower()
             canon.append(lw if (i > 0 and lw in _GEM_SMALL_WORDS) else w[0].upper() + w[1:])
         return re.sub(r"\s+", "_", " ".join(canon).strip())
+    # Basis-Varianten: 1) Alias (GGG-Name), 2) Original, 3) ohne Flavor-Praefix
+    bases = []
+    alias = _GEM_NAME_ALIASES.get(base.lower())
+    if alias:
+        bases.append(alias)
+    bases.append(base)
+    b_low = base.lower()
+    for p in _GEM_FLAVOR_PREFIXES:
+        if b_low.startswith(p + " "):
+            stripped = base[len(p) + 1:].strip()
+            if stripped:
+                bases.append(stripped)
+            break
     cands = []
-    if tier:
-        cands += [slug(base + " " + tier), slug(base)]
-    else:
-        cands += [slug(base)] + [slug(base + " " + t) for t in ("I", "II", "III")]
+    for b in bases:
+        if tier:
+            cands += [slug(b + " " + tier), slug(b)]
+        else:
+            cands += [slug(b)] + [slug(b + " " + t) for t in ("I", "II", "III")]
     # dedupe, Reihenfolge behalten
     seen, out = set(), []
     for c in cands:
         if c and c not in seen:
             seen.add(c); out.append(c)
-    return out[:5]
+    return out[:8]
 
 
 def _shorten_gem_desc(text, limit=320):
