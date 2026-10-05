@@ -65,9 +65,25 @@
     border-radius: 6px;
     padding: 9px 16px;
     font-size: 13px; font-weight: 600; letter-spacing: .5px;
-    cursor: pointer; text-decoration: none; display: inline-block;
+    cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     transition: all .15s;
   }
+  svg.ico {
+    display: inline-block; width: 1.1em; height: 1.1em;
+    vertical-align: -0.18em; flex: 0 0 auto;
+    stroke: currentColor; fill: none;
+  }
+  .scanner-hero-icon { color: #0d1110; }
+  .scanner-hero-icon svg.ico { width: 26px; height: 26px; }
+  .gem-icon svg.ico { width: 55%; height: 55%; stroke: #fff; }
+  .gb-import { display: inline-flex; align-items: center; gap: 5px; }
+  .gb-import svg.ico { width: 14px; height: 14px; }
+  .tt-mod.clickable svg.ico:last-child { margin-left: auto; width: 15px; height: 15px; opacity: .8; }
+  .tap-tip { display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .tap-tip svg.ico { width: 16px; height: 16px; opacity: 1; animation: tapTipWiggle 1.6s ease-in-out infinite; }
+  @keyframes tapTipWiggle { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+  .rc-title, .bp-label { display: inline-flex; align-items: center; gap: 6px; }
   .btn:hover { background: #2b303c; }
   .btn.primary { background: var(--gold); color: #0d1110; }
   .btn.primary:hover { background: #5eead4; }
@@ -98,6 +114,7 @@
     font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;
     color: var(--gold-soft); margin-bottom: 12px; border-bottom: 1px solid var(--border);
     padding-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
   }
 
   /* ---------- Login Karte ---------- */
@@ -379,7 +396,7 @@
   }
   .slot.filled .slot-icon { display: none; }
   .slot:not(.filled) .item-name.empty::after {
-    content: " · 🔍 Trade"; font-size: 8px; color: var(--gold-soft); opacity: 0;
+    content: " · Trade"; font-size: 8px; color: var(--gold-soft); opacity: 0;
     transition: opacity .2s;
   }
   .slot:not(.filled):hover .item-name.empty::after { opacity: .8; }
@@ -401,7 +418,7 @@
   /* Tippbar-Affordanz (v1.29): Reihen wie Menueeintraege + Einmal-Hinweis */
   .tt-mod.clickable { padding: 3px 6px; border-radius: 6px; transition: background .12s; }
   .tt-mod.clickable:hover { background: rgba(240,192,96,.08); }
-  .tt-mod .chevron { margin-left: auto; opacity: .45; font-weight: 700; }
+  .tt-mod .chevron { margin-left: auto; opacity: .8; display: flex; }
   .tap-tip {
     font-size: 10.5px; color: var(--gold-soft); text-align: center;
     padding: 4px 6px; margin-top: 5px; border: 1px dashed rgba(240,192,96,.35);
@@ -867,6 +884,53 @@
 </head>
 <body>
 
+<!-- Icon-Sprite (Lucide-Stil, currentColor) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-gamepad" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="2"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="i-bug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="14" x="8" y="6" rx="4"/><path d="m19 7-3 2"/><path d="m5 7 3 2"/><path d="m19 19-3-2"/><path d="m5 19 3-2"/><path d="M20 13h-4"/><path d="M4 13h4"/><path d="m10 4 1 2"/><path d="m14 4-1 2"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-coins" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="i-lightbulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+  <symbol id="i-chevron-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-book-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.53a2 2 0 0 1-.21.9L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.07-10.13A2 2 0 0 1 14 9.53V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></symbol>
+  <symbol id="i-gem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M2 9h20"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+  <symbol id="i-snowflake" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93 4.93 19.07"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="i-skull" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2M16 20v2"/><path d="M12 2a8 8 0 0 0-8 8v2a4 4 0 0 0 2 3.4V18a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-2.6A4 4 0 0 0 20 12v-2a8 8 0 0 0-8-8z"/></symbol>
+  <symbol id="i-swords" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-pointer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 14a8 8 0 0 1-8 8"/><path d="M18 11v-1a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M14 10V9a2 2 0 0 0-2-2 2 2 0 0 0-2 2v1"/><path d="M10 9.5V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v10"/><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></symbol>
+  <symbol id="i-crop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></symbol>
+</svg>
+
+
 <header>
   <div class="logo">
     <svg viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="1.8">
@@ -886,9 +950,9 @@
     <div class="ts-value" id="tsValue">0</div>
   </div>
   <div style="display:flex;gap:8px;align-items:center">
-    <button id="langToggle" class="btn" style="padding:7px 11px;font-size:12px" onclick="toggleLang()">🌍 DE</button>
-    <a id="loginBtn" class="btn primary" data-i18n="login_btn" style="display:none;padding:7px 11px;font-size:12px" href="/login">🔐 Mit GGG anmelden</a>
-    <button id="installBtn" class="btn" style="display:none" onclick="installApp()">📲 App installieren</button>
+    <button id="langToggle" class="btn" style="padding:7px 11px;font-size:12px" onclick="toggleLang()"><svg class="ico" aria-hidden="true"><use href="#i-globe"></use></svg> DE</button>
+    <a id="loginBtn" class="btn primary" style="display:none;padding:7px 11px;font-size:12px" href="/login"><svg class="ico" aria-hidden="true"><use href="#i-lock"></use></svg><span data-i18n="login_btn">Mit GGG anmelden</span></a>
+    <button id="installBtn" class="btn" style="display:none" onclick="installApp()"><svg class="ico" aria-hidden="true"><use href="#i-phone"></use></svg> App installieren</button>
     <button id="logoutBtn" class="btn danger hidden" onclick="location.href='/logout'">Logout</button>
   </div>
 </header>
@@ -917,7 +981,7 @@
   <span class="gb-label" data-i18n="gb_label">◆ Build</span>
   <select id="globalBuildSelect" class="trade-sel" onchange="globalBuildSwitch(this.value)"></select>
   <span class="gb-count" id="gbCount" style="display:none"></span>
-  <button class="gb-import" id="gbImportBtn" onclick="goImportBuild()" data-i18n-title="gb_import_title" aria-label="Build importieren">📥</button>
+  <button class="gb-import" id="gbImportBtn" onclick="goImportBuild()" data-i18n-title="gb_import_title" aria-label="Build importieren"><svg class="ico" aria-hidden="true"><use href="#i-download"></use></svg></button>
 </div>
 
 <div id="banner"></div>
@@ -927,7 +991,7 @@
      ============================================================ -->
 <div class="panel" data-panel-id="scanner">
   <div class="panel-head">
-    <h2 data-i18n="panel_scanner">📷 Item-Scanner</h2>
+    <h2><svg class="ico" aria-hidden="true"><use href="#i-camera"></use></svg><span data-i18n="panel_scanner">Item-Scanner</span></h2>
     <div class="head-right">
       <span class="status-badge"></span>
       <span class="arrow">▶</span>
@@ -936,16 +1000,16 @@
   <div class="panel-body">
     <div class="scanner-hero scan-area">
       <div class="scanner-hero-head">
-        <div class="scanner-hero-icon">📷</div>
+        <div class="scanner-hero-icon"><svg class="ico" aria-hidden="true"><use href="#i-camera"></use></svg></div>
         <div>
           <h2 class="scanner-hero-title" data-i18n="scan_title">Item scannen</h2>
           <p class="scanner-hero-sub" data-i18n="scan_sub">Foto vom Item-Tooltip machen – Exile Eye liest die Werte aus und vergleicht. Kein Login nötig.</p>
         </div>
       </div>
       <input type="file" id="fileInput" accept="image/*" capture="environment">
-      <button class="btn primary scanner-hero-btn" data-i18n="photo_btn" onclick="document.getElementById('fileInput').click()">📷 Foto aufnehmen / Bild wählen</button>
-      <button class="btn scanner-paste-btn" data-i18n="paste_btn" onclick="pasteFromClipboard()">📋 Screenshot aus Zwischenablage einfügen</button>
-      <p class="scanner-paste-hint" data-i18n-html="paste_hint">💡 Tipp: Screenshot machen und einfach <b>Strg + V</b> drücken – kein Suchen auf der Festplatte nötig.</p>
+      <button class="btn primary scanner-hero-btn" onclick="document.getElementById('fileInput').click()"><svg class="ico" aria-hidden="true"><use href="#i-camera"></use></svg><span data-i18n="photo_btn">Foto aufnehmen / Bild wählen</span></button>
+      <button class="btn scanner-paste-btn" onclick="pasteFromClipboard()"><svg class="ico" aria-hidden="true"><use href="#i-clipboard"></use></svg><span data-i18n="paste_btn">Screenshot aus Zwischenablage einfügen</span></button>
+      <p class="scanner-paste-hint"><svg class="ico" aria-hidden="true"><use href="#i-lightbulb"></use></svg> <span data-i18n-html="paste_hint">Tipp: Screenshot machen und einfach <b>Strg + V</b> drücken – kein Suchen auf der Festplatte nötig.</span></p>
       <div class="scanner-options">
         <label class="scan-opt-lang">
           <span data-i18n="game_lang_lbl">Spiel-Sprache:</span>
@@ -957,7 +1021,7 @@
         </label>
         <label class="scan-opt-crop">
           <input type="checkbox" id="autoCropToggle" checked style="width:18px;height:18px;accent-color:var(--gold)">
-          <span data-i18n="autocrop_lbl">🤖 Auto-Zuschnitt (findet das Item-Tooltip selbst)</span>
+          <svg class="ico" aria-hidden="true"><use href="#i-cpu"></use></svg><span data-i18n="autocrop_lbl">Auto-Zuschnitt (findet das Item-Tooltip selbst)</span>
         </label>
       </div>
       <div id="cropArea">
@@ -967,11 +1031,11 @@
           <div class="crop-handle sw"></div><div class="crop-handle se"></div>
         </div>
       </div>
-      <div class="crop-hint" id="cropHint" data-i18n-html="crop_hint" style="display:none">
-        🟨 Ziehe den goldenen Rahmen genau um den <b>Item-Text</b> (der Rahmen wurde automatisch vorgeschlagen)
+      <div class="crop-hint" id="cropHint" style="display:none">
+        <svg class="ico" aria-hidden="true"><use href="#i-crop"></use></svg> <span data-i18n-html="crop_hint">Ziehe den goldenen Rahmen genau um den <b>Item-Text</b> (der Rahmen wurde automatisch vorgeschlagen)</span>
       </div>
       <img id="previewImg" alt="Vorschau">
-      <button id="analyzeBtn" class="btn hidden" data-i18n="analyze_btn" onclick="analyzeImage()">🔍 Zugeschnittenes Item analysieren</button>
+      <button id="analyzeBtn" class="btn hidden" onclick="analyzeImage()"><svg class="ico" aria-hidden="true"><use href="#i-search"></use></svg><span data-i18n="analyze_btn">Zugeschnittenes Item analysieren</span></button>
       <div id="scanResult"></div>
       <div id="scanSlotBox">
         <label><span data-i18n="slot_select_lbl">Mit welchem Slot vergleichen?</span> <span id="slotAutoHint"></span></label>
@@ -994,8 +1058,8 @@
       <div id="comparePanel"></div>
       <div id="scanHistorySection" style="display:none;margin-top:20px;text-align:left">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-soft)" data-i18n="scan_history_title">📜 Scan-Verlauf</span>
-          <button class="btn danger" style="padding:4px 10px;font-size:11px" data-i18n="scan_history_clear" onclick="clearScanHistory()">🗑 Alle löschen</button>
+          <span style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-soft);display:inline-flex;align-items:center;gap:6px"><svg class="ico" aria-hidden="true"><use href="#i-clock"></use></svg><span data-i18n="scan_history_title">Scan-Verlauf</span></span>
+          <button class="btn danger" style="padding:4px 10px;font-size:11px" onclick="clearScanHistory()"><svg class="ico" aria-hidden="true"><use href="#i-trash"></use></svg><span data-i18n="scan_history_clear">Alle löschen</span></button>
         </div>
         <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px" data-i18n="scan_history_hint">Deine letzten Scans – tippe einen an, um ihn erneut anzusehen.</div>
         <div id="scanHistoryList"></div>
@@ -1009,7 +1073,7 @@
      ============================================================ -->
 <div class="panel" data-panel-id="character">
   <div class="panel-head">
-    <h2 data-i18n="panel_character">🎮 Charakter & Ausrüstung</h2>
+    <h2><svg class="ico" aria-hidden="true"><use href="#i-gamepad"></use></svg><span data-i18n="panel_character">Charakter & Ausrüstung</span></h2>
     <div class="head-right">
       <span class="status-badge"></span>
       <span class="arrow">▶</span>
@@ -1024,9 +1088,9 @@
       </svg>
       <h2 style="color:var(--gold);letter-spacing:1px" data-i18n="login_welcome">Willkommen, Exile</h2>
       <p data-i18n-html="login_sub">Melde dich mit deinem Path&nbsp;of&nbsp;Exile&nbsp;Account an,<br>um deine Charaktere und Ausrüstung zu laden.</p>
-      <a href="/login" class="btn primary" data-i18n="login_btn">🔐 Mit GGG anmelden</a>
+      <a href="/login" class="btn primary"><svg class="ico" aria-hidden="true"><use href="#i-lock"></use></svg><span data-i18n="login_btn">Mit GGG anmelden</span></a>
       <div style="margin-top:14px">
-        <button class="btn" data-i18n="demo_btn" onclick="loadDemo()" style="font-size:12px">🎮 Demo ausprobieren (ohne Login)</button>
+        <button class="btn" onclick="loadDemo()" style="font-size:12px"><svg class="ico" aria-hidden="true"><use href="#i-gamepad"></use></svg><span data-i18n="demo_btn">Demo ausprobieren (ohne Login)</span></button>
         <p style="font-size:11px;color:var(--text-dim);margin-top:8px" data-i18n-html="demo_hint">Probier die App mit Beispiel-Charakter aus – Scanner, Build-Vergleich &amp; HUD live testen!</p>
       </div>
     </div>
@@ -1044,12 +1108,12 @@
 
         <div id="buildProgress">
           <div class="bp-top">
-            <span class="bp-label" data-i18n="bp_label">🎯 Build-Fortschritt</span>
+            <span class="bp-label"><svg class="ico" aria-hidden="true"><use href="#i-target"></use></svg><span data-i18n="bp_label">Build-Fortschritt</span></span>
             <span class="bp-count" id="bpCount">0 / 0</span>
           </div>
           <div class="bp-bar"><div class="bp-fill" id="bpFill" style="width:0%"></div></div>
           <div class="bp-hint" id="bpHint" data-i18n-title="bp_hint_title" data-i18n="bp_hint">Importiere einen Build, um deinen Fortschritt zu sehen</div>
-          <button id="bpMissingToggle" class="bp-missing-toggle" data-i18n="bp_missing_show" style="display:none" onclick="toggleMissingList()">🔍 Was fehlt mir? Liste anzeigen</button>
+          <button id="bpMissingToggle" class="bp-missing-toggle" style="display:none" onclick="toggleMissingList()"><svg class="ico" aria-hidden="true"><use href="#i-search"></use></svg><span data-i18n="bp_missing_show">Was fehlt mir? Liste anzeigen</span></button>
           <div id="bpMissingList" style="display:none"></div>
         </div>
 
@@ -1123,7 +1187,7 @@
      ============================================================ -->
 <div class="panel" data-panel-id="buildplan">
   <div class="panel-head">
-    <h2 data-i18n="panel_buildplan">🎯 Build-Planung</h2>
+    <h2><svg class="ico" aria-hidden="true"><use href="#i-target"></use></svg><span data-i18n="panel_buildplan">Build-Planung</span></h2>
     <div class="head-right">
       <span class="status-badge"></span>
       <span class="arrow">▶</span>
@@ -1131,36 +1195,36 @@
   </div>
   <div class="panel-body">
     <div class="section" id="buildImportSection">
-      <h2 data-i18n="import_section">🧠 Build importieren</h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-download"></use></svg><span data-i18n="import_section">Build importieren</span></h2>
       <div id="activeBuildBar" style="display:none;background:rgba(46,111,176,.12);border:1px solid #2e5a80;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
           <span id="activeBuildName" style="color:#9ab8d8"></span>
           <span style="display:flex;gap:6px">
             <button class="btn danger" style="padding:5px 10px;font-size:11px;white-space:nowrap" data-i18n="active_build_remove" onclick="clearBuild()">✕ Aktiven Build entfernen</button>
-            <button class="btn danger" style="padding:5px 9px;font-size:11px;white-space:nowrap" data-i18n-title="ab_delete_title" onclick="deleteActiveBuild()">🗑</button>
+            <button class="btn danger" style="padding:5px 9px;font-size:11px;white-space:nowrap" data-i18n-title="ab_delete_title" onclick="deleteActiveBuild()" aria-label="Delete"><svg class="ico" aria-hidden="true"><use href="#i-trash"></use></svg></button>
           </span>
         </div>
       </div>
 
       <div class="build-import">
         <input type="file" id="buildFileInput" style="display:none">
-        <button id="buildFileBtn" class="btn primary" style="width:100%;margin-bottom:6px" data-i18n="import_file_btn" onclick="document.getElementById('buildFileInput').click()">📂 .build-Datei auswählen</button>
-        <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.5" data-i18n-html="import_file_hint">
-          Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus. ⭐ am genauesten
+        <button id="buildFileBtn" class="btn primary" style="width:100%;margin-bottom:6px" onclick="document.getElementById('buildFileInput').click()"><svg class="ico" aria-hidden="true"><use href="#i-folder"></use></svg><span data-i18n="import_file_btn">.build-Datei auswählen</span></button>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.5">
+          <svg class="ico" aria-hidden="true"><use href="#i-star"></use></svg> <span data-i18n-html="import_file_hint">Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus — am genauesten</span>
         </div>
         <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px" data-i18n="import_paste_lbl">…oder einen Link / Code / Text einfügen:</label>
         <textarea id="buildCode" data-i18n-ph="buildcode_ph" placeholder='https://pobb.in/xxxxx • https://maxroll.gg/... • PoB-Code • oder Item-Text'></textarea>
-        <button class="btn primary" style="margin-top:8px" data-i18n="import_btn" onclick="importBuild()">📥 Build importieren &amp; Gewichtung übernehmen</button>
+        <button class="btn primary" style="margin-top:8px" onclick="importBuild()"><svg class="ico" aria-hidden="true"><use href="#i-download"></use></svg><span data-i18n="import_btn">Build importieren &amp; Gewichtung übernehmen</span></button>
         <div id="buildResult"></div>
       </div>
     </div>
 
     <div class="section">
-      <h2 data-i18n="weights_section">Gewichtung &amp; Build-Import</h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-scale"></use></svg><span data-i18n="weights_section">Gewichtung</span></h2>
 
       <div id="resCapBox">
         <div class="rc-top">
-          <span class="rc-title" data-i18n="rescap_title">🛡️ Resistenzen (aus deinem Gear)</span>
+          <span class="rc-title"><svg class="ico" aria-hidden="true"><use href="#i-shield"></use></svg><span data-i18n="rescap_title">Resistenzen (aus deinem Gear)</span></span>
           <span class="rc-capwrap">
             Cap:
             <select id="resCapSelect" onchange="renderResCap()">
@@ -1172,7 +1236,7 @@
           </span>
         </div>
         <div id="resCapRows"></div>
-        <div class="rc-note" data-i18n-html="rescap_note">⚠️ Nur Werte aus deinem <b>getragenen Gear</b>. Passivbaum, Ascendancy &amp; Liga-Strafe sind <b>nicht</b> enthalten.</div>
+        <div class="rc-note"><svg class="ico" aria-hidden="true"><use href="#i-alert"></use></svg> <span data-i18n-html="rescap_note">Nur Werte aus deinem <b>getragenen Gear</b>. Passivbaum, Ascendancy &amp; Liga-Strafe sind <b>nicht</b> enthalten.</span></div>
       </div>
 
       <div class="weight-presets" id="presets">
@@ -1201,7 +1265,7 @@
      ============================================================ -->
 <div class="panel" data-panel-id="settings">
   <div class="panel-head">
-    <h2 data-i18n="panel_settings">⚙️ Einstellungen &amp; Handel</h2>
+    <h2><svg class="ico" aria-hidden="true"><use href="#i-settings"></use></svg><span data-i18n="panel_settings">Einstellungen &amp; Handel</span></h2>
     <div class="head-right">
       <span class="status-badge"></span>
       <span class="arrow">▶</span>
@@ -1209,7 +1273,7 @@
   </div>
   <div class="panel-body">
     <div class="section">
-      <h2 data-i18n="trade_section">🛒 Trade-Einstellungen</h2>
+      <h2><svg class="ico" aria-hidden="true"><use href="#i-bag"></use></svg><span data-i18n="trade_section">Trade-Einstellungen</span></h2>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div>
           <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px" data-i18n="trade_league_lbl">Liga</label>
@@ -1247,7 +1311,7 @@
 
 <!-- BUG-REPORT / FEEDBACK (immer sichtbar ganz unten) -->
 <div style="text-align:center;margin:20px 18px 0">
-  <button class="btn" data-i18n="bug_btn" onclick="reportBug()" style="font-size:13px">🐞 Fehler melden / Feedback geben</button>
+  <button class="btn" onclick="reportBug()" style="font-size:13px"><svg class="ico" aria-hidden="true"><use href="#i-bug"></use></svg><span data-i18n="bug_btn">Fehler melden / Feedback geben</span></button>
   <p style="font-size:11px;color:var(--text-dim);margin-top:6px" data-i18n="bug_hint">Etwas funktioniert nicht? Sag uns Bescheid – öffnet eine vorausgefüllte E-Mail.</p>
 </div>
 
@@ -1267,7 +1331,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.29";
+const APP_VERSION = "v1.30";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1337,7 +1401,7 @@ const I18N = {
     // (kompatible Alt-Keys)
     h_character:"Charakter", h_equipment:"Aktuelle Ausrüstung",
     h_skills:"Skills & Support-Gems", h_weights:"Gewichtung · was ist dir wichtig?",
-    h_trade:"🛒 Trade-Einstellungen", h_scan:"Item scannen",
+    h_trade:"Trade-Einstellungen", h_scan:"Item scannen",
     tab_scanner:"Scanner", tab_character:"Charakter", tab_build:"Build", tab_settings:"Einstellungen",
     skills_gear_title:"Skills & Gems (dein Charakter)", skills_gear_unknown:"Unbekanntes Gem",
     gem_notinbuild:"nicht im Build", gem_notinbuild_hint:"Dieser Skill kommt im aktiven Build nicht vor.",
@@ -1352,16 +1416,16 @@ const I18N = {
     logout:"Logout",
     ts_tooltip:"Rechnet deine Ausrüstung mit effektiven Werten: (Basiswert + flat-Mods) × (1 + increased%) – so zählt z.B. 85% erhöhte Rüstung auf einer 369er-Basis wie +314 Rüstung. Unique-Effekte, Skill-Synergien und Build-Mechaniken zählen nicht.",
     ts_count0:"0 Slots gewertet", ts_count:"{n} Slots gewertet",
-    panel_scanner:"📷 Item-Scanner", scan_title:"Item scannen",
+    panel_scanner:"Item-Scanner", scan_title:"Item scannen",
     scan_sub:"Foto vom Item-Tooltip machen – Exile Eye liest die Werte aus und vergleicht. Kein Login nötig.",
-    photo_btn:"📷 Foto aufnehmen / Bild wählen",
-    paste_btn:"📋 Screenshot aus Zwischenablage einfügen",
-    paste_hint:"💡 Tipp: Screenshot machen und einfach <b>Strg + V</b> drücken – kein Suchen auf der Festplatte nötig.",
+    photo_btn:"Foto aufnehmen / Bild wählen",
+    paste_btn:"Screenshot aus Zwischenablage einfügen",
+    paste_hint:"Tipp: Screenshot machen und einfach <b>Strg + V</b> drücken – kein Suchen auf der Festplatte nötig.",
     game_lang_lbl:"Spiel-Sprache:", lang_auto:"Automatisch (DE+EN)", lang_de:"Deutsch", lang_en:"English",
-    autocrop_lbl:"🤖 Auto-Zuschnitt (findet das Item-Tooltip selbst)",
-    crop_hint:"🟨 Ziehe den goldenen Rahmen genau um den <b>Item-Text</b> (der Rahmen wurde automatisch vorgeschlagen)",
-    analyze_btn:"🔍 Zugeschnittenes Item analysieren",
-    analyze_btn_auto:"🔍 Item analysieren (Auto-Zuschnitt)",
+    autocrop_lbl:"Auto-Zuschnitt (findet das Item-Tooltip selbst)",
+    crop_hint:"Ziehe den goldenen Rahmen genau um den <b>Item-Text</b> (der Rahmen wurde automatisch vorgeschlagen)",
+    analyze_btn:"Zugeschnittenes Item analysieren",
+    analyze_btn_auto:"Item analysieren (Auto-Zuschnitt)",
     slot_select_lbl:"Mit welchem Slot vergleichen?", slot_choose:"– Slot wählen –",
     slot_weapon:"Waffe", slot_offhand:"Nebenhand", slot_helm:"Helm", slot_body:"Rüstung",
     slot_weapon2:"Waffe 2", slot_offhand2:"Nebenhand 2",
@@ -1369,51 +1433,51 @@ const I18N = {
     gb_import_btn:"Build importieren…", gb_import_title:"Build aus Mobalytics / Maxroll / PoB importieren (Gewichtung, Vergleiche & Gem-Check freischalten)",
     slot_gloves:"Handschuhe", slot_boots:"Stiefel", slot_belt:"Gürtel", slot_amulet:"Amulett",
     slot_ring_l:"Ring L", slot_ring_r:"Ring R",
-    scan_history_title:"📜 Scan-Verlauf", scan_history_clear:"🗑 Alle löschen",
+    scan_history_title:"Scan-Verlauf", scan_history_clear:"Alle löschen",
     scan_history_hint:"Deine letzten Scans – tippe einen an, um ihn erneut anzusehen.",
-    panel_character:"🎮 Charakter & Ausrüstung",
+    panel_character:"Charakter & Ausrüstung",
     login_welcome:"Willkommen, Exile",
     login_sub:"Melde dich mit deinem Path&nbsp;of&nbsp;Exile&nbsp;Account an,<br>um deine Charaktere und Ausrüstung zu laden.",
-    login_btn:"🔐 Mit GGG anmelden", demo_btn:"🎮 Demo ausprobieren (ohne Login)",
+    login_btn:"Mit GGG anmelden", demo_btn:"Demo ausprobieren (ohne Login)",
     demo_hint:"Probier die App mit Beispiel-Charakter aus – Scanner, Build-Vergleich &amp; HUD live testen!",
     char_section:"Charakter", char_choose:"– Charakter wählen –",
     equip_section:"Aktuelle Ausrüstung",
-    bp_label:"🎯 Build-Fortschritt",
+    bp_label:"Build-Fortschritt",
     bp_hint:"Importiere einen Build, um deinen Fortschritt zu sehen",
     bp_hint_title:"Zählt pro Slot, den dein Build fordert: ✓ = Anforderungen komplett erfüllt · ✗ = fehlt oder zu niedrig",
-    bp_missing_show:"🔍 Was fehlt mir? Liste anzeigen",
-    panel_buildplan:"🎯 Build-Planung",
+    bp_missing_show:"Was fehlt mir? Liste anzeigen",
+    panel_buildplan:"Build-Planung",
     skills_section:"Skills & Support-Gems",
-    weights_section:"⚖️ Gewichtung", import_section:"🧠 Build importieren",
-    rescap_title:"🛡️ Resistenzen (aus deinem Gear)",
-    rescap_note:"⚠️ Nur Werte aus deinem <b>getragenen Gear</b>. Passivbaum, Ascendancy &amp; Liga-Strafe sind <b>nicht</b> enthalten.",
+    weights_section:"Gewichtung", import_section:"Build importieren",
+    rescap_title:"Resistenzen (aus deinem Gear)",
+    rescap_note:"Nur Werte aus deinem <b>getragenen Gear</b>. Passivbaum, Ascendancy &amp; Liga-Strafe sind <b>nicht</b> enthalten.",
     preset_balanced:"Ausgewogen", preset_life:"Life-Build", preset_es:"ES-Build", preset_resi:"Resi-Cap zuerst",
     active_build_remove:"✕ Aktiven Build entfernen",
     ab_delete_title:"Aktiven Build endgültig aus der Liste löschen", bn_no_active_build:"Kein aktiver Build zum Löschen.",
-    import_file_btn:"📂 .build-Datei auswählen",
-    import_file_hint:"Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus. ⭐ am genauesten",
+    import_file_btn:".build-Datei auswählen",
+    import_file_hint:"Lade bei <b>Mobalytics</b> die „Build Planner Export“ <b>.build</b>-Datei herunter und wähle sie hier aus — am genauesten",
     import_paste_lbl:"…oder einen Link / Code / Text einfügen:",
     buildcode_ph:"https://pobb.in/xxxxx • https://maxroll.gg/... • PoB-Code • oder Item-Text",
-    import_btn:"📥 Build importieren & Gewichtung übernehmen",
-    panel_settings:"⚙️ Einstellungen & Handel",
-    trade_section:"🛒 Trade-Einstellungen",
+    import_btn:"Build importieren & Gewichtung übernehmen",
+    panel_settings:"Einstellungen & Handel",
+    trade_section:"Trade-Einstellungen",
     trade_league_lbl:"Liga", league_auto:"Vom Charakter", league_current:"Aktuelle Liga", league_current_hc:"Aktuelle (HC)",
     trade_status_lbl:"Handelsstatus", trade_status_any:"Beliebig", trade_status_buyout:"Sofort kaufbar", trade_status_online:"Online-Spieler",
     tol_lbl:"Attribut-Toleranz",
     tol_hint:"z.B. -15%: sucht auch Items mit etwas niedrigeren Werten",
-    bug_btn:"🐞 Fehler melden / Feedback geben",
+    bug_btn:"Fehler melden / Feedback geben",
     bug_hint:"Etwas funktioniert nicht? Sag uns Bescheid – öffnet eine vorausgefüllte E-Mail.",
     rc_fire:"Feuer-Res", rc_cold:"Kälte-Res", rc_lightning:"Blitz-Res", rc_chaos:"Chaos-Res",
     rc_buffer:"+{d}% Puffer ✓", rc_ok:"Cap erreicht ✓", rc_missing:"noch {d}% bis Cap",
     bn_chars_loaded:"{n} Charakter(e) geladen",
     legal_impressum:"Impressum", legal_privacy:"Datenschutz", legal_terms:"Nutzungsbedingungen",
-    empty_slot:"leer", active_build_prefix:"🧠 Aktiver Build: ", score_prefix:"Score ",
+    empty_slot:"leer", active_build_prefix:"Aktiver Build: ", score_prefix:"Score ",
     auto_detected:"(auto-erkannt: {s})", not_detected:"(nicht erkannt)", loaded_from_history:"(aus Verlauf geladen)",
-    list_hide:"🔼 Liste ausblenden", list_show:"🔍 Was fehlt mir? Liste anzeigen",
+    list_hide:"Liste ausblenden", list_show:"Was fehlt mir? Liste anzeigen",
     file_reading:"Lese Datei…", file_empty:"Datei ist leer.", file_read_error:"Datei konnte nicht gelesen werden.",
     importing:"Importiere…", import_success:"✓ Import erfolgreich", import_failed:"Import fehlgeschlagen: ",
     updating:"Aktualisiere…",
-    skills_empty:"📚 Skills erscheinen automatisch, sobald du einen Build importierst.<br><span style=\"opacity:.7\">(Mobalytics .build-Datei, pobb.in-Link, oder Maxroll-URL)</span>",
+    skills_empty:"Skills erscheinen automatisch, sobald du einen Build importierst.<br><span style=\"opacity:.7\">(Mobalytics .build-Datei, pobb.in-Link, oder Maxroll-URL)</span>",
     cmp_empty:"✓ Slot ist leer – ausrüsten! (Score {s})",
     cmp_better:"▲ BESSER  (+{d} Score)", cmp_worse:"▼ SCHLECHTER  ({d} Score)", cmp_equal:"= Gleichwertig",
     tt_required:"Benötigt", tt_unnamed:"(unbenannt)", tt_corrupted:"Korrumpiert",
@@ -1421,13 +1485,13 @@ const I18N = {
     tt_runes:"◈ Runen",
     tt_socketed:"◈ Sockel-Inhalt", socket_type_rune:"Rune", socket_type_soulcore:"Seelenkern",
     tap_hint:"Antippen für Beschreibung & Details",
-    hint_title:"ℹ Hinweise",
+    hint_title:"Hinweise",
     hint_res_partial:"{name}: von +{v}% zählen nur ~{e}% (du bist bei {c}% / Cap {cap}%)",
     hint_allres_partial:"Alle Elementar-Res: von +{v}% zählen nur ~{e}% (am wenigsten Platz frei)",
     hint_cond_attacks:"{n} Mod(s): gelten nur bei Angriffen",
     hint_cond_onhit:"{n} Mod(s): gelten nur bei Treffer",
     hint_cond_local:"{n} Mod(s): gelten nur für dieses Item",
-    tt_trade_link:"🔍 Besseres Item auf dem Trade suchen", tt_trade_hint:"Wichtig für deinen Build:",
+    tt_trade_link:"Besseres Item auf dem Trade suchen", tt_trade_hint:"Wichtig für deinen Build:",
     bn_iphone_hint:"Am iPhone: Teilen-Symbol → Zum Home-Bildschirm",
     bn_analyze_failed:"Analyse fehlgeschlagen: ", bn_analyze_done:"Analyse fertig – Score ",
     bn_gear_of:"Ausrüstung von ", bn_gear_error:"Ausrüstung-Fehler: ",
@@ -1440,14 +1504,14 @@ const I18N = {
     bn_login_error:"Login-Fehler: ", bn_ocr_error:"OCR-Fehler: ", bn_price_error:"Preis-Check-Fehler: ",
     bn_history_cleared:"Scan-Verlauf gelöscht", bn_server_down:"Server nicht erreichbar. Läuft app.py?",
     bn_status_error:"Status-Fehler: ", bn_trade_error:"Trade-Fehler: ", bn_trade_open:"Trade-Suche geöffnet",
-    bn_demo_active:"🎮 Demo-Modus aktiv", bn_price_open:"💰 Preis-Check geöffnet",
-    bn_paste_done:"📋 Screenshot eingefügt!", bn_history_loaded:"📜 Scan aus Verlauf geladen",
+    bn_demo_active:"Demo-Modus aktiv", bn_price_open:"Preis-Check geöffnet",
+    bn_paste_done:"Screenshot eingefügt!", bn_history_loaded:"Scan aus Verlauf geladen",
     cf_build_delete:"Gespeicherten Build „{n}“ löschen?", cf_history_delete:"Wirklich den ganzen Scan-Verlauf löschen?",
   },
   en: {
     h_character:"Character", h_equipment:"Current Equipment",
     h_skills:"Skills & Support Gems", h_weights:"Weighting · what matters to you?",
-    h_trade:"🛒 Trade Settings", h_scan:"Scan item",
+    h_trade:"Trade Settings", h_scan:"Scan item",
     tab_scanner:"Scanner", tab_character:"Character", tab_build:"Build", tab_settings:"Settings",
     skills_gear_title:"Skills & Gems (your character)", skills_gear_unknown:"Unknown gem",
     gem_notinbuild:"not in build", gem_notinbuild_hint:"This skill doesn't appear in the active build.",
@@ -1462,16 +1526,16 @@ const I18N = {
     logout:"Logout",
     ts_tooltip:"Scores your gear with effective values: (base + flat mods) × (1 + increased%). E.g. 85% increased Armour on a 369 base counts like +314 Armour. Unique effects, skill synergies and build mechanics are not included.",
     ts_count0:"0 slots scored", ts_count:"{n} slots scored",
-    panel_scanner:"📷 Item Scanner", scan_title:"Scan item",
+    panel_scanner:"Item Scanner", scan_title:"Scan item",
     scan_sub:"Take a photo of the item tooltip – Exile Eye reads the stats and compares. No login needed.",
-    photo_btn:"📷 Take photo / choose image",
-    paste_btn:"📋 Paste screenshot from clipboard",
-    paste_hint:"💡 Tip: Take a screenshot and just press <b>Ctrl + V</b> – no file searching needed.",
+    photo_btn:"Take photo / choose image",
+    paste_btn:"Paste screenshot from clipboard",
+    paste_hint:"Tip: Take a screenshot and just press <b>Ctrl + V</b> – no file searching needed.",
     game_lang_lbl:"Game language:", lang_auto:"Automatic (DE+EN)", lang_de:"German", lang_en:"English",
-    autocrop_lbl:"🤖 Auto-crop (finds the item tooltip itself)",
-    crop_hint:"🟨 Drag the golden frame exactly around the <b>item text</b> (frame was auto-suggested)",
-    analyze_btn:"🔍 Analyze cropped item",
-    analyze_btn_auto:"🔍 Analyze item (auto-crop)",
+    autocrop_lbl:"Auto-crop (finds the item tooltip itself)",
+    crop_hint:"Drag the golden frame exactly around the <b>item text</b> (frame was auto-suggested)",
+    analyze_btn:"Analyze cropped item",
+    analyze_btn_auto:"Analyze item (auto-crop)",
     slot_select_lbl:"Compare with which slot?", slot_choose:"– Choose slot –",
     slot_weapon:"Weapon", slot_offhand:"Offhand", slot_helm:"Helm", slot_body:"Armour",
     slot_weapon2:"Weapon 2", slot_offhand2:"Offhand 2",
@@ -1479,51 +1543,51 @@ const I18N = {
     gb_import_btn:"Import build…", gb_import_title:"Import a build from Mobalytics / Maxroll / PoB (unlocks weighting, compare & gem check)",
     slot_gloves:"Gloves", slot_boots:"Boots", slot_belt:"Belt", slot_amulet:"Amulet",
     slot_ring_l:"Ring L", slot_ring_r:"Ring R",
-    scan_history_title:"📜 Scan history", scan_history_clear:"🗑 Delete all",
+    scan_history_title:"Scan history", scan_history_clear:"Delete all",
     scan_history_hint:"Your recent scans – tap one to view it again.",
-    panel_character:"🎮 Character & Equipment",
+    panel_character:"Character & Equipment",
     login_welcome:"Welcome, Exile",
     login_sub:"Sign in with your Path&nbsp;of&nbsp;Exile&nbsp;account<br>to load your characters and equipment.",
-    login_btn:"🔐 Sign in with GGG", demo_btn:"🎮 Try the demo (no login)",
+    login_btn:"Sign in with GGG", demo_btn:"Try the demo (no login)",
     demo_hint:"Try the app with a sample character – scanner, build compare &amp; HUD, all live!",
     char_section:"Character", char_choose:"– Choose character –",
     equip_section:"Current equipment",
-    bp_label:"🎯 Build progress",
+    bp_label:"Build progress",
     bp_hint:"Import a build to see your progress",
     bp_hint_title:"Counts per slot your build requires: ✓ = fully met · ✗ = missing or too low",
-    bp_missing_show:"🔍 What am I missing? Show list",
-    panel_buildplan:"🎯 Build Planning",
+    bp_missing_show:"What am I missing? Show list",
+    panel_buildplan:"Build Planning",
     skills_section:"Skills & Support Gems",
-    weights_section:"⚖️ Weighting", import_section:"🧠 Import build",
-    rescap_title:"🛡️ Resistances (from your gear)",
-    rescap_note:"⚠️ Values from your <b>equipped gear</b> only. Passive tree, ascendancy &amp; league penalty are <b>not</b> included.",
+    weights_section:"Weighting", import_section:"Import build",
+    rescap_title:"Resistances (from your gear)",
+    rescap_note:"Values from your <b>equipped gear</b> only. Passive tree, ascendancy &amp; league penalty are <b>not</b> included.",
     preset_balanced:"Balanced", preset_life:"Life Build", preset_es:"ES Build", preset_resi:"Resi-Cap first",
     active_build_remove:"✕ Remove active build",
     ab_delete_title:"Permanently delete the active build from the list", bn_no_active_build:"No active build to delete.",
-    import_file_btn:"📂 Choose .build file",
-    import_file_hint:"Download the \u201eBuild Planner Export\u201c <b>.build</b> file from <b>Mobalytics</b> and choose it here. ⭐ most accurate",
+    import_file_btn:"Choose .build file",
+    import_file_hint:"Download the \u201eBuild Planner Export\u201c <b>.build</b> file from <b>Mobalytics</b> and choose it here — most accurate",
     import_paste_lbl:"…or paste a link / code / text:",
     buildcode_ph:"https://pobb.in/xxxxx • https://maxroll.gg/... • PoB code • or item text",
-    import_btn:"📥 Import build & apply weighting",
-    panel_settings:"⚙️ Settings & Trade",
-    trade_section:"🛒 Trade Settings",
+    import_btn:"Import build & apply weighting",
+    panel_settings:"Settings & Trade",
+    trade_section:"Trade Settings",
     trade_league_lbl:"League", league_auto:"From character", league_current:"Current league", league_current_hc:"Current (HC)",
     trade_status_lbl:"Trade status", trade_status_any:"Any", trade_status_buyout:"Buyable now", trade_status_online:"Online players",
     tol_lbl:"Attribute tolerance",
     tol_hint:"e.g. -15%: also matches items with slightly lower values",
-    bug_btn:"🐞 Report bug / Send feedback",
+    bug_btn:"Report bug / Send feedback",
     bug_hint:"Something not working? Let us know – opens a pre-filled email.",
     rc_fire:"Fire Res", rc_cold:"Cold Res", rc_lightning:"Lightning Res", rc_chaos:"Chaos Res",
     rc_buffer:"+{d}% buffer ✓", rc_ok:"Cap reached ✓", rc_missing:"{d}% to cap",
     bn_chars_loaded:"{n} character(s) loaded",
     legal_impressum:"Imprint", legal_privacy:"Privacy Policy", legal_terms:"Terms of Use",
-    empty_slot:"empty", active_build_prefix:"🧠 Active build: ", score_prefix:"Score ",
+    empty_slot:"empty", active_build_prefix:"Active build: ", score_prefix:"Score ",
     auto_detected:"(auto-detected: {s})", not_detected:"(not detected)", loaded_from_history:"(loaded from history)",
-    list_hide:"🔼 Hide list", list_show:"🔍 What am I missing? Show list",
+    list_hide:"Hide list", list_show:"What am I missing? Show list",
     file_reading:"Reading file…", file_empty:"File is empty.", file_read_error:"File could not be read.",
     importing:"Importing…", import_success:"✓ Import successful", import_failed:"Import failed: ",
     updating:"Updating…",
-    skills_empty:"📚 Skills appear automatically once you import a build.<br><span style=\"opacity:.7\">(Mobalytics .build file, pobb.in link, or Maxroll URL)</span>",
+    skills_empty:"Skills appear automatically once you import a build.<br><span style=\"opacity:.7\">(Mobalytics .build file, pobb.in link, or Maxroll URL)</span>",
     cmp_empty:"✓ Slot is empty – equip it! (Score {s})",
     cmp_better:"▲ BETTER  (+{d} Score)", cmp_worse:"▼ WORSE  ({d} Score)", cmp_equal:"= Equal",
     tt_required:"Required", tt_unnamed:"(unnamed)", tt_corrupted:"Corrupted",
@@ -1531,13 +1595,13 @@ const I18N = {
     tt_runes:"◈ Runes",
     tt_socketed:"◈ Socket Contents", socket_type_rune:"Rune", socket_type_soulcore:"Soul Core",
     tap_hint:"Tap for description & details",
-    hint_title:"ℹ Notes",
+    hint_title:"Notes",
     hint_res_partial:"{name}: only ~{e}% of +{v}% counts (you're at {c}% / {cap}% cap)",
     hint_allres_partial:"All Elemental Res: only ~{e}% of +{v}% counts (least headroom left)",
     hint_cond_attacks:"{n} mod(s): only apply to attacks",
     hint_cond_onhit:"{n} mod(s): only apply on hit",
     hint_cond_local:"{n} mod(s): only apply to this item",
-    tt_trade_link:"🔍 Find a better item on trade", tt_trade_hint:"Important for your build:",
+    tt_trade_link:"Find a better item on trade", tt_trade_hint:"Important for your build:",
     bn_iphone_hint:"On iPhone: Share icon → Add to Home Screen",
     bn_analyze_failed:"Analysis failed: ", bn_analyze_done:"Analysis done – Score ",
     bn_gear_of:"Gear of ", bn_gear_error:"Gear error: ",
@@ -1550,14 +1614,19 @@ const I18N = {
     bn_login_error:"Login error: ", bn_ocr_error:"OCR error: ", bn_price_error:"Price check error: ",
     bn_history_cleared:"Scan history cleared", bn_server_down:"Server not reachable. Is app.py running?",
     bn_status_error:"Status error: ", bn_trade_error:"Trade error: ", bn_trade_open:"Trade search opened",
-    bn_demo_active:"🎮 Demo mode active", bn_price_open:"💰 Price check opened",
-    bn_paste_done:"📋 Screenshot pasted!", bn_history_loaded:"📜 Scan loaded from history",
+    bn_demo_active:"Demo mode active", bn_price_open:"Price check opened",
+    bn_paste_done:"Screenshot pasted!", bn_history_loaded:"Scan loaded from history",
     cf_build_delete:"Delete saved build \"{n}\"?", cf_history_delete:"Really delete the entire scan history?",
   },
 };
 // Sprache: gespeichert > Browser-Sprache > EN
 let currentLang = localStorage.getItem("exileEye_lang") ||
   ((navigator.language || "en").toLowerCase().startsWith("de") ? "de" : "en");
+
+function ico(name, px) {
+  const sz = px ? ` style="width:${px}px;height:${px}px"` : "";
+  return `<svg class="ico"${sz} aria-hidden="true"><use href="#i-${name}"></use></svg>`;
+}
 
 function t(key, vars) {
   let s = (I18N[currentLang] && I18N[currentLang][key] !== undefined)
@@ -1582,7 +1651,7 @@ function applyLang() {
     el.title = t(el.getAttribute("data-i18n-title"));
   });
   const tog = document.getElementById("langToggle");
-  if (tog) tog.textContent = currentLang === "de" ? "🌍 DE" : "🌍 EN";
+  if (tog) tog.innerHTML = ico("globe") + (currentLang === "de" ? " DE" : " EN");
 }
 
 function toggleLang() {
@@ -1673,7 +1742,7 @@ async function init() {
 
 const DEMO_CHARACTERS = {
   sorc: {
-    label: "🎮 Demo: Sorceress (Lvl 90, Caster/ES)",
+    label: "Demo: Sorceress (Lvl 90, Caster/ES)",
     items: [
       { slot:"Weapon", name:"Oak Staff", typeLine:"Oak Staff", baseType:"Oak Staff",
         icon:"", rarity:2, corrupted:false,
@@ -1723,7 +1792,7 @@ const DEMO_CHARACTERS = {
     ],
   },
   warrior: {
-    label: "🎮 Demo: Warrior (Lvl 88, Life/Armour)",
+    label: "Demo: Warrior (Lvl 88, Life/Armour)",
     items: [
       { slot:"Weapon", name:"Brutal Mace", typeLine:"Mace", baseType:"Mace",
         icon:"", rarity:2, corrupted:false,
@@ -1757,7 +1826,7 @@ const DEMO_CHARACTERS = {
     ],
   },
   ranger: {
-    label: "🎮 Demo: Ranger (Lvl 85, Bow/Evasion)",
+    label: "Demo: Ranger (Lvl 85, Bow/Evasion)",
     items: [
       { slot:"Weapon", name:"Sturmbogen", typeLine:"Kriegsbogen", baseType:"Kriegsbogen",
         icon:"", rarity:2, corrupted:false,
@@ -1802,7 +1871,7 @@ function loadDemo() {
   sel.innerHTML = opts;
   const firstKey = Object.keys(DEMO_CHARACTERS)[0];
   loadDemoCharacter(firstKey);
-  setPanelStatus("character", "🎮 Demo-Modus");
+  setPanelStatus("character", t("bn_demo_active"));
   const demoBadge = document.getElementById("demoBadge");
   if (demoBadge) demoBadge.style.display = "inline-block";
 }
@@ -2233,7 +2302,7 @@ function updateBuildStatus() {
   }
   const missing = total - fulfilled;
   document.getElementById("bpHint").textContent = missing === 0
-    ? "🎉 Perfekt! Alle Build-Slots erfüllt!" : `Noch ${missing} Slot${missing > 1 ? "s" : ""} zu verbessern`;
+    ? "Perfekt! Alle Build-Slots erfüllt!" : `Noch ${missing} Slot${missing > 1 ? "s" : ""} zu verbessern`;
   const toggle = document.getElementById("bpMissingToggle");
   if (missing > 0) {
     toggle.style.display = "block";
@@ -2283,10 +2352,10 @@ function renderMissingList() {
     html += `<div class="miss-item">
       <div class="miss-slot">${esc(slotLabel(slot))}</div>
       <div class="miss-detail">${detail}</div>
-      <a class="miss-trade" href="#" onclick="openTrade('${esc(slot)}');return false;">🔍 Passendes Item suchen</a>
+      <a class="miss-trade" href="#" onclick="openTrade('${esc(slot)}');return false;">${ico("search")} Passendes Item suchen</a>
     </div>`;
   });
-  list.innerHTML = html || `<div class="miss-empty">🎉 Alles erfüllt – nichts fehlt!</div>`;
+  list.innerHTML = html || `<div class="miss-empty">${ico("check")} Alles erfüllt – nichts fehlt!</div>`;
 }
 
 function checkSlotFulfilled(slot) {
@@ -2344,7 +2413,7 @@ function showItem(slot) {
       const isRune = runeTest(g);
       const sym = isRune ? "\u25C8" : "\u2726";
       const col = isRune ? "#6fd3c8" : "#c9a86a";
-      html += `<div class="tt-mod clickable" style="color:${col};display:flex;align-items:center;gap:6px" onclick="showSocketed(${si})" title="${esc(t("gem_info_title"))}">${sym} <span>${esc(g.name)}</span><span class="chevron">›</span></div>`;
+      html += `<div class="tt-mod clickable" style="color:${col};display:flex;align-items:center;gap:6px" onclick="showSocketed(${si})" title="${esc(t("gem_info_title"))}">${sym} <span>${esc(g.name)}</span>${ico("pointer")}</div>`;
     });
     html += tapHintHtml();
     html += `</div>`;
@@ -2374,7 +2443,7 @@ function showItem(slot) {
   html += buildHintBlock(it, slot);
   html += buildCompareBlock(slot, it);
   const topStats = topWeightedStats(3);
-  html += `<a class="tt-trade" href="#" onclick="openTrade('${esc(slot)}');return false;">${t("tt_trade_link")}</a>`;
+  html += `<a class="tt-trade" href="#" onclick="openTrade('${esc(slot)}');return false;">${ico("search")} ${t("tt_trade_link")}</a>`;
   if (topStats.length) {
     html += `<div class="tt-trade-hint">${t("tt_trade_hint")} <b>${topStats.map(esc).join(", ")}</b></div>`;
   }
@@ -2447,12 +2516,12 @@ function renderGlobalBuildBar() {
     // CTA-Modus: kein Build vorhanden -> Einladung zum Importieren zeigen
     sel.style.display = "none";
     if (cnt) cnt.style.display = "none";
-    if (btn) { btn.textContent = "📥 " + t("gb_import_btn"); btn.style.flex = "1"; }
+    if (btn) { btn.innerHTML = ico("download") + " " + t("gb_import_btn"); btn.style.flex = "1"; }
     bar.style.display = "flex";
     return;
   }
   sel.style.display = "";
-  if (btn) { btn.textContent = "📥"; btn.style.flex = "0 0 auto"; }
+  if (btn) { btn.innerHTML = ico("download"); btn.style.flex = "0 0 auto"; }
   sel.innerHTML = "";
   const none = document.createElement("option");
   none.value = ""; none.textContent = t("gb_none");
@@ -2569,7 +2638,7 @@ async function openTrade(slot) {
     const data = await res.json();
     if (data.url) {
       window.open(data.url, "_blank");
-      setPanelStatus("settings", "🔗 Trade geöffnet", false);
+      setPanelStatus("settings", t("bn_trade_open"), false);
       showBanner(t("bn_trade_open"), "ok");
     }
   } catch (e) { showBanner(t("bn_trade_error") + e.message); }
@@ -2817,7 +2886,7 @@ document.addEventListener("paste", (e) => {
   for (const it of items) {
     if (it.type && it.type.startsWith("image/")) {
       const file = it.getAsFile();
-      if (file) { loadImageFromFile(file); showBanner("📋 Screenshot eingefügt!", "ok"); e.preventDefault(); }
+      if (file) { loadImageFromFile(file); showBanner(t("bn_paste_done"), "ok"); e.preventDefault(); }
       return;
     }
   }
@@ -2982,7 +3051,7 @@ async function analyzeImage() {
     setPanelStatus("scanner", "✓ " + (data.guessed_slot ? slotLabel(data.guessed_slot) : "Analyse"));
     showBanner(t("bn_analyze_done") + data.score, "ok");
   } catch (e) { showBanner(t("bn_analyze_failed") + e.message); }
-  finally { btn.disabled = false; btn.innerHTML = "🔍 Analysieren"; }
+  finally { btn.disabled = false; btn.innerHTML = ico("search") + t("analyze_btn"); }
 }
 
 const SCAN_STAT_KEYS = ["life","mana","energy_shield","spirit","fire_res","cold_res","lightning_res","chaos_res","armour","movement_speed","spell_damage","fire_damage","cold_damage","lightning_damage","chaos_damage","spell_skills","crit_chance","crit_dmg_bonus","eva_es"];
@@ -2993,7 +3062,7 @@ function renderScanResult() {
   const stats = lastScan.stats || {};
   lastScan.score = scoreFromStats(stats);
   let html = `<div class="score-big">${lastScan.score}</div>`;
-  html += `<div style="font-size:11px;color:var(--text-dim);text-align:center;margin:-4px 0 10px">✏️ Werte korrigieren – Score & Vergleich passen sich an.</div>`;
+  html += `<div style="font-size:11px;color:var(--text-dim);text-align:center;margin:-4px 0 10px">${ico("pencil")} Werte korrigieren – Score & Vergleich passen sich an.</div>`;
   const keys = Object.keys(stats);
   if (keys.length === 0) {
     html += `<p style="color:var(--text-dim);text-align:center;margin-bottom:10px">Keine Stats erkannt – Foto schärfer versuchen oder unten manuell hinzufügen.</p>`;
@@ -3010,7 +3079,7 @@ function renderScanResult() {
   SCAN_STAT_KEYS.filter(k => !(k in stats)).forEach(k => { opts += `<option value="${esc(k)}">${esc(labelFor(k))}</option>`; });
   html += `<div class="scan-edit-add"><select id="addScanStatSel" onchange="addScanStat(this.value)">${opts}</select></div>`;
   if (keys.length > 0) {
-    html += `<a class="tt-trade" href="#" style="margin:14px 0 0" onclick="priceCheckScan();return false;">💰 Preis checken</a>`;
+    html += `<a class="tt-trade" href="#" style="margin:14px 0 0" onclick="priceCheckScan();return false;">${ico("coins")} Preis checken</a>`;
     html += `<div style="font-size:10px;color:var(--text-dim);text-align:center;margin-top:6px">Öffnet Trade-Suche mit diesen Stats</div>`;
   }
   result.innerHTML = html; result.style.display = "block";
@@ -3154,7 +3223,7 @@ async function priceCheckScan() {
     const data = await res.json();
     if (data.url) {
       window.open(data.url, "_blank");
-      setPanelStatus("settings", "💰 Preis-Check geöffnet", false);
+      setPanelStatus("settings", t("bn_price_open"), false);
       showBanner(t("bn_price_open"), "ok");
     }
   } catch (e) { showBanner(t("bn_price_error") + e.message); }
@@ -3215,16 +3284,17 @@ function runCompare() {
 
 let allSkills = [];
 function gemIconClass(tags, isSupport, color) {
-  if (color === "blue") return ["t-cold", isSupport ? "+" : "✦"];
-  if (color === "green") return ["t-skill", isSupport ? "+" : "✦"];
-  if (color === "red") return ["t-fire", isSupport ? "+" : "⚔️"];
-  const t = (tags || []).join(" ").toLowerCase();
-  if (t.includes("feuer")) return ["t-fire", "🔥"];
-  if (t.includes("kälte")) return ["t-cold", "❄️"];
-  if (t.includes("blitz")) return ["t-light", "⚡"];
-  if (t.includes("chaos")) return ["t-chaos", "☠️"];
-  if (t.includes("projektil") || t.includes("nahkampf") || t.includes("bogen")) return ["t-phys", "⚔️"];
-  return isSupport ? ["t-support", "+"] : ["t-skill", "✦"];
+  const plus = ico("plus", 12), spark = ico("sparkle", 14);
+  if (color === "blue") return ["t-cold", isSupport ? plus : spark];
+  if (color === "green") return ["t-skill", isSupport ? plus : spark];
+  if (color === "red") return ["t-fire", isSupport ? plus : ico("swords", 14)];
+  const tg = (tags || []).join(" ").toLowerCase();
+  if (tg.includes("feuer")) return ["t-fire", ico("flame", 14)];
+  if (tg.includes("kälte")) return ["t-cold", ico("snowflake", 14)];
+  if (tg.includes("blitz")) return ["t-light", ico("zap", 14)];
+  if (tg.includes("chaos")) return ["t-chaos", ico("skull", 14)];
+  if (tg.includes("projektil") || tg.includes("nahkampf") || tg.includes("bogen")) return ["t-phys", ico("swords", 14)];
+  return isSupport ? ["t-support", plus] : ["t-skill", spark];
 }
 
 function renderSkills(skills) {
@@ -3232,7 +3302,7 @@ function renderSkills(skills) {
   const sec = document.getElementById("skillsSection");
   const list = document.getElementById("skillsList");
   if (!skills.length) {
-    list.innerHTML = `<div style="text-align:center;padding:18px 12px;color:var(--text-dim);font-size:12px">${t("skills_empty")}</div>`;
+    list.innerHTML = `<div style="text-align:center;padding:18px 12px;color:var(--text-dim);font-size:12px">${ico("book")} ${t("skills_empty")}</div>`;
     sec.style.display = "block";
     return;
   }
@@ -3292,7 +3362,7 @@ function showGem(skillIdx, supIdx) {
     html += `<div class="tt-section"><div style="font-size:11px;color:var(--text-dim);margin-bottom:5px">${t("gem_supports_label", { n: s.supports.length })}</div>`;
     s.supports.forEach((sup, supSi) => {
       const [sc] = gemIconClass(sup.tags, true, sup.color);
-      html += `<div class="tt-mod clickable" style="color:#9ab8d8;display:flex;align-items:center;gap:6px" onclick="showGem(${skillIdx},${supSi})" title="${esc(t("gem_info_title"))}"><span class="mini-gem ${sc}"></span>${esc(gemPlannerDisplay(sup.name))}<span class="chevron">›</span></div>`;
+      html += `<div class="tt-mod clickable" style="color:#9ab8d8;display:flex;align-items:center;gap:6px" onclick="showGem(${skillIdx},${supSi})" title="${esc(t("gem_info_title"))}"><span class="mini-gem ${sc}"></span>${esc(gemPlannerDisplay(sup.name))}${ico("pointer")}</div>`;
     });
     html += `</div>`;
   }
@@ -3322,7 +3392,7 @@ let curTooltipSockets = null;
 // erste Mal irgendein Gem/Rune angetippt wurde (markTapSeen in showGem/showGemInfo).
 function tapHintHtml() {
   if (localStorage.getItem("exileEye_tapHintSeen")) return "";
-  return `<div class="tap-tip">👆 ${t("tap_hint")}</div>`;
+  return `<div class="tap-tip">${ico("pointer")} ${t("tap_hint")}</div>`;
 }
 function markTapSeen() { localStorage.setItem("exileEye_tapHintSeen", "1"); }
 
@@ -3363,15 +3433,15 @@ function fetchGemInfoInto(boxId, name) {
   const fallback = () => {
     // Fallback-Link: normalisierten Namen nutzen (Alias, ohne "Player"/Flavor-Praefix)
     const wikiName = gemSearchName(name);
-    box.innerHTML = `<a class="gem-src" href="https://www.poe2wiki.net/wiki/${encodeURIComponent(wikiName.replace(/ /g, "_"))}" target="_blank" rel="noopener">📖 ${t("gem_wiki_link")} ↗</a>`;
+    box.innerHTML = `<a class="gem-src" href="https://www.poe2wiki.net/wiki/${encodeURIComponent(wikiName.replace(/ /g, "_"))}" target="_blank" rel="noopener">${ico("book-open")} ${t("gem_wiki_link")} ↗</a>`;
   };
-  box.innerHTML = `<div class="gem-desc" style="color:var(--text-dim)">💡 ${t("gem_loading")}</div>`;
+  box.innerHTML = `<div class="gem-desc" style="color:var(--text-dim)">${ico("lightbulb")} ${t("gem_loading")}</div>`;
   fetch("/api/gem-info?name=" + encodeURIComponent(name))
     .then(r => { if (!r.ok) throw new Error(); return r.json(); })
     .then(d => {
       if (d && d.found && d.description) {
         box.innerHTML = `<div class="gem-desc">${esc(d.description)}</div>
-          <a class="gem-src" href="${esc(d.url)}" target="_blank" rel="noopener">📖 ${t("gem_src")} ↗</a>`;
+          <a class="gem-src" href="${esc(d.url)}" target="_blank" rel="noopener">${ico("book-open")} ${t("gem_src")} ↗</a>`;
       } else {
         fallback();
       }
@@ -3386,12 +3456,12 @@ function renderConsumables(flasks, charms) {
   let html = "";
   if (flasks.length) {
     html += `<div class="consum-label">Flasks</div><div class="consum-row">`;
-    flasks.forEach(f => html += `<span class="consum-chip flask">🧪 ${esc(f)}</span>`);
+    flasks.forEach(f => html += `<span class="consum-chip flask">${ico("flask")} ${esc(f)}</span>`);
     html += `</div>`;
   }
   if (charms.length) {
     html += `<div class="consum-label">Charms</div><div class="consum-row">`;
-    charms.forEach(c => html += `<span class="consum-chip charm">🔮 ${esc(c)}</span>`);
+    charms.forEach(c => html += `<span class="consum-chip charm">${ico("gem")} ${esc(c)}</span>`);
     html += `</div>`;
   }
   list.innerHTML = html; sec.style.display = "block";
@@ -3459,7 +3529,7 @@ if ("serviceWorker" in navigator) {
 function showUpdateBanner() {
   const b = document.getElementById("banner");
   b.className = "ok"; b.style.display = "block"; b.style.cursor = "pointer";
-  b.innerHTML = "🔄 <b>Neue Version verfügbar!</b> Hier tippen, um zu aktualisieren.";
+  b.innerHTML = ico("refresh") + " <b>Neue Version verfügbar!</b> Hier tippen, um zu aktualisieren.";
   b.onclick = async () => {
     b.textContent = t("updating");
     const reg = await navigator.serviceWorker.getRegistration();

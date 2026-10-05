@@ -10,6 +10,14 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.30 (05.10.2026, Icon-Pack)
+- **Unicode-Emojis raus** aus Nav, Buttons, Überschriften, Status-Texten: einheitliche Inline-SVGs (Lucide-Stil, `currentColor`, ein Sprite). Nimmt Theme-Farben automatisch an – Reddit-Feedback von More_Exercise8413.
+- **Finger statt Chevron:** Tippbare Reihen (Sockel-Items, Support-Liste) zeigen jetzt eine Zeigehand, plus der 👆-Hinweis nutzt dasselbe Finger-Icon (wackelt dezent).
+- Gem-Typ-Symbole (Feuer/Kälte/Blitz/Chaos/Nahkampf) ebenfalls als SVG in den farbigen Kreisen.
+- Flatcap 🧢 und Status-Häkchen ✓/✗ bleiben – das sind Signatur bzw. Semantik, keine Deko-Emojis.
+
+---
+
 ## v1.29 (05.10.2026, Entdeckbarkeit)
 - **👆 Einmal-Hinweis** „Antippen für Beschreibung & Details" im Build-, Char-Skills- und Sockel-Bereich — verschwindet dauerhaft, sobald der Nutzer das erste Mal erfolgreich ein Gem/Rune angetippt hat (LocalStorage-Flag).
 - **Chevron „›"** auf allen tippbaren Reihen (Sockel-Items, Support-Liste im Gem-Modal) — sieht aus wie Menueeintraege, liest sich sofort klickbar.
