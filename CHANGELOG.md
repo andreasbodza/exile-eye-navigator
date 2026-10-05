@@ -10,7 +10,21 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
-## v1.20 (02.10.2026, Namenskonflikte im Support-Check)
+## v1.22 (05.10.2026, Waffenset 2 im HUD)
+- **Neu: Weapon-Swap-Slots** — das HUD zeigt jetzt auch das zweite Waffenset (GGG liefert es als `Weapon2`/`Offhand2`, siehe offizielle API/PoB-Import). Die beiden Flanken sind geteilt: oben Haupt-Set (Waffe/Nebenhand), unten Set 2 — mit eigenen Silhouetten. Vorher wurden Swap-Items aus der API still verworfen!
+- Swap-Set fließt mit in Stat-Score, Tooltips und Tap-Details ein; Trade-Kategorien dafür gab es schon (`Weapon2`→weapon, `Offhand2`→shield)
+- Scanner-Slot-Auswahl: „Waffe 2"/„Nebenhand 2" ergänzt (Scan-Vergleich auch gegen Swap-Set möglich)
+- Demo-Sorceress hat jetzt Beispiel-Swap-Items (Initiate's Sceptre + Rotted Buckler)
+
+## v1.21 (05.10.2026, HUD-Stufe 2c: Paper-Doll-Feinschliff)
+- **Handy-Modus (≤480px): Item-Art statt Text** — gefüllte Slots zeigen auf schmalen Screens jetzt das große Item-Icon wie ingame (Name, Details & Co. per Tap im Tooltip); ohne Icon (Demo) bleibt der Text-Modus als Fallback
+- **Item-Namen umbrechen auf 2 Zeilen** statt hart abzuschneiden — „Oak Staff" statt „Oak S…", volle Namen auch in schmalen Slots lesbar
+- **Leere Slots aufgeräumt:** große, besser sichtbare Silhouette zentriert (je Slot-Typ skaliert: Waffen 68px, Ringe 40px), doppeltes Mini-Icon entfernt, „leer/empty" klein am unteren Rand platziert
+- **Seltenheits-Kante:** gefüllte Slots bekommen oben einen 2px-Farbstreifen in PoE-Seltenheitsfarben (Magic blau / Rare gelb / Unique orange) mit leichtem Glow — Rarität auf den ersten Blick erkennbar, nicht nur am Namen
+- **Stat-Score als Pill-Badge** im Slot (teal, gerundet) statt nacktem Text
+- **Grid-Balance:** Amulett/Ring-Spalten etwas breiter, weniger Quetschung
+
+## v1.20 (05.10.2026, Namenskonflikte im Support-Check)
 - **Fuzzy-Gem-Matching:** GGG und Build-Planer nennen dieselben Skills oft anders — jetzt werden sie trotzdem erkannt:
   - „**Maul**" = „**Bear** Maul", „Fire Spell on Hit" = „**Ascendancy** Fire Spell On Hit" (Flavor-Präfixe Bear/Wolf/Wyvern/Ascendancy werden ignoriert)
   - „Primal Armament **Two**" = „Primal Armament **II**" (Tier-Wörter & Ziffern werden wie römische Zahlen behandelt)
