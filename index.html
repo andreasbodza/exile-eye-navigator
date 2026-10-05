@@ -289,17 +289,19 @@
   .hud {
     display: grid;
     gap: 7px;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr) minmax(0, 1.3fr) minmax(0, 0.85fr) minmax(0, 1.15fr);
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.05fr);
     grid-template-rows: auto auto auto auto;
     grid-template-areas:
-      "weapon  helm    helm    helm    weapon2"
-      "weapon  amulet  body    ring2   weapon2"
-      "weapon  glove   body    ring1   weapon2"
-      "weapon  glove   belt    boots   weapon2";
+      "weapon  helm    helm    helm    offhand"
+      "weapon  amulet  body    ring2   offhand"
+      "wepswap glove  body    ring1   offswap"
+      "wepswap glove  belt    boots   offswap";
   }
   .slot[data-area="weapon"]  { grid-area: weapon; }
   .slot[data-area="helm"]    { grid-area: helm; }
-  .slot[data-area="weapon2"] { grid-area: weapon2; }
+  .slot[data-area="offhand"] { grid-area: offhand; }
+  .slot[data-area="wepswap"] { grid-area: wepswap; }
+  .slot[data-area="offswap"] { grid-area: offswap; }
   .slot[data-area="amulet"]  { grid-area: amulet; }
   .slot[data-area="body"]    { grid-area: body; }
   .slot[data-area="ring2"]   { grid-area: ring2; }
@@ -308,23 +310,32 @@
   .slot[data-area="glove"]   { grid-area: glove; }
   .slot[data-area="boots"]   { grid-area: boots; }
 
-  .slot[data-area="weapon"], .slot[data-area="weapon2"] { min-height: 180px; }
+  /* Flanken: oben Haupt-Set, unten Waffenset 2 (Weapon Swap) */
+  .slot[data-area="weapon"], .slot[data-area="offhand"] { min-height: 115px; }
+  .slot[data-area="wepswap"], .slot[data-area="offswap"] { min-height: 92px; }
   .slot[data-area="body"] { min-height: 130px; }
 
   .slot .slot-silhouette {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    color: var(--text); opacity: .08;
+    color: var(--text); opacity: .14;
     pointer-events: none;
   }
-  .slot .slot-silhouette svg { width: 46px; height: 46px; }
+  .slot .slot-silhouette svg { width: 52px; height: 52px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.7)); }
+  .slot[data-area="weapon"] .slot-silhouette svg,
+  .slot[data-area="offhand"] .slot-silhouette svg { width: 64px; height: 64px; }
+  .slot[data-area="wepswap"] .slot-silhouette svg,
+  .slot[data-area="offswap"] .slot-silhouette svg { width: 54px; height: 54px; }
+  .slot[data-area="body"] .slot-silhouette svg { width: 60px; height: 60px; }
+  .slot[data-area="ring1"] .slot-silhouette svg,
+  .slot[data-area="ring2"] .slot-silhouette svg { width: 40px; height: 40px; }
   .slot.filled .slot-silhouette { display: none; }
   .slot {
     background:
       linear-gradient(180deg, rgba(30,26,20,.85), rgba(12,10,7,.95));
     border: 1px solid #333a47;
     border-radius: 5px;
-    padding: 7px 8px;
+    padding: 6px 6px;
     min-height: 64px;
     min-width: 0;
     display: flex; flex-direction: column; gap: 2px;
@@ -354,6 +365,7 @@
   .slot .slot-icon {
     position: absolute; top: 6px; right: 6px; width: 16px; height: 16px;
     opacity: .35; pointer-events: none;
+    display: none;   /* die große Silhouette im Zentrum trägt die Info */
   }
   .slot.filled .slot-icon { display: none; }
   .slot:not(.filled) .item-name.empty::after {
@@ -368,7 +380,9 @@
     filter: drop-shadow(0 0 4px rgba(0,0,0,.8));
   }
   .slot[data-area="weapon"] .item-img,
-  .slot[data-area="weapon2"] .item-img { max-height: 120px; }
+  .slot[data-area="offhand"] .item-img { max-height: 105px; }
+  .slot[data-area="wepswap"] .item-img,
+  .slot[data-area="offswap"] .item-img { max-height: 85px; }
   .slot[data-area="body"] .item-img { max-height: 90px; }
   .tap-hint {
     position: absolute; bottom: 4px; right: 6px;
@@ -478,24 +492,54 @@
   .tt-trade:hover { background: linear-gradient(180deg, #3a82c8, #245a90); }
   .tt-trade-hint { font-size: 10px; color: var(--text-dim); text-align: center; padding: 0 14px 8px; line-height: 1.4; }
   .slot .item-name {
-    font-size: 11.5px; font-weight: 700; line-height: 1.25;
-    /* Harter Cut fuer lange Worter in schmalen Handy-Spalten */
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis;
+    font-size: 10.5px; font-weight: 700; line-height: 1.25;
+    /* bis zu 2 Zeilen umbrechen statt abzuschneiden ("Oak S..." -> "Oak Staff") */
+    white-space: normal; overflow: hidden; word-break: break-word;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   }
   .slot .item-name.rarity-0 { color: #e8eaf0; }
   .slot .item-name.rarity-1 { color: #8888f0; }
   .slot .item-name.rarity-2 { color: #f0e060; }
   .slot .item-name.rarity-3 { color: #d08020; }
   .slot .item-name.empty    { color: #5b6472; font-style: italic; font-weight: 400; }
+  .slot:not(.filled) .item-name.empty {
+    position: absolute; bottom: 5px; left: 0; right: 0;
+    text-align: center; font-size: 9px;
+  }
+  /* Seltenheits-Kante oben am gefuellten Slot (PoE-Farben) */
+  .slot.filled::before {
+    content: ""; position: absolute; top: 0; left: 8%; right: 8%; height: 2px;
+    border-radius: 0 0 4px 4px; opacity: .9; pointer-events: none;
+  }
+  .slot.filled.rar-0::before { background: #49525f; }
+  .slot.filled.rar-1::before { background: #8888f0; box-shadow: 0 0 7px rgba(136,136,240,.55); }
+  .slot.filled.rar-2::before { background: #f0e060; box-shadow: 0 0 7px rgba(240,224,96,.5); }
+  .slot.filled.rar-3::before { background: #d08020; box-shadow: 0 0 8px rgba(208,128,32,.6); }
   .slot .item-meta { font-size: 9px; color: var(--text-dim); word-break: break-word; overflow-wrap: break-word; }
   .slot .item-gems { display: block; font-size: 10px; color: var(--gold-soft); margin-top: 2px; letter-spacing: 2px; }
   .tt-mod.rune-head { color: var(--gold-soft); font-size: 11px; margin-bottom: 3px; }
   .tt-mod.hint-head { color: var(--gold-soft); font-size: 11px; margin-bottom: 3px; }
   .tt-mod.hint-line { color: var(--text-dim); font-size: 11.5px; }
-  .slot .item-score { font-size: 10px; color: var(--green); margin-top: auto; font-weight: 600; }
+  /* Score als kleines Pill-Badge statt nacktem Text */
+  .slot .item-score {
+    margin-top: auto; align-self: flex-start; display: inline-block;
+    font-size: 9px; font-weight: 700; letter-spacing: .4px; color: #a7f3d0;
+    background: rgba(45,212,191,.14); border: 1px solid rgba(45,212,191,.35);
+    border-radius: 4px; padding: 1px 5px;
+  }
   .slot.filled { border-color: var(--gold-soft); box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 4px rgba(45,212,191,.2); }
+  /* Schmale Handys: Item-ART statt Text (wie im Game) - nur wenn ein Icon
+     vorhanden ist (Demo ohne Icons zeigt weiter Namen) */
+  @media (max-width: 480px) {
+    .slot.filled:has(.item-img) .item-name,
+    .slot.filled:has(.item-img) .item-meta { display: none; }
+    .slot .item-img { max-height: 80px; }
+    .slot[data-area="weapon"] .item-img,
+    .slot[data-area="offhand"] .item-img { max-height: 120px; }
+    .slot[data-area="wepswap"] .item-img,
+    .slot[data-area="offswap"] .item-img { max-height: 95px; }
+    .slot[data-area="body"] .item-img { max-height: 110px; }
+  }
   .slot.better { border-color: var(--green); box-shadow: 0 0 10px rgba(76,175,106,.4); }
   .slot.worse  { border-color: var(--red);   box-shadow: 0 0 10px rgba(208,88,78,.4); }
   .hud-consumables { margin-top: 12px; padding-top: 12px; border-top: 1px solid #333a47; }
@@ -878,6 +922,8 @@
           <option value="" data-i18n="slot_choose">– Slot wählen –</option>
           <option value="Weapon" data-i18n="slot_weapon">Waffe</option>
           <option value="Offhand" data-i18n="slot_offhand">Nebenhand</option>
+          <option value="Weapon2" data-i18n="slot_weapon2">Waffe 2</option>
+          <option value="Offhand2" data-i18n="slot_offhand2">Nebenhand 2</option>
           <option value="Helm" data-i18n="slot_helm">Helm</option>
           <option value="BodyArmour" data-i18n="slot_body">Rüstung</option>
           <option value="Gloves" data-i18n="slot_gloves">Handschuhe</option>
@@ -960,9 +1006,17 @@
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2a7 7 0 00-7 7v6h2v-3h10v3h2V9a7 7 0 00-7-7zm-3 8a1 1 0 110-2 1 1 0 010 2zm6 0a1 1 0 110-2 1 1 0 010 2z"/></svg>
               <span class="slot-label" data-i18n="slot_helm">Helm</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2a7 7 0 00-7 7v6h2v-3h10v3h2V9a7 7 0 00-7-7zm-3 8a1 1 0 110-2 1 1 0 010 2zm6 0a1 1 0 110-2 1 1 0 010 2z"/></svg></span></div>
-            <div class="slot" data-area="weapon2" data-slot="Offhand">
+            <div class="slot" data-area="offhand" data-slot="Offhand">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2L4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5l-8-3z"/></svg>
               <span class="slot-label" data-i18n="slot_offhand">Nebenhand</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
+            <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2L4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5l-8-3z"/></svg></span></div>
+            <div class="slot" data-area="wepswap" data-slot="Weapon2">
+              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M6.92 5L5 6.92l9.06 9.06-1.06 1.06-2.83-2.83-1.41 1.41 2.12 2.12-2.12 2.13 1.41 1.41 2.13-2.12 2.12 2.12 1.41-1.41-2.83-2.83 1.06-1.06L17.08 19 19 17.08 6.92 5z"/></svg>
+              <span class="slot-label" data-i18n="slot_weapon2">Waffe 2</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
+            <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M6.92 5L5 6.92l9.06 9.06-1.06 1.06-2.83-2.83-1.41 1.41 2.12 2.12-2.12 2.13 1.41 1.41 2.13-2.12 2.12 2.12 1.41-1.41-2.83-2.83 1.06-1.06L17.08 19 19 17.08 6.92 5z"/></svg></span></div>
+            <div class="slot" data-area="offswap" data-slot="Offhand2">
+              <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2L4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5l-8-3z"/></svg>
+              <span class="slot-label" data-i18n="slot_offhand2">Nebenhand 2</span><span class="item-name empty" data-i18n="empty_slot">leer</span>
             <span class="slot-silhouette"><svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 2L4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5l-8-3z"/></svg></span></div>
             <div class="slot" data-area="amulet" data-slot="Amulet">
               <svg class="slot-icon" viewBox="0 0 24 24" fill="currentColor" style="color:#2dd4bf"><path d="M12 3a5 5 0 00-5 5h2a3 3 0 116 0h2a5 5 0 00-5-5zm0 8a3 3 0 100 6 3 3 0 000-6z"/></svg>
@@ -1155,7 +1209,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.20";
+const APP_VERSION = "v1.22";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1250,6 +1304,7 @@ const I18N = {
     analyze_btn_auto:"🔍 Item analysieren (Auto-Zuschnitt)",
     slot_select_lbl:"Mit welchem Slot vergleichen?", slot_choose:"– Slot wählen –",
     slot_weapon:"Waffe", slot_offhand:"Nebenhand", slot_helm:"Helm", slot_body:"Rüstung",
+    slot_weapon2:"Waffe 2", slot_offhand2:"Nebenhand 2",
     slot_gloves:"Handschuhe", slot_boots:"Stiefel", slot_belt:"Gürtel", slot_amulet:"Amulett",
     slot_ring_l:"Ring L", slot_ring_r:"Ring R",
     scan_history_title:"📜 Scan-Verlauf", scan_history_clear:"🗑 Alle löschen",
@@ -1353,6 +1408,7 @@ const I18N = {
     analyze_btn_auto:"🔍 Analyze item (auto-crop)",
     slot_select_lbl:"Compare with which slot?", slot_choose:"– Choose slot –",
     slot_weapon:"Weapon", slot_offhand:"Offhand", slot_helm:"Helm", slot_body:"Armour",
+    slot_weapon2:"Weapon 2", slot_offhand2:"Offhand 2",
     slot_gloves:"Gloves", slot_boots:"Boots", slot_belt:"Belt", slot_amulet:"Amulet",
     slot_ring_l:"Ring L", slot_ring_r:"Ring R",
     scan_history_title:"📜 Scan history", scan_history_clear:"🗑 Delete all",
@@ -1549,6 +1605,17 @@ const DEMO_CHARACTERS = {
         mods:{implicit:[],enchant:[],rune:[],explicit:["34% increased Spell Damage","+6 to Level of all Spell Skills"],crafted:[],fractured:[]},
         all_mods:["34% increased Spell Damage","+6 to Level of all Spell Skills"],
         parsed_stats:{spell_damage:34, spell_skills:6} },
+      { slot:"Weapon2", name:"Initiate's Sceptre", typeLine:"Sceptre", baseType:"Sceptre",
+        icon:"", rarity:1, corrupted:false,
+        properties:[{name:"Spirit",value:"+50"}], requirements:[{name:"Level",value:"30"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+20% to Fire Resistance"],crafted:[],fractured:[]},
+        all_mods:["+20% to Fire Resistance"],
+        parsed_stats:{fire_res:20} },
+      { slot:"Offhand2", name:"Rotted Buckler", typeLine:"Buckler", baseType:"Buckler",
+        icon:"", rarity:0, corrupted:false,
+        properties:[{name:"Armour",value:"40"}], requirements:[{name:"Level",value:"12"}],
+        mods:{implicit:[],enchant:[],rune:[],explicit:["+15 to maximum Life"],crafted:[],fractured:[]},
+        all_mods:["+15 to maximum Life"], parsed_stats:{life:15} },
       { slot:"Helm", name:"Aged Greathelm", typeLine:"Greathelm", baseType:"Greathelm",
         icon:"", rarity:2, corrupted:false, properties:[{name:"Armour",value:"180"}], requirements:[{name:"Level",value:"45"}],
         mods:{implicit:[],enchant:[],rune:[],explicit:["+45 to maximum Life","+25% to Fire Resistance"],crafted:[],fractured:[]},
@@ -3070,10 +3137,12 @@ function renderConsumables(flasks, charms) {
 
 function slotLabel(slot) {
   const m = currentLang === "en"
-    ? { Weapon:"Weapon", Offhand:"Offhand", Helm:"Helm", BodyArmour:"Armour",
+    ? { Weapon:"Weapon", Offhand:"Offhand", Weapon2:"Weapon 2", Offhand2:"Offhand 2",
+      Helm:"Helm", BodyArmour:"Armour",
       Gloves:"Gloves", Boots:"Boots", Belt:"Belt", Amulet:"Amulet",
       Ring:"Ring L", Ring2:"Ring R" }
-    : { Weapon:"Waffe", Offhand:"Nebenhand", Helm:"Helm", BodyArmour:"Rüstung",
+    : { Weapon:"Waffe", Offhand:"Nebenhand", Weapon2:"Waffe 2", Offhand2:"Nebenhand 2",
+      Helm:"Helm", BodyArmour:"Rüstung",
       Gloves:"Handschuhe", Boots:"Stiefel", Belt:"Gürtel", Amulet:"Amulett",
       Ring:"Ring L", Ring2:"Ring R" };
   return m[slot] || slot;
@@ -3156,5 +3225,5 @@ applyLang();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4438e605c88d282',t:'MTc5MDk0MjUyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a45b8f27ec62d3bd',t:'MTc5MTE5NDIxNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
