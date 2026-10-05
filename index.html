@@ -412,9 +412,26 @@
   .slot[data-area="offswap"] .item-img { max-height: 85px; }
   .slot[data-area="body"] .item-img { max-height: 90px; }
   .tap-hint {
-    position: absolute; bottom: 4px; right: 6px;
-    font-size: 8px; color: var(--gold-soft); opacity: .6;
+    position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+    width: 28px; height: 28px; opacity: .95; pointer-events: none; z-index: 3;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,.8));
   }
+  .tap-hint svg { width: 28px; height: 28px; display: block; }
+  .slot[data-area="weapon"] .tap-hint,
+  .slot[data-area="offhand"] .tap-hint,
+  .slot[data-area="body"] .tap-hint { width: 34px; height: 34px; bottom: 26px; }
+  .slot[data-area="weapon"] .tap-hint svg,
+  .slot[data-area="offhand"] .tap-hint svg,
+  .slot[data-area="body"] .tap-hint svg { width: 34px; height: 34px; }
+  .slot:hover .tap-hint { opacity: 1; transform: translateX(-50%) scale(1.08); }
+  .slot[data-area="ring1"] .tap-hint,
+  .slot[data-area="ring2"] .tap-hint,
+  .slot[data-area="amulet"] .tap-hint { width: 18px; height: 18px; bottom: 5px; }
+  .slot[data-area="ring1"] .tap-hint svg,
+  .slot[data-area="ring2"] .tap-hint svg,
+  .slot[data-area="amulet"] .tap-hint svg { width: 18px; height: 18px; }
+  svg.hand-ptr { flex: 0 0 auto; width: 16px; height: 16px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
+  .tt-mod.clickable svg.hand-ptr { margin-left: auto; width: 16px; height: 16px; opacity: .95; }
   /* Tippbar-Affordanz (v1.29): Reihen wie Menueeintraege + Einmal-Hinweis */
   .tt-mod.clickable { padding: 3px 6px; border-radius: 6px; transition: background .12s; }
   .tt-mod.clickable:hover { background: rgba(240,192,96,.08); }
@@ -924,6 +941,7 @@
   <symbol id="i-swords" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/></symbol>
   <symbol id="i-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-hand" viewBox="0 0 24 24"><path fill="#fff" stroke="#1a1a1a" stroke-width="1.35" stroke-linejoin="round" stroke-linecap="round" d="M8 13.5V6.2a1.45 1.45 0 0 1 2.9 0V13m0-7.6V4.4a1.45 1.45 0 1 1 2.9 0V13m0-7.2V6.6a1.45 1.45 0 1 1 2.9 0V14m0-5.8V9.2a1.45 1.45 0 1 1 2.9 0v6.6A5.8 5.8 0 0 1 13.6 21.5h-1.15A5.5 5.5 0 0 1 7.1 16.2v-4.1A1.45 1.45 0 0 1 10 12.1V16"/></symbol>
   <symbol id="i-pointer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 14a8 8 0 0 1-8 8"/><path d="M18 11v-1a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M14 10V9a2 2 0 0 0-2-2 2 2 0 0 0-2 2v1"/><path d="M10 9.5V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v10"/><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></symbol>
   <symbol id="i-crop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></symbol>
   <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
@@ -1331,7 +1349,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.30";
+const APP_VERSION = "v1.31";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1626,6 +1644,11 @@ let currentLang = localStorage.getItem("exileEye_lang") ||
 function ico(name, px) {
   const sz = px ? ` style="width:${px}px;height:${px}px"` : "";
   return `<svg class="ico"${sz} aria-hidden="true"><use href="#i-${name}"></use></svg>`;
+}
+// Weisse Zeigehand (Mauszeiger-Stil) – "hier kannst du tippen"
+function handIco(px) {
+  const sz = px ? ` style="width:${px}px;height:${px}px"` : "";
+  return `<svg class="hand-ptr"${sz} aria-hidden="true"><use href="#i-hand"></use></svg>`;
 }
 
 function t(key, vars) {
@@ -2158,7 +2181,7 @@ function renderGear(items) {
     }
     const hint = document.createElement("span");
     hint.className = "tap-hint";
-    hint.textContent = "ℹ";
+    hint.innerHTML = handIco(26);
     slotEl.appendChild(hint);
     slotEl.onclick = () => showItem(it.slot);
     stored[it.slot] = { name: nameEl.textContent, score: sc };
@@ -2413,7 +2436,7 @@ function showItem(slot) {
       const isRune = runeTest(g);
       const sym = isRune ? "\u25C8" : "\u2726";
       const col = isRune ? "#6fd3c8" : "#c9a86a";
-      html += `<div class="tt-mod clickable" style="color:${col};display:flex;align-items:center;gap:6px" onclick="showSocketed(${si})" title="${esc(t("gem_info_title"))}">${sym} <span>${esc(g.name)}</span>${ico("pointer")}</div>`;
+      html += `<div class="tt-mod clickable" style="color:${col};display:flex;align-items:center;gap:6px" onclick="showSocketed(${si})" title="${esc(t("gem_info_title"))}">${sym} <span>${esc(g.name)}</span>${handIco()}</div>`;
     });
     html += tapHintHtml();
     html += `</div>`;
@@ -3362,7 +3385,7 @@ function showGem(skillIdx, supIdx) {
     html += `<div class="tt-section"><div style="font-size:11px;color:var(--text-dim);margin-bottom:5px">${t("gem_supports_label", { n: s.supports.length })}</div>`;
     s.supports.forEach((sup, supSi) => {
       const [sc] = gemIconClass(sup.tags, true, sup.color);
-      html += `<div class="tt-mod clickable" style="color:#9ab8d8;display:flex;align-items:center;gap:6px" onclick="showGem(${skillIdx},${supSi})" title="${esc(t("gem_info_title"))}"><span class="mini-gem ${sc}"></span>${esc(gemPlannerDisplay(sup.name))}${ico("pointer")}</div>`;
+      html += `<div class="tt-mod clickable" style="color:#9ab8d8;display:flex;align-items:center;gap:6px" onclick="showGem(${skillIdx},${supSi})" title="${esc(t("gem_info_title"))}"><span class="mini-gem ${sc}"></span>${esc(gemPlannerDisplay(sup.name))}${handIco()}</div>`;
     });
     html += `</div>`;
   }
@@ -3392,7 +3415,7 @@ let curTooltipSockets = null;
 // erste Mal irgendein Gem/Rune angetippt wurde (markTapSeen in showGem/showGemInfo).
 function tapHintHtml() {
   if (localStorage.getItem("exileEye_tapHintSeen")) return "";
-  return `<div class="tap-tip">${ico("pointer")} ${t("tap_hint")}</div>`;
+  return `<div class="tap-tip">${handIco(16)} ${t("tap_hint")}</div>`;
 }
 function markTapSeen() { localStorage.setItem("exileEye_tapHintSeen", "1"); }
 

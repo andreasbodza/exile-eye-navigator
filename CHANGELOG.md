@@ -10,6 +10,12 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.31 (05.10.2026, Zeigehand auf Slots)
+- **Weiße Mauszeiger-Hand** auf gefüllten HUD-Slots (unten mittig, mit Schatten) – macht sofort klar: antippen fürs Item-Tooltip. Auf Ringen/Amulett etwas kleiner.
+- Dieselbe Hand rechts an klickbaren Runen/Gems im Tooltip (statt Outline-Icon).
+
+---
+
 ## v1.30 (05.10.2026, Icon-Pack)
 - **Unicode-Emojis raus** aus Nav, Buttons, Überschriften, Status-Texten: einheitliche Inline-SVGs (Lucide-Stil, `currentColor`, ein Sprite). Nimmt Theme-Farben automatisch an – Reddit-Feedback von More_Exercise8413.
 - **Finger statt Chevron:** Tippbare Reihen (Sockel-Items, Support-Liste) zeigen jetzt eine Zeigehand, plus der 👆-Hinweis nutzt dasselbe Finger-Icon (wackelt dezent).
