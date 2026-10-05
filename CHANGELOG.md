@@ -10,6 +10,13 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.32 (05.10.2026, Cursor-Fix)
+- **Kein aufgemalter Finger mehr.** Die weiße Hand auf den Slots war ein Missverständnis – das war einfach Andreas’ Windows-Mauszeiger.
+- Klickbare Gems/Runen im Tooltip: dezentes **ℹ** statt Finger-Icon.
+- Überall `cursor: pointer` + `user-select: none` (Slots, Tooltip-Reihen) – kein I-Balken / Textcursor mehr beim Drüberfahren.
+
+---
+
 ## v1.31 (05.10.2026, Zeigehand auf Slots)
 - **Weiße Mauszeiger-Hand** auf gefüllten HUD-Slots (unten mittig, mit Schatten) – macht sofort klar: antippen fürs Item-Tooltip. Auf Ringen/Amulett etwas kleiner.
 - Dieselbe Hand rechts an klickbaren Runen/Gems im Tooltip (statt Outline-Icon).
