@@ -192,6 +192,148 @@ def gem_name_from_icon(icon_url):
     return " ".join(out)
 
 
+# ------------------------------------------------------------
+#  Gem-Info Live-Lookup (poe2db.tw) mit Server-Cache
+#  -> keine statische Gem-DB, die jede Liga gepflegt werden muss.
+#     poe2db wird von der Community aktuell gehalten; wir holen nur
+#     die Kurzbeschreibung (og:description) und verlinken die Quelle.
+# ------------------------------------------------------------
+GEM_INFO_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gem_cache.json")
+GEM_INFO_TTL_HIT  = 7 * 24 * 3600   # Treffer 7 Tage cachen
+GEM_INFO_TTL_MISS = 24 * 3600       # 404s 1 Tag cachen
+_GEM_UA = "ExileEyeNavigator/1.26 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
+_gem_cache = None
+
+
+def _load_gem_cache():
+    global _gem_cache
+    if _gem_cache is None:
+        try:
+            _gem_cache = json.load(open(GEM_INFO_CACHE_FILE, encoding="utf-8"))
+        except (OSError, ValueError):
+            _gem_cache = {}
+    return _gem_cache
+
+
+def _save_gem_cache():
+    try:
+        with open(GEM_INFO_CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(_gem_cache, f, ensure_ascii=False)
+    except OSError:
+        pass
+
+
+_GEM_TIER_WORDS = {"one": "I", "two": "II", "three": "III",
+                   "four": "IV", "five": "V", "six": "VI",
+                   "1": "I", "2": "II", "3": "III"}
+
+
+def _gem_slug_candidates(raw_name):
+    """
+    Aus einem Gem-Namen (egal ob GGG 'Aftershock II', Maxroll
+    'Primal Armament Two' oder 'Living Bomb Player') die
+    poe2db-Slug-Kandidaten bauen: Tier zuerst, dann ohne Tier.
+    """
+    s = re.sub(r"[^A-Za-z0-9 ]+", " ", str(raw_name or ""))
+    s = re.sub(r"\s+", " ", s).strip()
+    s = re.sub(r"\s+Player$", "", s, flags=re.IGNORECASE)
+    if not s:
+        return []
+    base, tier = s, None
+    m = re.search(r"\s+(I{1,3}|IV|V|VI|one|two|three|four|five|six|[1-3])$",
+                  s, re.IGNORECASE)
+    if m:
+        t = m.group(1)
+        tier = _GEM_TIER_WORDS.get(t.lower()) or (t.upper() if t.isalpha() else None)
+        base = s[:m.start()].strip()
+    def slug(x):
+        # poe2db nutzt ingame-Schreibweise ("Fist of War I" -> Fist_of_War_I):
+        # Small Words werden klein geschrieben (Maxroll: "Fist Of War" -> passt)
+        words = x.split()
+        canon = []
+        for i, w in enumerate(words):
+            lw = w.lower()
+            canon.append(lw if (i > 0 and lw in _GEM_SMALL_WORDS) else w[0].upper() + w[1:])
+        return re.sub(r"\s+", "_", " ".join(canon).strip())
+    cands = []
+    if tier:
+        cands += [slug(base + " " + tier), slug(base)]
+    else:
+        cands += [slug(base)] + [slug(base + " " + t) for t in ("I", "II", "III")]
+    # dedupe, Reihenfolge behalten
+    seen, out = set(), []
+    for c in cands:
+        if c and c not in seen:
+            seen.add(c); out.append(c)
+    return out[:5]
+
+
+def _shorten_gem_desc(text, limit=320):
+    """Kurzbeschreibung auf max. `limit` Zeichen, am Satzende abschneiden."""
+    t = re.sub(r"\s+", " ", (text or "")).strip()
+    # komplettes HTML & Entities raus (Sicherheit bei Fremdtext)
+    t = re.sub(r"<[^>]+>", "", t)
+    for ent, ch in (("&amp;", "&"), ("&lt;", "<"), ("&gt;", ">"), ("&quot;", '"'), ("&#39;", "'")):
+        t = t.replace(ent, ch)
+    if len(t) <= limit:
+        return t
+    cut = t[:limit]
+    # am letzten Satzende vor dem Limit abschneiden
+    best = max(cut.rfind(". "), cut.rfind("! "), cut.rfind("? "))
+    if best > limit * 0.45:
+        return cut[:best + 1].strip()
+    return cut.rstrip(",;: ") + " …"
+
+
+def gem_info_lookup(name):
+    """Live-Suche einer Gem-Kurzbeschreibung auf poe2db.tw (mit Cache)."""
+    cands = _gem_slug_candidates(name)
+    if not cands:
+        return {"found": False}
+    cache = _load_gem_cache()
+    now = time.time()
+    key = cands[0].lower()
+    hit = cache.get(key)
+    if hit and hit.get("ts", 0) > now - (GEM_INFO_TTL_HIT if hit.get("found") else GEM_INFO_TTL_MISS):
+        return hit["data"]
+    result = {"found": False}
+    for slug in cands:
+        url = "https://poe2db.tw/us/" + slug
+        try:
+            r = requests.get(url, headers={"User-Agent": _GEM_UA}, timeout=10)
+        except requests.RequestException:
+            continue
+        if r.status_code != 200:
+            continue
+        title = re.search(r'og:title" content="([^"]*)"', r.text)
+        desc = re.search(r'og:description" content="([^"]*)"', r.text)
+        if title and desc:
+            result = {
+                "found": True,
+                "name": re.sub(r"&amp;", "&", title.group(1)) or slug.replace("_", " "),
+                "description": _shorten_gem_desc(re.sub(r"&amp;", "&", desc.group(1))),
+                "url": url,
+                "source": "poe2db.tw",
+            }
+            break
+        time.sleep(0.2)
+    cache[key] = {"ts": now, "found": result["found"], "data": result}
+    if len(cache) > 2000:   # Cache nicht unendlich wachsen lassen
+        for k in sorted(cache, key=lambda k: cache[k].get("ts", 0))[:400]:
+            cache.pop(k, None)
+    _save_gem_cache()
+    return result
+
+
+@app.route("/api/gem-info")
+def api_gem_info():
+    """Kurzbeschreibung einer Gem liefern (Live-Lookup poe2db.tw, gecached)."""
+    name = (request.args.get("name") or "").strip()
+    if not name:
+        return jsonify({"found": False, "error": "missing name"}), 400
+    return jsonify(gem_info_lookup(name))
+
+
 def _coerce_display_value(v):
     """
     GGG API kann manchmal Werte als Objekte liefern (z.B. in properties/requirements).

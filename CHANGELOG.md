@@ -10,6 +10,13 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.26 (05.10.2026, Gem-Beschreibungen)
+- **Neu: „Was macht das Gem?" direkt im Gem-Modal** — Kurzbeschreibung + 📖-Quellenlink. Keine statische Datenbank: das Backend schaut **live auf poe2db.tw** nach (Community-gepflegt, jede Liga aktuell!) und cached Treffer 7 Tage (404s 1 Tag) in `gem_cache.json` → null Liga-Wartung
+- **Killer-Detail:** die Namensauflösung versteht alle Schreibweisen — GGG-Tiers („Aftershock II"), Maxroll-Wort-Tiers („… Two") und Maxroll-Varianten („… Player") werden aufgelöst; Support-Gems werden ggf. mit `_I`-Suffix probiert
+- **Gear-Skills sind jetzt klickbar:** Main-Gem und Support-Chips im Charakter-Tab öffnen das Gem-Info-Modal (komplette Bedeutung ohne ins Game zu müssen)
+- **Fallback:** Gem nicht gefunden oder App offline → 📖-Link in die PoE2-Wiki
+- Backend: neuer öffentlicher Endpunkt `/api/gem-info?name=…`
+
 ## v1.25 (05.10.2026, Build-Import sichtbar gemacht)
 - **Import-Sektion ganz nach OBEN im Build-Tab** — der natürliche Lesefluss: erst Build importieren, dann Gewichtung/Slider eichen, dann Skills checken
 - **📥-Import-Button im globalen Switcher** (neben dem Build-Dropdown): springt in den Build-Tab, scrollt den Import an, lässt ihn kurz aufpulsen und fokussiert das Textfeld

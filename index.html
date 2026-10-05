@@ -216,6 +216,13 @@
   .gear-skill-sup.miss::after { content: "✗"; font-size: 10px; margin-left: 1px; }
   .gear-nib { font-size: 10px; font-weight: 400; color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; padding: 1px 7px; margin-left: 2px; }
   .gear-alias { font-size: 10px; font-weight: 400; color: #7dd8c8; border: 1px solid rgba(45,212,191,.4); background: rgba(45,212,191,.06); border-radius: 8px; padding: 1px 7px; margin-left: 2px; }
+  /* Gem-Info (Live-Lookup): Beschreibung + Quellenlink im Gem-Modal */
+  .gem-desc { font-size: 12.5px; line-height: 1.55; color: #cdd6e0; margin-bottom: 8px; }
+  .gem-src { display: inline-block; font-size: 11px; color: var(--gold); text-decoration: none; border: 1px solid rgba(45,212,191,.4); border-radius: 5px; padding: 3px 8px; }
+  .gem-src:hover { background: rgba(45,212,191,.12); }
+  .gear-skill-main.clickable, .gear-skill-sup.clickable { cursor: pointer; }
+  .gear-skill-main.clickable:hover span:first-of-type { color: var(--gold); }
+  .gear-skill-sup.clickable:hover { border-color: var(--gold); color: var(--gold); }
 
   /* ============================================================
      EQUIPMENT-HUD im echten PoE2 Steinplatten-Look
@@ -1250,7 +1257,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.25";
+const APP_VERSION = "v1.26";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1327,6 +1334,8 @@ const I18N = {
     gem_missing_hint:"Im Build vorgesehen – bei dir nicht gesockelt",
     gem_match_hint:"Passt zum aktiven Build",
     gem_alias_hint:"Im Build heißt dieser Skill „{n}“",
+    gem_loading:"Lade Gem-Info…", gem_wiki_link:"In der PoE2-Wiki nachschlagen",
+    gem_src:"Quelle: poe2db.tw", gem_info_title:"Gem-Info anzeigen",
     wg_defense:"Defensiv", wg_offense:"Offensiv", wg_utility:"Utility",
     gem_type_skill:"Skill-Gemme", gem_type_support:"Support-Gemme", gem_level_from:"ab Level {l}",
     gem_supports_label:"UNTERSTÜTZUNGS-GEMMEN ({n})", gem_desc_hint:"Die vollständige Skill-Beschreibung findest du im Spiel.",
@@ -1433,6 +1442,8 @@ const I18N = {
     gem_missing_hint:"Planned in build – not socketed on your gear",
     gem_match_hint:"Matches the active build",
     gem_alias_hint:"In the build this skill is called \"{n}\"",
+    gem_loading:"Loading gem info…", gem_wiki_link:"Look up in the PoE2 wiki",
+    gem_src:"Source: poe2db.tw", gem_info_title:"Show gem info",
     wg_defense:"Defense", wg_offense:"Offense", wg_utility:"Utility",
     gem_type_skill:"Skill Gem", gem_type_support:"Support Gem", gem_level_from:"from Level {l}",
     gem_supports_label:"SUPPORT GEMS ({n})", gem_desc_hint:"The full skill description is in-game.",
@@ -1927,12 +1938,12 @@ function renderGearSkills(skills) {
     if (buildList && !bEntry && mainName !== t("skills_gear_unknown")) {
       badge = `<span class="gear-nib" title="${esc(t("gem_notinbuild_hint"))}">${t("gem_notinbuild")}</span>`;
     }
-    let supHtml = sups.map(sp => {
+    let supHtml = sups.map((sp, si) => {
       let cls = "gear-skill-sup", tt = sp.name;
       if (bEntry && bEntry._sups.includes(normGemName(sp.name))) {
         cls += " ok"; tt = t("gem_match_hint") + ": " + sp.name;
       }
-      return `<span class="${cls}" title="${esc(tt)}">${sp.icon ? `<img src="${esc(sp.icon)}" alt="" onerror="this.remove()">` : ""}${sp.name ? `<span>${esc(sp.name)}</span>` : ""}</span>`;
+      return `<span class="${cls} clickable" title="${esc(tt)}" onclick="showGearGem(${gi},${si})">${sp.icon ? `<img src="${esc(sp.icon)}" alt="" onerror="this.remove()">` : ""}${sp.name ? `<span>${esc(sp.name)}</span>` : ""}</span>`;
     });
     if (bEntry) {
       const buildName = gemDispName(bEntry.skill);
@@ -1948,7 +1959,7 @@ function renderGearSkills(skills) {
       });
     }
     html += `<div class="gear-skill">
-      <div class="gear-skill-main">
+      <div class="gear-skill-main clickable" onclick="showGearGem(${gi},-1)" title="${esc(t("gem_info_title"))}">
         ${main.icon ? `<img src="${esc(main.icon)}" alt="" onerror="this.remove()">` : ""}
         <span>${esc(mainName)}</span>${badge}
       </div>
@@ -3210,9 +3221,54 @@ function showGem(skillIdx, supIdx) {
     });
     html += `</div>`;
   }
-  html += `<div class="tt-section"><span style="color:var(--text-dim);font-size:11px">💡 ${t("gem_desc_hint")}</span></div>`;
+  html += `<div class="tt-section" id="gemInfoBox"></div>`;
   document.getElementById("tooltipBody").innerHTML = html;
   document.getElementById("itemModal").classList.add("show");
+  fetchGemInfoInto("gemInfoBox", gem.name);
+}
+
+// Mini-Modal fuer Gear-Skills (Main-Gem oder Support-Chip angeklickt)
+function showGearGem(gi, si) {
+  const s = (lastGearSkills || [])[gi];
+  if (!s) return;
+  const raw = si < 0 ? (s.name || (s.main || {}).name) : ((s.supports || [])[si] || {}).name;
+  showGemInfo(gemDispName(raw) || t("skills_gear_unknown"), si >= 0);
+}
+
+function showGemInfo(name, isSupport) {
+  const typeLabel = isSupport ? t("gem_type_support") : t("gem_type_skill");
+  const typeColor = isSupport ? "#9ab8d8" : "#f0c060";
+  const html = `<div class="tt-header r0" style="border-bottom:1px solid var(--border)">
+    <button class="tt-close" onclick="closeItem()">×</button>
+    <div class="tt-name" style="color:${typeColor}">${esc(name)}</div>
+    <div class="tt-base">${typeLabel}</div>
+  </div>
+  <div class="tt-section" id="gemInfoBox"></div>`;
+  document.getElementById("tooltipBody").innerHTML = html;
+  document.getElementById("itemModal").classList.add("show");
+  fetchGemInfoInto("gemInfoBox", name);
+}
+
+// Laedt die Kurzbeschreibung vom Backend (poe2db-Live-Lookup, gecached).
+// Fällt bei Offline/Fehler auf einen Wiki-Link zurueck.
+function fetchGemInfoInto(boxId, name) {
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  const fallback = () => {
+    box.innerHTML = `<a class="gem-src" href="https://www.poe2wiki.net/wiki/${encodeURIComponent(String(name).replace(/ /g, "_"))}" target="_blank" rel="noopener">📖 ${t("gem_wiki_link")} ↗</a>`;
+  };
+  box.innerHTML = `<div class="gem-desc" style="color:var(--text-dim)">💡 ${t("gem_loading")}</div>`;
+  fetch("/api/gem-info?name=" + encodeURIComponent(name))
+    .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+    .then(d => {
+      if (d && d.found && d.description) {
+        box.innerHTML = `<div class="gem-desc">${esc(d.description)}</div>
+          <a class="gem-src" href="${esc(d.url)}" target="_blank" rel="noopener">📖 ${t("gem_src")} ↗</a>`;
+      } else {
+        fallback();
+      }
+    })
+    .catch(fallback);
 }
 
 function renderConsumables(flasks, charms) {
@@ -3325,5 +3381,5 @@ if (typeof updateActiveBuildBar === "function") updateActiveBuildBar();
 init();
 loadScanHistory();
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a45c2d23bfa00686',t:'MTc5MTIwMDY4Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
