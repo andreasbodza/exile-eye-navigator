@@ -10,6 +10,14 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.37 (06.10.2026, Trade-Waffen Feinschliff + Liga am Char)
+- Trade ignoriert Runen-Mods (kein 92% Phys mehr, wenn 32% von der Rune kommen).
+- Mace/Crossbow-Kategorie aus Item-Typ („Marauding Mace“ → One-Hand Mace).
+- Mehr Waffen-Mods: Attack Speed, Added Phys/Lightning, Strength.
+- Charakter-Dropdown: Gruppen **Season / Liga** vs **Standard / Realm**, Liga steht am Namen.
+
+---
+
 ## v1.36 (06.10.2026, Trade-Waffen + Gem-Legende)
 - Waffen/Talismane: genauere Kategorie (`weapon.talisman`, `weapon.twomace` statt „Any Weapon“).
 - Mehr Mods in der Trade-Suche: Phys-Dmg, Crit-Chance, Crit-Dmg, Accuracy, +Melee-Skills, Ele-Dmg with Attacks, Added Fire/Cold.

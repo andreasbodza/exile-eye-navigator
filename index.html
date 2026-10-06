@@ -1342,7 +1342,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.36";
+const APP_VERSION = "v1.37";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1455,6 +1455,7 @@ const I18N = {
     login_btn:"Mit GGG anmelden", demo_btn:"Demo ausprobieren (ohne Login)",
     demo_hint:"Probier die App mit Beispiel-Charakter aus – Scanner, Build-Vergleich &amp; HUD live testen!",
     char_section:"Charakter", char_choose:"– Charakter wählen –",
+    chars_group_season:"Season / Liga", chars_group_realm:"Standard / Realm",
     equip_section:"Aktuelle Ausrüstung",
     bp_label:"Build-Fortschritt",
     bp_hint:"Importiere einen Build, um deinen Fortschritt zu sehen",
@@ -1569,6 +1570,7 @@ const I18N = {
     login_btn:"Sign in with GGG", demo_btn:"Try the demo (no login)",
     demo_hint:"Try the app with a sample character – scanner, build compare &amp; HUD, all live!",
     char_section:"Character", char_choose:"– Choose character –",
+    chars_group_season:"Season / League", chars_group_realm:"Standard / Realm",
     equip_section:"Current equipment",
     bp_label:"Build progress",
     bp_hint:"Import a build to see your progress",
@@ -1923,13 +1925,28 @@ async function loadCharacters() {
     const chars = data.characters || [];
     if (chars.length === 0) { showBanner(t("bn_no_chars")); return; }
     sel.innerHTML = '<option value="">' + t("char_choose") + '</option>';
-    chars.forEach(c => {
+    const season = [], realm = [];
+    chars.forEach(c => (isSeasonLeague(c.league) ? season : realm).push(c));
+    function addCharOpt(parent, c) {
       const opt = document.createElement("option");
       opt.value = c.name;
       opt.dataset.league = c.league || "Standard";
-      opt.textContent = `${c.name}  (Lvl ${c.level} ${c.class})`;
-      sel.appendChild(opt);
-    });
+      const lg = c.league || "Standard";
+      opt.textContent = `${c.name}  · Lvl ${c.level} ${c.class}  · ${lg}`;
+      parent.appendChild(opt);
+    }
+    if (season.length) {
+      const g = document.createElement("optgroup");
+      g.label = t("chars_group_season");
+      season.forEach(c => addCharOpt(g, c));
+      sel.appendChild(g);
+    }
+    if (realm.length) {
+      const g = document.createElement("optgroup");
+      g.label = t("chars_group_realm");
+      realm.forEach(c => addCharOpt(g, c));
+      sel.appendChild(g);
+    }
     hideDemoBadge();   // echte Chars geladen -> kein Demo-Zustand mehr
     showBanner(t("bn_chars_loaded", { n: chars.length }), "ok");
   } catch (e) { showBanner(t("bn_error") + e.message); }
@@ -2517,6 +2534,12 @@ function buildCompareBlock(slot, item) {
 }
 
 let currentLeague = "Standard";
+function isSeasonLeague(league) {
+  const l = String(league || "Standard").trim().toLowerCase();
+  if (!l || l === "standard" || l === "hardcore") return false;
+  if (l === "solo self-found" || l === "hardcore ssf" || l === "ssf" || l === "ssf standard" || l === "ssf hardcore") return false;
+  return true;
+}
 let buildSlotStats = {};
 let buildSlotUniques = {};
 (function loadSlotStats() {
@@ -2663,19 +2686,15 @@ async function openTrade(slot) {
     const payload = { slot, league, trade_status: document.getElementById("tradeStatus").value,
       tolerance: parseInt(document.getElementById("tradeTolerance").value) || 0,
       typeLine: equipped.typeLine || "", baseType: equipped.baseType || "" };
+    payload.itemClass = (equipped.properties || []).map(p => p.name).filter(Boolean).join(" ");
     if (buildSlotUniques[slot]) { payload.unique_name = buildSlotUniques[slot]; }
     else {
       let statsObj = buildSlotStats[slot];
       if (!statsObj || Object.keys(statsObj).length === 0) {
-        // Kein Slot-Soll aus dem Build: Upgrade-Suche mit den echten
-        // Mod-Werten des getragenen Items (parsed_stats, NICHT effective/
-        // Basis-Ruestung — die wuerde als % Armour-Min Quatsch erzeugen).
-        const have = (equippedItems[slot] && equippedItems[slot].parsed_stats) || {};
+        // Nur Explicit/Crafted/Fractured — KEINE Runen (die gehoeren nicht zum Item).
+        const m = equipped.mods || {};
+        payload.mod_lines = [...(m.explicit || []), ...(m.crafted || []), ...(m.fractured || [])];
         statsObj = {};
-        Object.entries(have).forEach(([k, v]) => {
-          const n = parseFloat(v);
-          if (!isNaN(n) && n > 0) statsObj[k] = n;
-        });
       }
       payload.stats = statsObj;
     }
@@ -3536,7 +3555,8 @@ function labelFor(key) {
       spell_skills:"+Skill Level", spirit:"Spirit", eva_es:"Eva+ES %", crit_dmg_bonus:"Crit Dmg",
       phys_damage:"Phys Dmg", crit_damage:"Crit Dmg", accuracy:"Accuracy",
       melee_skills:"+Melee Skills", ele_atk_damage:"Ele Dmg (Attacks)",
-      added_fire:"Added Fire", added_cold:"Added Cold" };
+      added_fire:"Added Fire", added_cold:"Added Cold", added_phys:"Added Phys",
+      added_lightning:"Added Light", attack_speed:"Attack Speed", strength:"Strength" };
     if (en[key]) return en[key];
     return key;
   }
@@ -3551,7 +3571,8 @@ function labelFor(key) {
     ele_res: "Elem-Res (gesamt)", spell_skills: "+Skill-Level", spirit: "Spirit",
     phys_damage: "Phys-Schaden", crit_damage: "Krit-Schaden", accuracy: "Genauigkeit",
     melee_skills: "+Nahkampf-Skills", ele_atk_damage: "Ele-Schaden (Angriffe)",
-    added_fire: "zus. Feuer", added_cold: "zus. Kälte",
+    added_fire: "zus. Feuer", added_cold: "zus. Kälte", added_phys: "zus. Phys",
+    added_lightning: "zus. Blitz", attack_speed: "Angriffsgeschwindigkeit", strength: "Stärke",
     eva_es: "Eva+ES %", crit_dmg_bonus: "Krit-Schaden",
   };
   return map[key] || key;

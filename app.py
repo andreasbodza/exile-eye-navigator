@@ -238,7 +238,7 @@ def gem_name_from_icon(icon_url):
 GEM_INFO_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gem_cache.json")
 GEM_INFO_TTL_HIT  = 7 * 24 * 3600   # Treffer 7 Tage cachen
 GEM_INFO_TTL_MISS = 24 * 3600       # 404s 1 Tag cachen
-_GEM_UA = "ExileEyeNavigator/1.36 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
+_GEM_UA = "ExileEyeNavigator/1.37 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
 _gem_cache = None
 
 
@@ -1932,6 +1932,10 @@ TRADE_STAT_IDS = {
     "cold_damage":      "explicit.stat_3291658075",   # #% increased Cold Damage
     "added_fire":       "explicit.stat_709508406",    # Adds # to # Fire Damage
     "added_cold":       "explicit.stat_1037193709",    # Adds # to # Cold Damage
+    "added_phys":       "explicit.stat_1940865751",   # Adds # to # Physical Damage
+    "added_lightning":  "explicit.stat_3336890334",   # Adds # to # Lightning Damage
+    "attack_speed":     "explicit.stat_210067635",    # #% increased Attack Speed (Local)
+    "strength":         "explicit.stat_4080418644",   # # to Strength
 }
 
 # Genauere Trade-Kategorie anhand typeLine/baseType (PoB TradeHelpers).
@@ -1941,6 +1945,8 @@ _TYPELINE_CATEGORY = [
     ("two-handed mace", "weapon.twomace"),
     ("greatclub", "weapon.twomace"),
     ("one hand mace", "weapon.onemace"),
+    ("marauding mace", "weapon.onemace"),
+    ("mace", "weapon.onemace"),
     ("crossbow", "weapon.crossbow"),
     ("quarterstaff", "weapon.warstaff"),
     ("warstaff", "weapon.warstaff"),
@@ -1956,8 +1962,8 @@ _TYPELINE_CATEGORY = [
 ]
 
 
-def _trade_category(slot, type_line="", base_type=""):
-    blob = f"{type_line} {base_type}".lower()
+def _trade_category(slot, type_line="", base_type="", item_class=""):
+    blob = f"{type_line} {base_type} {item_class}".lower()
     for needle, cat in _TYPELINE_CATEGORY:
         if needle in blob:
             return cat
@@ -1965,8 +1971,11 @@ def _trade_category(slot, type_line="", base_type=""):
 
 
 def _trade_stat_id(key, slot=""):
-    if key == "accuracy" and slot not in ("Weapon", "Weapon2"):
-        return "explicit.stat_803737631"  # global Accuracy (Ringe/Amulette)
+    weapon = slot in ("Weapon", "Weapon2")
+    if key == "accuracy":
+        return "explicit.stat_691932474" if weapon else "explicit.stat_803737631"
+    if key == "attack_speed":
+        return "explicit.stat_210067635" if weapon else "explicit.stat_681332047"
     return TRADE_STAT_IDS.get(key)
 
 # Mapping: Regex (Zahl direkt am Stat) -> Stat-Key.
@@ -2034,6 +2043,8 @@ def api_trade_link():
         tolerance = body.get("tolerance", 0)      # +-% Toleranz auf Min-Werte
         type_line = (body.get("typeLine") or body.get("type_line") or "").strip()
         base_type = (body.get("baseType") or body.get("base_type") or "").strip()
+        item_class = (body.get("itemClass") or body.get("item_class") or "").strip()
+        mod_lines = body.get("mod_lines") or []
     else:
         slot = request.args.get("slot", "").strip()
         league = request.args.get("league", "Standard").strip() or "Standard"
@@ -2044,6 +2055,8 @@ def api_trade_link():
         tolerance = 0
         type_line = request.args.get("typeLine", "").strip()
         base_type = request.args.get("baseType", "").strip()
+        item_class = ""
+        mod_lines = []
 
     # Handelsstatus: "online" (sofort kaufbar), "onlineleague", "any"
     status_map = {
@@ -2059,7 +2072,7 @@ def api_trade_link():
     except (ValueError, TypeError):
         tol = 0.0
 
-    category = _trade_category(slot, type_line, base_type)
+    category = _trade_category(slot, type_line, base_type, item_class)
 
     query = {
         "query": {
@@ -2080,6 +2093,9 @@ def api_trade_link():
         applied = ["unique:" + unique_name]
     else:
         # --- Rare/Magic: nach Kategorie + Stats suchen ---
+        if mod_lines:
+            parsed = parse_item_stats("\n".join(str(x) for x in mod_lines if x))
+            want = {k: v for k, v in (parsed or {}).items() if v and float(v) > 0}
         want = _collapse_trade_want(want)
         stat_filters = []
         for key, minval in want.items():

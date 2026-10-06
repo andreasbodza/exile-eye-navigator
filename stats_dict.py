@@ -159,6 +159,14 @@ STAT_DICT = {
         r"Adds\s+(\d+)\s+to\s+\d+\s+Cold\s+Damage",
         r"Fügt\s+(\d+)\s+bis\s+\d+\s+K[äa]lteschaden\s+hinzu",
     ],
+    "added_phys": [
+        r"Adds\s+(\d+)\s+to\s+\d+\s+Physical\s+Damage",
+        r"Fügt\s+(\d+)\s+bis\s+\d+\s+physischen\s+Schaden\s+hinzu",
+    ],
+    "added_lightning": [
+        r"Adds\s+(\d+)\s+to\s+\d+\s+Lightning\s+Damage",
+        r"Fügt\s+(\d+)\s+bis\s+\d+\s+Blitzschaden\s+hinzu",
+    ],
     "attack_speed": [
         r"(\d+)%\s+erh[öo]hte\s+Angriffsgeschwindigkeit",
         r"(\d+)%\s+increased\s+Attack\s+Speed",
