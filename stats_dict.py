@@ -106,8 +106,12 @@ STAT_DICT = {
         r"(\d+)%\s+increased\s+Physical\s+Damage",
     ],
     "elemental_damage": [
-        r"(\d+)%\s+erh[öo]hter\s+Elementarschaden",
-        r"(\d+)%\s+increased\s+Elemental\s+Damage",
+        r"(\d+)%\s+erh[öo]hter\s+Elementarschaden(?!\s+mit)",
+        r"(\d+)%\s+increased\s+Elemental\s+Damage(?!\s+with)",
+    ],
+    "ele_atk_damage": [
+        r"(\d+)%\s+erh[öo]hter\s+Elementarschaden\s+mit\s+Angriffen",
+        r"(\d+)%\s+increased\s+Elemental\s+Damage\s+with\s+Attacks",
     ],
     "fire_damage": [
         r"(\d+)%\s+erh[öo]hter\s+Feuerschaden",
@@ -129,12 +133,31 @@ STAT_DICT = {
     # ---------- KRIT / SPEED ----------
     "crit_chance": [
         r"(\d+(?:[.,]\d+)?)%\s+erh[öo]hte\s+kritische\s+Trefferchance",
-        r"(\d+(?:[.,]\d+)?)%\s+(?:to\s+|increased\s+)?Critical\s+(?:Hit\s+|Strike\s+)?Chance",
         r"\+?(\d+(?:[.,]\d+)?)%\s+zu\s+kritischer\s+Trefferchance",
+        r"\+?(\d+(?:[.,]\d+)?)%\s+to\s+Critical\s+Hit\s+Chance",
+        r"(\d+(?:[.,]\d+)?)%\s+increased\s+Critical\s+(?:Hit\s+|Strike\s+)?Chance",
     ],
     "crit_damage": [
         r"(\d+)%\s+erh[öo]hter\s+kritischer\s+Schadensbonus",
         r"(\d+)%\s+increased\s+Critical\s+Damage\s+Bonus",
+        r"\+?(\d+(?:[.,]\d+)?)%\s+zu\s+kritischem\s+Schadensbonus",
+        r"\+?(\d+(?:[.,]\d+)?)%\s+to\s+Critical\s+Damage\s+Bonus",
+    ],
+    "accuracy": [
+        r"\+?(\d+)\s+zu\s+Treffergenauigkeit",
+        r"\+?(\d+)\s+to\s+Accuracy\s+Rating",
+    ],
+    "melee_skills": [
+        r"\+?(\d+)\s+zu\s+Stufen?\s+aller\s+Nahkampffertigkeiten",
+        r"\+?(\d+)\s+to\s+Level\s+of\s+all\s+Melee\s+Skills",
+    ],
+    "added_fire": [
+        r"Adds\s+(\d+)\s+to\s+\d+\s+Fire\s+Damage",
+        r"Fügt\s+(\d+)\s+bis\s+\d+\s+Feuerschaden\s+hinzu",
+    ],
+    "added_cold": [
+        r"Adds\s+(\d+)\s+to\s+\d+\s+Cold\s+Damage",
+        r"Fügt\s+(\d+)\s+bis\s+\d+\s+K[äa]lteschaden\s+hinzu",
     ],
     "attack_speed": [
         r"(\d+)%\s+erh[öo]hte\s+Angriffsgeschwindigkeit",
@@ -205,7 +228,7 @@ STAT_DICT = {
 PERCENT_STATS = {
     "fire_res", "cold_res", "lightning_res", "chaos_res", "all_res",
     "armour", "evasion", "armour_es", "eva_es", "armour_eva",
-    "spell_damage", "phys_damage", "elemental_damage", "fire_damage",
+    "spell_damage", "phys_damage", "elemental_damage", "ele_atk_damage", "fire_damage",
     "cold_damage", "lightning_damage", "chaos_damage",
     "crit_chance", "crit_damage", "attack_speed", "cast_speed",
     "movement_speed", "mana_regen",

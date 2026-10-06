@@ -10,6 +10,14 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.36 (06.10.2026, Trade-Waffen + Gem-Legende)
+- Waffen/Talismane: genauere Kategorie (`weapon.talisman`, `weapon.twomace` statt „Any Weapon“).
+- Mehr Mods in der Trade-Suche: Phys-Dmg, Crit-Chance, Crit-Dmg, Accuracy, +Melee-Skills, Ele-Dmg with Attacks, Added Fire/Cold.
+- Bugfix: Crit-Chance wurde fälschlich als Crit-Damage-Bonus geschickt.
+- Skills & Gems: Legende für ✓ / nackig / rot-gestrichelt.
+
+---
+
 ## v1.35 (05.10.2026, Trade-Mins vom Item)
 - Trade-Filter ohne Mindestwert fliegen raus (leeres „Total Ele Res“ hat quasi alles gefunden).
 - Upgrade-Suche nimmt die **echten Mods** des getragenen Items (Life, Resistenzen, …) als Min — nicht die Gewichtung ohne Werte und nicht die Basis-Rüstung.

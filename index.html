@@ -230,6 +230,15 @@
   .gear-skill-sup.ok::after { content: "✓"; font-size: 10px; margin-left: 1px; }
   .gear-skill-sup.miss { border-style: dashed; border-color: rgba(248,113,113,.6); color: #fca5a5; background: rgba(248,113,113,.06); }
   .gear-skill-sup.miss::after { content: "✗"; font-size: 10px; margin-left: 1px; }
+  .gear-legend {
+    display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 10px;
+    font-size: 11px; color: var(--text-dim); line-height: 1.4;
+  }
+  .gear-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .gear-legend .sw { width: 18px; height: 14px; border-radius: 4px; flex: 0 0 auto; }
+  .gear-legend .sw.ok { border: 1px solid rgba(45,212,191,.55); background: rgba(45,212,191,.07); }
+  .gear-legend .sw.have { border: 1px solid var(--border); background: var(--panel); }
+  .gear-legend .sw.miss { border: 1px dashed rgba(248,113,113,.6); background: rgba(248,113,113,.06); }
   .gear-nib { font-size: 10px; font-weight: 400; color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; padding: 1px 7px; margin-left: 2px; }
   .gear-alias { font-size: 10px; font-weight: 400; color: #7dd8c8; border: 1px solid rgba(45,212,191,.4); background: rgba(45,212,191,.06); border-radius: 8px; padding: 1px 7px; margin-left: 2px; }
   /* Gem-Info (Live-Lookup): Beschreibung + Quellenlink im Gem-Modal */
@@ -1333,7 +1342,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.35";
+const APP_VERSION = "v1.36";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1407,6 +1416,9 @@ const I18N = {
     tab_scanner:"Scanner", tab_character:"Charakter", tab_build:"Build", tab_settings:"Einstellungen",
     skills_gear_title:"Skills & Gems (dein Charakter)", skills_gear_unknown:"Unbekanntes Gem",
     gem_notinbuild:"nicht im Build", gem_notinbuild_hint:"Dieser Skill kommt im aktiven Build nicht vor.",
+    skills_legend_ok:"✓ im Build und gesockelt",
+    skills_legend_have:"gesockelt, nicht im Build",
+    skills_legend_miss:"im Build, bei dir nicht gesockelt",
     gem_missing_hint:"Im Build vorgesehen – bei dir nicht gesockelt",
     gem_match_hint:"Passt zum aktiven Build",
     gem_alias_hint:"Im Build heißt dieser Skill „{n}“",
@@ -1518,6 +1530,9 @@ const I18N = {
     tab_scanner:"Scanner", tab_character:"Character", tab_build:"Build", tab_settings:"Settings",
     skills_gear_title:"Skills & Gems (your character)", skills_gear_unknown:"Unknown gem",
     gem_notinbuild:"not in build", gem_notinbuild_hint:"This skill doesn't appear in the active build.",
+    skills_legend_ok:"✓ in build and socketed",
+    skills_legend_have:"socketed, not in build",
+    skills_legend_miss:"in build, not socketed on you",
     gem_missing_hint:"Planned in build – not socketed on your gear",
     gem_match_hint:"Matches the active build",
     gem_alias_hint:"In the build this skill is called \"{n}\"",
@@ -2115,6 +2130,13 @@ function renderGearSkills(skills) {
       ${supHtml.length ? `<div class="gear-skill-supports">${supHtml.join("")}</div>` : ""}
     </div>`;
   });
+  if (buildList) {
+    html += `<div class="gear-legend">
+      <span><i class="sw ok"></i>${esc(t("skills_legend_ok"))}</span>
+      <span><i class="sw have"></i>${esc(t("skills_legend_have"))}</span>
+      <span><i class="sw miss"></i>${esc(t("skills_legend_miss"))}</span>
+    </div>`;
+  }
   list.innerHTML = html + tapHintHtml();
   sec.style.display = "block";
 }
@@ -2637,8 +2659,10 @@ async function openTrade(slot) {
   try {
     const leagueSel = document.getElementById("tradeLeague").value;
     const league = (leagueSel === "auto") ? currentLeague : leagueSel;
+    const equipped = equippedItems[slot] || {};
     const payload = { slot, league, trade_status: document.getElementById("tradeStatus").value,
-      tolerance: parseInt(document.getElementById("tradeTolerance").value) || 0 };
+      tolerance: parseInt(document.getElementById("tradeTolerance").value) || 0,
+      typeLine: equipped.typeLine || "", baseType: equipped.baseType || "" };
     if (buildSlotUniques[slot]) { payload.unique_name = buildSlotUniques[slot]; }
     else {
       let statsObj = buildSlotStats[slot];
@@ -3226,7 +3250,6 @@ function scanStatsToTradeStats(stats) {
   const out = {};
   for (const [k, v] of Object.entries(stats || {})) {
     if (["fire_res","cold_res","lightning_res","all_res"].includes(k)) out["ele_res"] = (out["ele_res"] || 0) + v;
-    else if (k === "crit_chance") out["crit_dmg_bonus"] = v;
     else out[k] = v;
   }
   return out;
@@ -3510,7 +3533,10 @@ function labelFor(key) {
       crit_chance:"Crit Chance", spell_damage:"Spell Dmg", fire_damage:"Fire Dmg",
       cold_damage:"Cold Dmg", lightning_damage:"Lightning Dmg", chaos_damage:"Chaos Dmg",
       movement_speed:"Move Speed", armour:"Armour", ele_res:"Elem Res (total)",
-      spell_skills:"+Skill Level", spirit:"Spirit", eva_es:"Eva+ES %", crit_dmg_bonus:"Crit Dmg" };
+      spell_skills:"+Skill Level", spirit:"Spirit", eva_es:"Eva+ES %", crit_dmg_bonus:"Crit Dmg",
+      phys_damage:"Phys Dmg", crit_damage:"Crit Dmg", accuracy:"Accuracy",
+      melee_skills:"+Melee Skills", ele_atk_damage:"Ele Dmg (Attacks)",
+      added_fire:"Added Fire", added_cold:"Added Cold" };
     if (en[key]) return en[key];
     return key;
   }
@@ -3523,6 +3549,9 @@ function labelFor(key) {
     lightning_damage: "Blitz-Schaden", chaos_damage: "Chaos-Schaden",
     movement_speed: "Lauftempo", armour: "Rüstung",
     ele_res: "Elem-Res (gesamt)", spell_skills: "+Skill-Level", spirit: "Spirit",
+    phys_damage: "Phys-Schaden", crit_damage: "Krit-Schaden", accuracy: "Genauigkeit",
+    melee_skills: "+Nahkampf-Skills", ele_atk_damage: "Ele-Schaden (Angriffe)",
+    added_fire: "zus. Feuer", added_cold: "zus. Kälte",
     eva_es: "Eva+ES %", crit_dmg_bonus: "Krit-Schaden",
   };
   return map[key] || key;

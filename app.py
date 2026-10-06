@@ -238,7 +238,7 @@ def gem_name_from_icon(icon_url):
 GEM_INFO_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gem_cache.json")
 GEM_INFO_TTL_HIT  = 7 * 24 * 3600   # Treffer 7 Tage cachen
 GEM_INFO_TTL_MISS = 24 * 3600       # 404s 1 Tag cachen
-_GEM_UA = "ExileEyeNavigator/1.35 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
+_GEM_UA = "ExileEyeNavigator/1.36 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
 _gem_cache = None
 
 
@@ -1876,7 +1876,6 @@ _TRADE_KEY_ALIAS = {
     "cold_res": "ele_res",
     "lightning_res": "ele_res",
     "all_res": "ele_res",
-    "crit_chance": "crit_dmg_bonus",
 }
 
 
@@ -1922,7 +1921,53 @@ TRADE_STAT_IDS = {
     "armour":           "explicit.stat_3484657501",   # #% increased Armour (Local)
     # Resistenzen am besten ueber pseudo-total (egal welche Resi)
     "ele_res":          "pseudo.pseudo_total_elemental_resistance",  # [verifiziert]
+    # Waffen-Mods (IDs aus GGG trade2/data/stats via PoB TradeSiteStats.lua)
+    "phys_damage":      "explicit.stat_1509134228",   # #% increased Physical Damage
+    "crit_damage":      "explicit.stat_2694482655",   # #% to Critical Damage Bonus
+    "crit_chance":      "explicit.stat_518292764",    # #% to Critical Hit Chance
+    "accuracy":         "explicit.stat_691932474",    # # to Accuracy Rating (Local) — Waffen
+    "melee_skills":     "explicit.stat_9187492",      # # to Level of all Melee Skills
+    "ele_atk_damage":   "explicit.stat_387439868",    # #% increased Elemental Damage with Attacks
+    "fire_damage":      "explicit.stat_3962278098",   # #% increased Fire Damage
+    "cold_damage":      "explicit.stat_3291658075",   # #% increased Cold Damage
+    "added_fire":       "explicit.stat_709508406",    # Adds # to # Fire Damage
+    "added_cold":       "explicit.stat_1037193709",    # Adds # to # Cold Damage
 }
+
+# Genauere Trade-Kategorie anhand typeLine/baseType (PoB TradeHelpers).
+_TYPELINE_CATEGORY = [
+    ("talisman", "weapon.talisman"),
+    ("two hand mace", "weapon.twomace"),
+    ("two-handed mace", "weapon.twomace"),
+    ("greatclub", "weapon.twomace"),
+    ("one hand mace", "weapon.onemace"),
+    ("crossbow", "weapon.crossbow"),
+    ("quarterstaff", "weapon.warstaff"),
+    ("warstaff", "weapon.warstaff"),
+    ("talisman", "weapon.talisman"),
+    ("spear", "weapon.spear"),
+    ("flail", "weapon.flail"),
+    ("sceptre", "weapon.sceptre"),
+    ("wand", "weapon.wand"),
+    ("staff", "weapon.staff"),
+    ("bow", "weapon.bow"),
+    ("claw", "weapon.claw"),
+    ("dagger", "weapon.dagger"),
+]
+
+
+def _trade_category(slot, type_line="", base_type=""):
+    blob = f"{type_line} {base_type}".lower()
+    for needle, cat in _TYPELINE_CATEGORY:
+        if needle in blob:
+            return cat
+    return SLOT_TRADE_CATEGORY.get(slot)
+
+
+def _trade_stat_id(key, slot=""):
+    if key == "accuracy" and slot not in ("Weapon", "Weapon2"):
+        return "explicit.stat_803737631"  # global Accuracy (Ringe/Amulette)
+    return TRADE_STAT_IDS.get(key)
 
 # Mapping: Regex (Zahl direkt am Stat) -> Stat-Key.
 # So erkennen wir aus dem Build-Item den Stat UND den Mindestwert.
@@ -1987,6 +2032,8 @@ def api_trade_link():
         unique_name = (body.get("unique_name") or "").strip()
         trade_status = (body.get("trade_status") or "any").strip()
         tolerance = body.get("tolerance", 0)      # +-% Toleranz auf Min-Werte
+        type_line = (body.get("typeLine") or body.get("type_line") or "").strip()
+        base_type = (body.get("baseType") or body.get("base_type") or "").strip()
     else:
         slot = request.args.get("slot", "").strip()
         league = request.args.get("league", "Standard").strip() or "Standard"
@@ -1995,6 +2042,8 @@ def api_trade_link():
         unique_name = request.args.get("unique_name", "").strip()
         trade_status = request.args.get("trade_status", "any").strip()
         tolerance = 0
+        type_line = request.args.get("typeLine", "").strip()
+        base_type = request.args.get("baseType", "").strip()
 
     # Handelsstatus: "online" (sofort kaufbar), "onlineleague", "any"
     status_map = {
@@ -2010,7 +2059,7 @@ def api_trade_link():
     except (ValueError, TypeError):
         tol = 0.0
 
-    category = SLOT_TRADE_CATEGORY.get(slot)
+    category = _trade_category(slot, type_line, base_type)
 
     query = {
         "query": {
@@ -2034,7 +2083,7 @@ def api_trade_link():
         want = _collapse_trade_want(want)
         stat_filters = []
         for key, minval in want.items():
-            sid = TRADE_STAT_IDS.get(key)
+            sid = _trade_stat_id(key, slot)
             if not sid:
                 continue
             f = {"id": sid, "disabled": False}
