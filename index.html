@@ -62,7 +62,7 @@
     background: var(--panel-2);
     color: var(--gold);
     border: 1px solid var(--gold-soft);
-    border-radius: 6px;
+    border-radius: 2px;
     padding: 9px 16px;
     font-size: 13px; font-weight: 600; letter-spacing: .5px;
     cursor: pointer; text-decoration: none;
@@ -98,7 +98,7 @@
     z-index: 60;
     max-width: min(340px, calc(100vw - 32px));
     padding: 10px 14px;
-    border-radius: 8px; font-size: 13px; border: 1px solid;
+    border-radius: 2px; font-size: 13px; border: 1px solid;
     box-shadow: 0 6px 20px rgba(0,0,0,.5);
     animation: toast-in .25s ease-out;
   }
@@ -119,14 +119,14 @@
   /* ---------- Login Karte ---------- */
   .login-card {
     background: var(--panel); border: 1px solid var(--border);
-    border-radius: 10px; padding: 28px 22px; text-align: center; margin: 30px 18px;
+    border-radius: 2px; padding: 28px 22px; text-align: center; margin: 30px 18px;
   }
   .login-card p { color: var(--text-dim); margin: 12px 0 22px; font-size: 14px; line-height: 1.5; }
 
   /* ---------- Charakter-Auswahl ---------- */
   #charSelect {
     width: 100%; background: var(--panel-2); color: var(--text);
-    border: 1px solid var(--gold-soft); border-radius: 6px;
+    border: 1px solid var(--gold-soft); border-radius: 2px;
     padding: 11px; font-size: 14px;
   }
 
@@ -136,7 +136,7 @@
   .panel {
     background: linear-gradient(180deg, var(--panel-2), #181b21);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 2px;
     margin: 16px 18px 0;
     overflow: hidden;
     display: none;
@@ -205,14 +205,14 @@
     background: rgba(52,211,153,.12); color: var(--green);
     border: 1px solid rgba(52,211,153,.45);
     font-size: 10px; font-weight: 700; letter-spacing: 1px;
-    padding: 2px 8px; border-radius: 4px; margin-left: 10px;
+    padding: 2px 8px; border-radius: 2px; margin-left: 10px;
     vertical-align: middle;
     white-space: nowrap;
   }
 
   /* Kompaktes Resist-Grid (2x2) */
   #resCapRows { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .rc-tile { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .rc-tile { background: var(--panel-2); border: 1px solid var(--border); border-radius: 2px; padding: 10px 12px; }
   .rc-tile-head { display: flex; align-items: center; gap: 7px; font-size: 12px; }
   .rc-tile-name { font-weight: 600; color: var(--text); }
   .rc-tile-val { margin-left: auto; font-weight: 700; font-size: 13px; color: var(--text); }
@@ -220,11 +220,11 @@
   .rc-bar-sm { height: 5px; margin-top: 8px; }
 
   /* Skill-Gems aus GGG-API (Charakter-Tab) */
-  .gear-skill { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .gear-skill { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 2px; margin-bottom: 8px; flex-wrap: wrap; }
   .gear-skill-main { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text); }
   .gear-skill-main img { width: 28px; height: 28px; }
   .gear-skill-supports { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-left: auto; }
-  .gear-skill-sup { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-dim); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 3px 7px; }
+  .gear-skill-sup { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-dim); background: var(--panel); border: 1px solid var(--border); border-radius: 2px; padding: 3px 7px; }
   .gear-skill-sup img { width: 20px; height: 20px; }
   .gear-skill-sup.ok { border-color: rgba(45,212,191,.55); color: #7dd8c8; background: rgba(45,212,191,.07); }
   .gear-skill-sup.ok::after { content: "✓"; font-size: 10px; margin-left: 1px; }
@@ -235,15 +235,15 @@
     font-size: 11px; color: var(--text-dim); line-height: 1.4;
   }
   .gear-legend span { display: inline-flex; align-items: center; gap: 6px; }
-  .gear-legend .sw { width: 18px; height: 14px; border-radius: 4px; flex: 0 0 auto; }
+  .gear-legend .sw { width: 18px; height: 14px; border-radius: 2px; flex: 0 0 auto; }
   .gear-legend .sw.ok { border: 1px solid rgba(45,212,191,.55); background: rgba(45,212,191,.07); }
   .gear-legend .sw.have { border: 1px solid var(--border); background: var(--panel); }
   .gear-legend .sw.miss { border: 1px dashed rgba(248,113,113,.6); background: rgba(248,113,113,.06); }
-  .gear-nib { font-size: 10px; font-weight: 400; color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; padding: 1px 7px; margin-left: 2px; }
-  .gear-alias { font-size: 10px; font-weight: 400; color: #7dd8c8; border: 1px solid rgba(45,212,191,.4); background: rgba(45,212,191,.06); border-radius: 8px; padding: 1px 7px; margin-left: 2px; }
+  .gear-nib { font-size: 10px; font-weight: 400; color: var(--text-dim); border: 1px solid var(--border); border-radius: 2px; padding: 1px 7px; margin-left: 2px; }
+  .gear-alias { font-size: 10px; font-weight: 400; color: #7dd8c8; border: 1px solid rgba(45,212,191,.4); background: rgba(45,212,191,.06); border-radius: 2px; padding: 1px 7px; margin-left: 2px; }
   /* Gem-Info (Live-Lookup): Beschreibung + Quellenlink im Gem-Modal */
   .gem-desc { font-size: 12.5px; line-height: 1.55; color: #cdd6e0; margin-bottom: 8px; }
-  .gem-src { display: inline-block; font-size: 11px; color: var(--gold); text-decoration: none; border: 1px solid rgba(45,212,191,.4); border-radius: 5px; padding: 3px 8px; }
+  .gem-src { display: inline-block; font-size: 11px; color: var(--gold); text-decoration: none; border: 1px solid rgba(45,212,191,.4); border-radius: 2px; padding: 3px 8px; }
   .gem-src:hover { background: rgba(45,212,191,.12); }
   .gear-skill-main.clickable, .gear-skill-sup.clickable { cursor: pointer; }
   .gear-skill-main.clickable:hover span:first-of-type { color: var(--gold); }
@@ -259,7 +259,7 @@
       repeating-linear-gradient(45deg, var(--stone-2) 0 6px, var(--stone-3) 6px 12px),
       radial-gradient(circle at 30% 20%, var(--stone-1), var(--stone-3) 70%);
     border: 3px solid #3d4353;
-    border-radius: 10px;
+    border-radius: 2px;
     box-shadow: inset 0 0 40px rgba(0,0,0,.7), 0 4px 20px rgba(0,0,0,.6);
     padding: 16px;
     position: relative;
@@ -279,7 +279,7 @@
     gap: 10px;
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 2px;
     padding: 5px 12px;
     margin-left: auto;
     margin-right: 10px;
@@ -369,7 +369,7 @@
     background:
       linear-gradient(180deg, rgba(30,26,20,.85), rgba(12,10,7,.95));
     border: 1px solid #333a47;
-    border-radius: 5px;
+    border-radius: 2px;
     padding: 6px 6px;
     min-height: 64px;
     min-width: 0;
@@ -423,7 +423,7 @@
   .slot[data-area="body"] .item-img { max-height: 90px; }
   /* Tippbar-Affordanz: Reihen wie Menueeintraege, Standard-Pointer (kein I-Balken) */
   .tt-mod.clickable {
-    padding: 3px 6px; border-radius: 6px; transition: background .12s;
+    padding: 3px 6px; border-radius: 2px; transition: background .12s;
     cursor: pointer; user-select: none;
   }
   .tt-mod.clickable:hover { background: rgba(240,192,96,.08); }
@@ -433,7 +433,7 @@
   .tap-tip {
     font-size: 10.5px; color: var(--gold-soft); text-align: center;
     padding: 4px 6px; margin-top: 5px; border: 1px dashed rgba(240,192,96,.35);
-    border-radius: 8px; animation: tapTipPulse 2s ease-in-out infinite;
+    border-radius: 2px; animation: tapTipPulse 2s ease-in-out infinite;
   }
   @keyframes tapTipPulse { 0%,100% { opacity: .9; } 50% { opacity: .45; } }
   .slot .build-badge {
@@ -451,7 +451,7 @@
   #globalBuildBar {
     align-items: center; gap: 8px;
     max-width: 560px; margin: 8px auto 4px; padding: 6px 10px;
-    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 2px;
   }
   #globalBuildBar .gb-label {
     font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
@@ -461,11 +461,11 @@
   #globalBuildBar .gb-count {
     font-size: 11px; font-weight: 700; color: #a7f3d0;
     background: rgba(45,212,191,.14); border: 1px solid rgba(45,212,191,.35);
-    border-radius: 4px; padding: 1px 6px; white-space: nowrap;
+    border-radius: 2px; padding: 1px 6px; white-space: nowrap;
   }
   #globalBuildBar .gb-import {
     background: rgba(45,212,191,.1); border: 1px solid rgba(45,212,191,.4);
-    color: var(--gold); border-radius: 6px; padding: 4px 9px; font-size: 12px;
+    color: var(--gold); border-radius: 2px; padding: 4px 9px; font-size: 12px;
     cursor: pointer; white-space: nowrap; font-weight: 600;
   }
   #globalBuildBar .gb-import:hover { background: rgba(45,212,191,.22); }
@@ -474,13 +474,13 @@
     0%, 100% { box-shadow: 0 0 0 rgba(45,212,191,0); border-color: var(--border); }
     50%      { box-shadow: 0 0 22px rgba(45,212,191,.5); border-color: var(--gold); }
   }
-  .flash-target { animation: flashTarget 1s ease-in-out 2; border-radius: 8px; }
+  .flash-target { animation: flashTarget 1s ease-in-out 2; border-radius: 2px; }
 
   /* Build-Fortschritts-Leiste über dem HUD */
   #buildProgress {
     display: none; max-width: 560px; margin: 0 auto 12px;
     background: var(--panel-2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 12px 14px;
+    border-radius: 2px; padding: 12px 14px;
   }
   #buildProgress .bp-top {
     display: flex; justify-content: space-between; align-items: center;
@@ -489,31 +489,31 @@
   #buildProgress .bp-label { color: var(--text); font-weight: 600; }
   #buildProgress .bp-count { color: var(--gold); font-weight: 700; font-size: 15px; }
   #buildProgress .bp-bar {
-    height: 10px; background: #181b21; border-radius: 5px; overflow: hidden;
+    height: 10px; background: #181b21; border-radius: 2px; overflow: hidden;
     border: 1px solid var(--border);
   }
   #buildProgress .bp-fill {
-    height: 100%; border-radius: 5px; transition: width .6s ease;
+    height: 100%; border-radius: 2px; transition: width .6s ease;
     background: linear-gradient(90deg, var(--gold-soft), var(--gold));
   }
   #buildProgress .bp-hint { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
   .bp-missing-toggle {
     width: 100%; margin-top: 10px; background: var(--panel);
-    color: var(--gold); border: 1px solid var(--gold-soft); border-radius: 6px;
+    color: var(--gold); border: 1px solid var(--gold-soft); border-radius: 2px;
     padding: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
   }
   .bp-missing-toggle:hover { background: var(--panel-2); }
   #bpMissingList { margin-top: 10px; }
   .miss-item {
     background: var(--panel); border: 1px solid var(--red); border-left: 3px solid var(--red);
-    border-radius: 6px; padding: 10px 12px; margin-bottom: 8px;
+    border-radius: 2px; padding: 10px 12px; margin-bottom: 8px;
   }
   .miss-item .miss-slot { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
   .miss-item .miss-detail { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; line-height: 1.5; }
   .miss-item .miss-detail .miss-need { color: #f0a89e; font-weight: 600; }
   .miss-item .miss-detail .miss-uniq { color: #d08020; font-weight: 700; }
   .miss-item .miss-trade {
-    display: inline-block; font-size: 11px; padding: 6px 12px; border-radius: 5px;
+    display: inline-block; font-size: 11px; padding: 6px 12px; border-radius: 2px;
     background: linear-gradient(180deg, #2e6fb0, #1d4a78); color: #fff;
     border: 1px solid #4a90d0; cursor: pointer; text-decoration: none;
   }
@@ -524,7 +524,7 @@
   #resCapBox {
     display: none; margin: 0 0 16px;
     background: var(--panel-2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 12px 14px;
+    border-radius: 2px; padding: 12px 14px;
   }
   #resCapBox .rc-top {
     display: flex; justify-content: space-between; align-items: center;
@@ -534,7 +534,7 @@
   #resCapBox .rc-capwrap { font-size: 11px; color: var(--text-dim); }
   #resCapBox .rc-capwrap select {
     background: var(--panel); color: var(--gold); border: 1px solid var(--gold-soft);
-    border-radius: 5px; padding: 3px 6px; font-size: 12px; font-weight: 600;
+    border-radius: 2px; padding: 3px 6px; font-size: 12px; font-weight: 600;
   }
   .rc-row { margin-bottom: 9px; }
   .rc-row:last-child { margin-bottom: 0; }
@@ -546,10 +546,10 @@
   .rc-row .rc-val { font-weight: 700; font-size: 13px; }
   .rc-row .rc-val .rc-status { font-size: 11px; font-weight: 600; margin-left: 6px; }
   .rc-bar {
-    height: 9px; background: #181b21; border-radius: 5px; overflow: hidden;
+    height: 9px; background: #181b21; border-radius: 2px; overflow: hidden;
     border: 1px solid var(--border); position: relative;
   }
-  .rc-fill { height: 100%; border-radius: 5px; transition: width .5s ease; }
+  .rc-fill { height: 100%; border-radius: 2px; transition: width .5s ease; }
   .rc-fill.ok    { background: linear-gradient(90deg, #2e7d4a, var(--green)); }
   .rc-fill.under { background: linear-gradient(90deg, #a83a32, var(--red)); }
   .rc-fill.over  { background: linear-gradient(90deg, var(--gold-soft), var(--gold)); }
@@ -563,7 +563,7 @@
     display: block; width: calc(100% - 28px); margin: 10px 14px;
     text-align: center; padding: 10px;
     background: linear-gradient(180deg, #2e6fb0, #1d4a78);
-    color: #fff; border: 1px solid #4a90d0; border-radius: 6px;
+    color: #fff; border: 1px solid #4a90d0; border-radius: 2px;
     font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none;
   }
   .tt-trade:hover { background: linear-gradient(180deg, #3a82c8, #245a90); }
@@ -586,7 +586,7 @@
   /* Seltenheits-Kante oben am gefuellten Slot (PoE-Farben) */
   .slot.filled::before {
     content: ""; position: absolute; top: 0; left: 8%; right: 8%; height: 2px;
-    border-radius: 0 0 4px 4px; opacity: .9; pointer-events: none;
+    border-radius: 2px; opacity: .9; pointer-events: none;
   }
   .slot.filled.rar-0::before { background: #49525f; }
   .slot.filled.rar-1::before { background: #8888f0; box-shadow: 0 0 7px rgba(136,136,240,.55); }
@@ -602,7 +602,7 @@
     margin-top: auto; align-self: flex-start; display: inline-block;
     font-size: 9px; font-weight: 700; letter-spacing: .4px; color: #a7f3d0;
     background: rgba(45,212,191,.14); border: 1px solid rgba(45,212,191,.35);
-    border-radius: 4px; padding: 1px 5px;
+    border-radius: 2px; padding: 1px 5px;
   }
   .slot.filled { border-color: var(--gold-soft); box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 4px rgba(45,212,191,.2); }
   /* Schmale Handys: Item-ART statt Text (wie im Game) - nur wenn ein Icon
@@ -623,7 +623,7 @@
 
   .trade-sel {
     width: 100%; background: var(--panel-2); color: var(--text);
-    border: 1px solid var(--gold-soft); border-radius: 6px; padding: 9px; font-size: 13px;
+    border: 1px solid var(--gold-soft); border-radius: 2px; padding: 9px; font-size: 13px;
   }
   .scan-area { text-align: center; }
 
@@ -633,7 +633,7 @@
       radial-gradient(circle at 50% 0%, rgba(45,212,191,.10), transparent 60%),
       linear-gradient(180deg, #1f1810, #181b21);
     border: 2px solid var(--gold-soft);
-    border-radius: 14px;
+    border-radius: 2px;
     padding: 20px 18px;
     box-shadow: 0 0 24px rgba(45,212,191,.18), inset 0 0 30px rgba(0,0,0,.5);
     position: relative;
@@ -643,7 +643,7 @@
     margin-bottom: 16px;
   }
   .scanner-hero-icon {
-    flex: 0 0 auto; width: 52px; height: 52px; border-radius: 12px;
+    flex: 0 0 auto; width: 52px; height: 52px; border-radius: 2px;
     background: linear-gradient(180deg, var(--gold), var(--gold-soft));
     display: flex; align-items: center; justify-content: center; font-size: 26px;
     box-shadow: 0 0 16px rgba(45,212,191,.35);
@@ -665,10 +665,10 @@
     .scanner-hero-icon { width: 44px; height: 44px; font-size: 22px; }
   }
   #fileInput { display: none; }
-  #previewImg { max-width: 100%; border-radius: 8px; margin: 12px 0; display: none; border: 1px solid var(--border); }
+  #previewImg { max-width: 100%; border-radius: 2px; margin: 12px 0; display: none; border: 1px solid var(--border); }
 
-  #cropArea { display: none; margin: 12px auto; position: relative; width: fit-content; max-width: 100%; touch-action: none; user-select: none; overflow: hidden; border-radius: 8px; }
-  #cropCanvas { display: block; max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); }
+  #cropArea { display: none; margin: 12px auto; position: relative; width: fit-content; max-width: 100%; touch-action: none; user-select: none; overflow: hidden; border-radius: 2px; }
+  #cropCanvas { display: block; max-width: 100%; height: auto; border-radius: 2px; border: 1px solid var(--border); }
   #cropBox {
     position: absolute; border: 2px solid var(--gold);
     box-shadow: 0 0 0 2000px rgba(0,0,0,.55); cursor: move;
@@ -684,7 +684,7 @@
   .crop-handle.se { bottom: -15px; right: -15px; cursor: nwse-resize; }
   .crop-hint { font-size: 12px; color: var(--text-dim); margin: 8px 0; }
   #scanResult {
-    background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 2px;
     padding: 14px; margin-top: 12px; text-align: left; display: none;
   }
   #scanResult .score-big { font-size: 32px; color: var(--gold); font-weight: 700; text-align: center; margin-bottom: 8px; }
@@ -694,12 +694,12 @@
   .scan-edit-input {
     width: 78px; text-align: right; font-size: 14px; font-weight: 600;
     background: var(--panel); color: var(--gold);
-    border: 1px solid var(--gold-soft); border-radius: 6px; padding: 7px 8px;
+    border: 1px solid var(--gold-soft); border-radius: 2px; padding: 7px 8px;
     -moz-appearance: textfield;
   }
   .scan-edit-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 6px rgba(45,212,191,.28); }
   .scan-edit-del {
-    width: 28px; height: 28px; flex: 0 0 auto; border-radius: 6px;
+    width: 28px; height: 28px; flex: 0 0 auto; border-radius: 2px;
     background: rgba(208,88,78,.12); border: 1px solid var(--red); color: var(--red);
     font-size: 13px; cursor: pointer; line-height: 1;
   }
@@ -707,17 +707,17 @@
   .scan-edit-add { margin-top: 10px; }
   .scan-edit-add select {
     width: 100%; background: var(--panel-2); color: var(--text);
-    border: 1px dashed var(--gold-soft); border-radius: 6px; padding: 9px; font-size: 13px;
+    border: 1px dashed var(--gold-soft); border-radius: 2px; padding: 9px; font-size: 13px;
   }
   .hist-item {
     display: flex; align-items: center; gap: 10px;
     background: var(--panel-2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px 12px; margin-bottom: 7px;
+    border-radius: 2px; padding: 10px 12px; margin-bottom: 7px;
     cursor: pointer; transition: border-color .15s, transform .1s;
   }
   .hist-item:hover { border-color: var(--gold-soft); transform: translateY(-1px); }
   .hist-score {
-    flex: 0 0 auto; min-width: 42px; height: 42px; border-radius: 8px;
+    flex: 0 0 auto; min-width: 42px; height: 42px; border-radius: 2px;
     background: linear-gradient(180deg, #2e3340, #241c12); border: 1px solid var(--gold-soft);
     display: flex; align-items: center; justify-content: center;
     font-size: 16px; font-weight: 700; color: var(--gold);
@@ -727,7 +727,7 @@
   .hist-stats { font-size: 11px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hist-time { font-size: 10px; color: #5b6472; margin-top: 2px; }
   .hist-del {
-    flex: 0 0 auto; width: 30px; height: 30px; border-radius: 6px;
+    flex: 0 0 auto; width: 30px; height: 30px; border-radius: 2px;
     background: rgba(208,88,78,.1); border: 1px solid var(--red); color: var(--red);
     font-size: 14px; cursor: pointer; line-height: 1;
   }
@@ -747,7 +747,7 @@
     background: linear-gradient(180deg, #0a0806, #181b21);
     border: 1px solid var(--gold-soft);
     box-shadow: 0 0 30px rgba(0,0,0,.8);
-    border-radius: 4px;
+    border-radius: 2px;
   }
   .tt-header { text-align: center; padding: 12px 10px; position: relative; border-bottom: 1px solid var(--border); }
   .tt-header.r0 { background: linear-gradient(180deg, #2a2620, #1a1510); }
@@ -778,7 +778,7 @@
   .tt-sep { height: 1px; background: var(--border); margin: 6px 0; }
   .tt-corrupt { color: var(--red); font-size: 12px; text-align: center; padding: 4px; font-weight: 600; }
   .tt-score { text-align: center; padding: 10px; font-size: 14px; color: var(--green); background: rgba(76,175,106,.08); font-weight: 600; }
-  .tt-build { margin: 0 14px 10px; padding: 10px; background: rgba(46,111,176,.1); border: 1px solid #2e5a80; border-radius: 6px; }
+  .tt-build { margin: 0 14px 10px; padding: 10px; background: rgba(46,111,176,.1); border: 1px solid #2e5a80; border-radius: 2px; }
   .tt-build h5 { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #9ab8d8; margin-bottom: 6px; }
   .tt-build .bld-unique { color: #d08020; font-weight: 700; font-size: 13px; }
   .tt-build .bld-stat { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
@@ -790,7 +790,7 @@
   .weight-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
   .preset-btn {
     flex: 1 1 auto; background: var(--panel-2); color: var(--text);
-    border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px;
+    border: 1px solid var(--border); border-radius: 2px; padding: 8px 10px;
     font-size: 12px; cursor: pointer; transition: all .15s; min-width: 90px;
   }
   .preset-btn:hover { border-color: var(--gold-soft); }
@@ -806,7 +806,7 @@
   #buildFileBtn:hover { border-color: var(--gold-soft); color: var(--text); }
   .weight-row input[type=range] {
     flex: 1; height: 5px; -webkit-appearance: none; appearance: none;
-    background: var(--border); border-radius: 3px; outline: none;
+    background: var(--border); border-radius: 2px; outline: none;
   }
   .weight-row input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
@@ -820,10 +820,10 @@
   .build-import { margin-top: 14px; }
   .build-import textarea {
     width: 100%; background: var(--panel-2); color: var(--text);
-    border: 1px solid var(--gold-soft); border-radius: 6px; padding: 10px;
+    border: 1px solid var(--gold-soft); border-radius: 2px; padding: 10px;
     font-size: 12px; font-family: monospace; resize: vertical; min-height: 60px;
   }
-  #buildResult { margin-top: 8px; font-size: 12px; padding: 8px 10px; border-radius: 6px; display: none; }
+  #buildResult { margin-top: 8px; font-size: 12px; padding: 8px 10px; border-radius: 2px; display: none; }
   #buildResult.ok  { background: rgba(76,175,106,.12); border: 1px solid var(--green); color: #a8e0b8; }
   #buildResult.err { background: rgba(208,88,78,.12); border: 1px solid var(--red); color: #f0a89e; }
 
@@ -831,7 +831,7 @@
   #skillsSection { display: none; }
   .skill-group {
     background: linear-gradient(180deg, rgba(30,26,20,.7), rgba(12,10,7,.9));
-    border: 1px solid var(--border); border-radius: 8px;
+    border: 1px solid var(--border); border-radius: 2px;
     padding: 12px; margin-bottom: 10px;
   }
   .skill-main { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; color: var(--gold); cursor: pointer; margin-bottom: 8px; }
@@ -846,17 +846,17 @@
   .skill-name-wrap { display: flex; flex-direction: column; gap: 2px; flex: 1; }
   .skill-name-wrap .sn { line-height: 1.1; }
   .skill-name-wrap .st { font-size: 9px; color: var(--text-dim); font-weight: 400; letter-spacing: .5px; }
-  .gem-level-badge { font-size: 11px; font-weight: 700; color: var(--gold-soft); background: rgba(45,212,191,.10); border: 1px solid var(--gold-soft); border-radius: 10px; padding: 2px 8px; white-space: nowrap; }
+  .gem-level-badge { font-size: 11px; font-weight: 700; color: var(--gold-soft); background: rgba(45,212,191,.10); border: 1px solid var(--gold-soft); border-radius: 2px; padding: 2px 8px; white-space: nowrap; }
   .skill-info-i { font-size: 12px; opacity: .5; margin-left: 4px; }
   .skill-supports { display: flex; flex-wrap: wrap; gap: 6px; padding-left: 38px; }
-  .support-chip { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #9ab8d8; background: rgba(46,111,176,.12); border: 1px solid #2e5a80; border-radius: 14px; padding: 3px 10px 3px 4px; cursor: pointer; }
+  .support-chip { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #9ab8d8; background: rgba(46,111,176,.12); border: 1px solid #2e5a80; border-radius: 2px; padding: 3px 10px 3px 4px; cursor: pointer; }
   .support-chip:hover { background: rgba(46,111,176,.3); }
   .support-chip .mini-gem { width: 16px; height: 16px; border-radius: 50%; flex: 0 0 auto; border: 1px solid rgba(255,255,255,.2); }
-  .gem-tag { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: rgba(45,212,191,.10); border: 1px solid var(--gold-soft); color: var(--text); white-space: nowrap; }
+  .gem-tag { font-size: 10px; padding: 2px 7px; border-radius: 2px; background: rgba(45,212,191,.10); border: 1px solid var(--gold-soft); color: var(--text); white-space: nowrap; }
   .gem-lvl { font-size: 10px; color: var(--text-dim); font-weight: 400; }
   .consum-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
   .consum-row:last-child { margin-bottom: 0; }
-  .consum-chip { font-size: 12px; padding: 6px 11px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--border); color: var(--text); display: flex; align-items: center; gap: 6px; }
+  .consum-chip { font-size: 12px; padding: 6px 11px; border-radius: 2px; background: var(--panel-2); border: 1px solid var(--border); color: var(--text); display: flex; align-items: center; gap: 6px; }
   .consum-chip.flask { border-color: #c0392b; }
   .consum-chip.charm { border-color: #2e6fb0; }
   .consum-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
@@ -865,11 +865,11 @@
   #scanSlotBox label { font-size: 12px; color: var(--text-dim); display: block; margin-bottom: 5px; }
   #scanSlotSelect {
     width: 100%; background: var(--panel-2); color: var(--text);
-    border: 1px solid var(--gold-soft); border-radius: 6px; padding: 10px; font-size: 14px;
+    border: 1px solid var(--gold-soft); border-radius: 2px; padding: 10px; font-size: 14px;
   }
   #comparePanel { display: none; margin-top: 14px; text-align: left; }
   .cmp-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: stretch; }
-  .cmp-col { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+  .cmp-col { background: var(--panel-2); border: 1px solid var(--border); border-radius: 2px; padding: 12px; }
   .cmp-col.old { border-color: #333a47; }
   .cmp-col.new { border-color: var(--gold-soft); }
   .cmp-col h4 { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; text-align: center; }
@@ -878,7 +878,7 @@
   .cmp-stat { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; border-bottom: 1px solid var(--border); }
   .cmp-stat .v { font-weight: 600; }
   .cmp-arrow { display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--text-dim); }
-  .cmp-verdict { text-align: center; margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: 700; }
+  .cmp-verdict { text-align: center; margin-top: 12px; padding: 12px; border-radius: 2px; font-size: 16px; font-weight: 700; }
   .cmp-verdict.better { background: rgba(76,175,106,.15); border: 1px solid var(--green); color: var(--green); }
   .cmp-verdict.worse  { background: rgba(208,88,78,.15); border: 1px solid var(--red);   color: var(--red); }
   .cmp-verdict.equal  { background: rgba(45,212,191,.10); border: 1px solid var(--gold-soft); color: var(--gold); }
@@ -1207,7 +1207,7 @@
   <div class="panel-body">
     <div class="section" id="buildImportSection">
       <h2><svg class="ico" aria-hidden="true"><use href="#i-download"></use></svg><span data-i18n="import_section">Build importieren</span></h2>
-      <div id="activeBuildBar" style="display:none;background:rgba(46,111,176,.12);border:1px solid #2e5a80;border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:12px">
+      <div id="activeBuildBar" style="display:none;background:rgba(46,111,176,.12);border:1px solid #2e5a80;border-radius: 2px;padding:10px 12px;margin-bottom:12px;font-size:12px">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
           <span id="activeBuildName" style="color:#9ab8d8"></span>
           <span style="display:flex;gap:6px">
@@ -1342,7 +1342,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.37";
+const APP_VERSION = "v1.38";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1909,6 +1909,7 @@ function loadDemo() {
   setPanelStatus("character", t("bn_demo_active"));
   const demoBadge = document.getElementById("demoBadge");
   if (demoBadge) demoBadge.style.display = "inline-block";
+  updateActiveBuildBar();
 }
 function loadDemoCharacter(key) {
   const c = DEMO_CHARACTERS[key];
@@ -2563,12 +2564,19 @@ function updateActiveBuildBar() {
 }
 
 // Globaler Build-Switcher (unter den Tabs): aktiven Build ueberall wechseln
+function characterUiOpen() {
+  const main = document.getElementById("mainView");
+  return !!(main && !main.classList.contains("hidden"));
+}
+
 function renderGlobalBuildBar() {
   const bar = document.getElementById("globalBuildBar");
   const sel = document.getElementById("globalBuildSelect");
   const btn = document.getElementById("gbImportBtn");
   const cnt = document.getElementById("gbCount");
   if (!bar || !sel) return;
+  // Nicht ueber der Login-Karte schweben: erst nach Login oder Demo
+  if (!characterUiOpen()) { bar.style.display = "none"; return; }
   const builds = getSavedBuilds();
   const activeName = localStorage.getItem("exileEye_buildName") || "";
   if (!builds.length) {

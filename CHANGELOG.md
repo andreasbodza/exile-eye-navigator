@@ -10,6 +10,12 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.38 (06.10.2026, scharfe Kanten + Build-Leiste)
+- Globale Build-Leiste nur nach Login oder Demo, nicht mehr über der Welcome-Card.
+- Panes/Buttons/Inputs: `border-radius` 2px (Feedback „Avoid rounded rectangles“). Kreise (Gem-Icons, Dots) bleiben rund.
+
+---
+
 ## v1.37 (06.10.2026, Trade-Waffen Feinschliff + Liga am Char)
 - Trade ignoriert Runen-Mods (kein 92% Phys mehr, wenn 32% von der Rune kommen).
 - Mace/Crossbow-Kategorie aus Item-Typ („Marauding Mace“ → One-Hand Mace).
