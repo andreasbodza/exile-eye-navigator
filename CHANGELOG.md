@@ -10,6 +10,14 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.43 (07.10.2026, i18n + Footer-Feedback)
+- Sprachmix: Install-Button, Gear-Toast, Gem-Tags (Nahkampf/Melee …) folgen DE/EN.
+- Großer Bug-Button weg, **Feedback** als Textlink im Footer.
+- Build-Import-Icon hat ein Label („Import“).
+- Gem-Legende bleibt unter dem Inventar.
+
+---
+
 ## v1.42 (07.10.2026, Scanner-Slot)
 - Scanner-Feld ist ein leerer Item-Slot: gestrichelter Rahmen, Ecken, „Tooltip hier rein“.
 - Kein zweiter Produktname, Foto/Screenshot sitzen im Slot.

@@ -502,6 +502,7 @@
     display: inline-flex; align-items: center; justify-content: center;
   }
   #globalBuildBar .gb-import:hover { background: rgba(45,212,191,.22); }
+  #globalBuildBar .gb-import .gb-import-lbl { font-size: 12px; font-weight: 650; }
   /* Scroll-Fokus: Sektion kurz pulsieren lassen (z.B. Build-Import) */
   @keyframes flashTarget {
     0%, 100% { box-shadow: 0 0 0 rgba(45,212,191,0); border-color: var(--border); }
@@ -933,6 +934,11 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .disclaimer { text-align: center; color: #5b6472; font-size: 10px; margin: 18px 18px 0; line-height: 1.4; }
   footer { text-align: center; color: var(--text-dim); font-size: 11px; margin-top: 14px; }
+  footer .footer-link {
+    background: none; border: 0; color: var(--gold-soft); font: inherit;
+    cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
+    padding: 0; margin: 0 6px;
+  }
 </style>
 </head>
 <body>
@@ -1005,8 +1011,8 @@
   <div style="display:flex;gap:8px;align-items:center">
     <button id="langToggle" class="btn" style="padding:7px 11px;font-size:12px" onclick="toggleLang()"><svg class="ico" aria-hidden="true"><use href="#i-globe"></use></svg> DE</button>
     <a id="loginBtn" class="btn primary" style="display:none;padding:7px 11px;font-size:12px" href="/login"><svg class="ico" aria-hidden="true"><use href="#i-lock"></use></svg><span data-i18n="login_btn">Mit GGG anmelden</span></a>
-    <button id="installBtn" class="btn" style="display:none" onclick="installApp()"><svg class="ico" aria-hidden="true"><use href="#i-phone"></use></svg> App installieren</button>
-    <button id="logoutBtn" class="btn danger hidden" onclick="location.href='/logout'">Logout</button>
+    <button id="installBtn" class="btn" style="display:none" onclick="installApp()"><svg class="ico" aria-hidden="true"><use href="#i-phone"></use></svg><span data-i18n="install_btn">App installieren</span></button>
+    <button id="logoutBtn" class="btn danger hidden" onclick="location.href='/logout'" data-i18n="logout">Logout</button>
   </div>
 </header>
 
@@ -1363,12 +1369,6 @@
   </div>
 </div>
 
-<!-- BUG-REPORT / FEEDBACK (immer sichtbar ganz unten) -->
-<div style="text-align:center;margin:20px 18px 0">
-  <button class="btn" onclick="reportBug()" style="font-size:13px"><svg class="ico" aria-hidden="true"><use href="#i-bug"></use></svg><span data-i18n="bug_btn">Fehler melden / Feedback geben</span></button>
-  <p style="font-size:11px;color:var(--text-dim);margin-top:6px" data-i18n="bug_hint">Etwas funktioniert nicht? Sag uns Bescheid – öffnet eine vorausgefüllte E-Mail.</p>
-</div>
-
 <!-- ITEM-DETAIL POPUP -->
 <div id="itemModal" onclick="if(event.target===this)closeItem()">
   <div class="tooltip" id="tooltipBody"></div>
@@ -1380,12 +1380,13 @@
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_impressum">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_privacy">Datenschutz</a> ·
-    <a href="/nutzungsbedingungen" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_terms">Nutzungsbedingungen</a>
+    <a href="/nutzungsbedingungen" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_terms">Nutzungsbedingungen</a> ·
+    <button type="button" class="footer-link" onclick="reportBug()" data-i18n="bug_footer">Feedback</button>
   </span>
 </footer>
 
 <script>
-const APP_VERSION = "v1.42";
+const APP_VERSION = "v1.43";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1487,7 +1488,11 @@ const I18N = {
     slot_weapon:"Waffe", slot_offhand:"Nebenhand", slot_helm:"Helm", slot_body:"Rüstung",
     slot_weapon2:"Waffe 2", slot_offhand2:"Nebenhand 2",
     gb_label:"◆ Build", gb_none:"– kein Build –",
-    gb_import_btn:"Build importieren…", gb_import_title:"Build aus Mobalytics / Maxroll / PoB importieren (Gewichtung, Vergleiche & Gem-Check freischalten)",
+    gb_import_btn:"Build importieren…", gb_import_short:"Import", gb_import_title:"Build aus Mobalytics / Maxroll / PoB importieren (Gewichtung, Vergleiche & Gem-Check freischalten)",
+    install_btn:"App installieren", bug_footer:"Feedback",
+    bn_gear_loaded:"Ausrüstung von {n} geladen",
+    bn_new_version:"Neue Version verfügbar!", bn_new_version_tap:"Hier tippen, um zu aktualisieren.",
+    gem_tags:"Tags",
     slot_gloves:"Handschuhe", slot_boots:"Stiefel", slot_belt:"Gürtel", slot_amulet:"Amulett",
     slot_ring_l:"Ring L", slot_ring_r:"Ring R",
     scan_history_title:"Scan-Verlauf", scan_history_clear:"Alle löschen",
@@ -1602,7 +1607,11 @@ const I18N = {
     slot_weapon:"Weapon", slot_offhand:"Offhand", slot_helm:"Helm", slot_body:"Armour",
     slot_weapon2:"Weapon 2", slot_offhand2:"Offhand 2",
     gb_label:"◆ Build", gb_none:"– no build –",
-    gb_import_btn:"Import build…", gb_import_title:"Import a build from Mobalytics / Maxroll / PoB (unlocks weighting, compare & gem check)",
+    gb_import_btn:"Import build…", gb_import_short:"Import", gb_import_title:"Import a build from Mobalytics / Maxroll / PoB (unlocks weighting, compare & gem check)",
+    install_btn:"Install app", bug_footer:"Feedback",
+    bn_gear_loaded:"Loaded gear of {n}",
+    bn_new_version:"New version available!", bn_new_version_tap:"Tap here to update.",
+    gem_tags:"Tags",
     slot_gloves:"Gloves", slot_boots:"Boots", slot_belt:"Belt", slot_amulet:"Amulet",
     slot_ring_l:"Ring L", slot_ring_r:"Ring R",
     scan_history_title:"Scan history", scan_history_clear:"Delete all",
@@ -2018,8 +2027,8 @@ async function loadGear(name) {
     renderGear(data.items || []);
     renderGearSkills(data.skills || []);
     setPanelStatus("character", "✓ " + name);
-    showBanner(t("bn_gear_of") + name + " geladen", "ok");
-  } catch (e) { showBanner("Fehler: " + e.message); }
+    showBanner(t("bn_gear_loaded", { n: name }), "ok");
+  } catch (e) { showBanner(t("bn_error") + e.message); }
 }
 
 let equippedItems = {};
@@ -2626,12 +2635,22 @@ function renderGlobalBuildBar() {
     // CTA-Modus: kein Build vorhanden -> Einladung zum Importieren zeigen
     sel.style.display = "none";
     if (cnt) cnt.style.display = "none";
-    if (btn) { btn.innerHTML = ico("download") + " " + t("gb_import_btn"); btn.style.flex = "1"; }
+    if (btn) {
+      btn.innerHTML = ico("download") + " " + t("gb_import_btn");
+      btn.style.flex = "1";
+      btn.setAttribute("aria-label", t("gb_import_title"));
+      btn.title = t("gb_import_title");
+    }
     bar.style.display = "flex";
     return;
   }
   sel.style.display = "";
-  if (btn) { btn.innerHTML = ico("download"); btn.style.flex = "0 0 auto"; }
+  if (btn) {
+    btn.innerHTML = ico("download") + " <span class=\"gb-import-lbl\">" + t("gb_import_short") + "</span>";
+    btn.style.flex = "0 0 auto";
+    btn.setAttribute("aria-label", t("gb_import_title"));
+    btn.title = t("gb_import_title");
+  }
   sel.innerHTML = "";
   const none = document.createElement("option");
   none.value = ""; none.textContent = t("gb_none");
@@ -3399,17 +3418,34 @@ function runCompare() {
 }
 
 let allSkills = [];
+const GEM_TAG_PAIRS = [
+  ["Nahkampf","Melee"], ["Blitz","Lightning"], ["Feuer","Fire"], ["Kälte","Cold"],
+  ["Chaos","Chaos"], ["Zauber","Spell"], ["Angriff","Attack"], ["Projektil","Projectile"],
+  ["Bogen","Bow"], ["Dauer","Duration"], ["Totem","Totem"], ["Aura","Aura"],
+  ["Schlag","Strike"], ["Fläche","AoE"], ["Unterstützung","Support"], ["Physisch","Physical"],
+  ["Kritisch","Critical"], ["Kanalisieren","Channelling"], ["Kampfschrei","Warcry"],
+  ["Diener","Minion"], ["Reise","Travel"], ["Nova","Nova"], ["Aufstampfen","Slam"],
+  ["Falle","Trap"], ["Mine","Mine"], ["Marke","Mark"], ["Fluch","Curse"],
+  ["Banner","Banner"], ["Wächter","Herald"]
+];
+function gemTagLabel(tag) {
+  const n = String(tag || "").trim().toLowerCase();
+  for (const [de, en] of GEM_TAG_PAIRS) {
+    if (n === de.toLowerCase() || n === en.toLowerCase()) return currentLang === "de" ? de : en;
+  }
+  return tag;
+}
 function gemIconClass(tags, isSupport, color) {
   const plus = ico("plus", 12), spark = ico("sparkle", 14);
   if (color === "blue") return ["t-cold", isSupport ? plus : spark];
   if (color === "green") return ["t-skill", isSupport ? plus : spark];
   if (color === "red") return ["t-fire", isSupport ? plus : ico("swords", 14)];
   const tg = (tags || []).join(" ").toLowerCase();
-  if (tg.includes("feuer")) return ["t-fire", ico("flame", 14)];
-  if (tg.includes("kälte")) return ["t-cold", ico("snowflake", 14)];
-  if (tg.includes("blitz")) return ["t-light", ico("zap", 14)];
+  if (tg.includes("feuer") || tg.includes("fire")) return ["t-fire", ico("flame", 14)];
+  if (tg.includes("kälte") || tg.includes("kalte") || tg.includes("cold")) return ["t-cold", ico("snowflake", 14)];
+  if (tg.includes("blitz") || tg.includes("lightning")) return ["t-light", ico("zap", 14)];
   if (tg.includes("chaos")) return ["t-chaos", ico("skull", 14)];
-  if (tg.includes("projektil") || tg.includes("nahkampf") || tg.includes("bogen")) return ["t-phys", ico("swords", 14)];
+  if (tg.includes("projektil") || tg.includes("projectile") || tg.includes("nahkampf") || tg.includes("melee") || tg.includes("bogen") || tg.includes("bow")) return ["t-phys", ico("swords", 14)];
   return isSupport ? ["t-support", plus] : ["t-skill", spark];
 }
 
@@ -3427,7 +3463,7 @@ function renderSkills(skills) {
     const g = document.createElement("div");
     g.className = "skill-group";
     const [iconCls, sym] = gemIconClass(s.tags, false, s.color);
-    const tagStr = (s.tags || []).join(" · ") || t("gem_type_skill");
+    const tagStr = (s.tags || []).map(gemTagLabel).join(" · ") || t("gem_type_skill");
     const lvl = s.level ? `<span class="gem-level-badge">Lvl ${s.level}+</span>` : "";
     let html = `<div class="skill-main" onclick="showGem(${idx},-1)">
         <span class="gem-icon ${iconCls}">${sym}</span>
@@ -3470,8 +3506,8 @@ function showGem(skillIdx, supIdx) {
     <div class="tt-base">${typeLabel}${gem.level ? " · " + t("gem_level_from", { l: gem.level }) : ""}</div>
   </div>`;
   if (gem.tags && gem.tags.length) {
-    html += `<div class="tt-section"><div style="font-size:10px;color:var(--text-dim);margin-bottom:6px">TAGS</div><div style="display:flex;flex-wrap:wrap;gap:6px">`;
-    gem.tags.forEach(t => html += `<span class="gem-tag">${esc(t)}</span>`);
+    html += `<div class="tt-section"><div style="font-size:10px;color:var(--text-dim);margin-bottom:6px">${t("gem_tags")}</div><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    gem.tags.forEach(tag => html += `<span class="gem-tag">${esc(gemTagLabel(tag))}</span>`);
     html += `</div></div>`;
   }
   if (!gem.is_support && s.supports && s.supports.length) {
@@ -3653,7 +3689,7 @@ if ("serviceWorker" in navigator) {
 function showUpdateBanner() {
   const b = document.getElementById("banner");
   b.className = "ok"; b.style.display = "block"; b.style.cursor = "pointer";
-  b.innerHTML = ico("refresh") + " <b>Neue Version verfügbar!</b> Hier tippen, um zu aktualisieren.";
+  b.innerHTML = ico("refresh") + " <b>" + t("bn_new_version") + "</b> " + t("bn_new_version_tap");
   b.onclick = async () => {
     b.textContent = t("updating");
     const reg = await navigator.serviceWorker.getRegistration();
