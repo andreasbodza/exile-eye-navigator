@@ -10,6 +10,12 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.42 (07.10.2026, Scanner-Slot)
+- Scanner-Feld ist ein leerer Item-Slot: gestrichelter Rahmen, Ecken, „Tooltip hier rein“.
+- Kein zweiter Produktname, Foto/Screenshot sitzen im Slot.
+
+---
+
 ## v1.41 (07.10.2026, Scanner-Name + Build-Leiste)
 - Nur noch **Scanner** als Name (Tab, Panel, kein zweites „Item scannen“ / „Item Scanner“).
 - Build-Leiste sitzt in einer Zeile mit den Tabs, gleiche Höhe. Wird der Platz knapp, rutscht sie darunter.

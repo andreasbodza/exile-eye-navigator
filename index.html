@@ -668,21 +668,33 @@
     box-shadow: none;
     position: relative;
   }
-  .scanner-hero-head {
-    display: flex; align-items: center; gap: 14px; text-align: left;
-    margin-bottom: 16px;
+  .scan-well {
+    position: relative;
+    border: 1px dashed var(--gold-soft);
+    border-radius: 2px;
+    padding: 18px 14px 14px;
+    background: rgba(0,0,0,.18);
+    box-shadow: inset 0 0 18px rgba(0,0,0,.45);
+    margin: 0 0 10px;
   }
-  .scanner-hero-icon {
-    flex: 0 0 auto; width: 52px; height: 52px; border-radius: 2px;
-    background: linear-gradient(180deg, var(--gold), var(--gold-soft));
-    display: flex; align-items: center; justify-content: center; font-size: 26px;
-    box-shadow: 0 0 16px rgba(45,212,191,.35);
+  .scan-well::before, .scan-well::after {
+    content: ""; position: absolute; width: 12px; height: 12px;
+    border: 2px solid var(--gold); pointer-events: none;
   }
-  .scanner-hero-title {
-    font-size: 19px; letter-spacing: 1px; text-transform: uppercase;
-    color: var(--gold); font-weight: 700; margin: 0; border: none; padding: 0;
+  .scan-well::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+  .scan-well::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+  .scan-well-cam {
+    width: 48px; height: 48px; margin: 0 auto 10px;
+    border-radius: 2px; border: 1px solid var(--gold-soft);
+    color: var(--gold); display: flex; align-items: center; justify-content: center;
+    background: #1c1f26;
   }
-  .scanner-hero-sub { font-size: 14px; color: var(--text-dim); margin: 0; line-height: 1.45; }
+  .scan-well-cam svg.ico { width: 22px; height: 22px; }
+  .scan-well-k {
+    font-size: 13px; font-weight: 700; color: var(--text);
+    text-align: center; margin: 0 0 4px;
+  }
+  .scanner-hero-sub { font-size: 12.5px; color: var(--text-dim); margin: 0 0 14px; line-height: 1.4; text-align: center; }
   .scanner-hero-btn { width: 100%; font-size: 16px; padding: 15px; box-shadow: 0 0 16px rgba(45,212,191,.28); }
   .scanner-paste-btn { width: 100%; margin-top: 8px; font-size: 13px; padding: 11px; }
   .scanner-paste-hint { font-size: 11px; color: var(--text-dim); margin: 8px 0 0; line-height: 1.4; }
@@ -691,8 +703,8 @@
   .scan-opt-lang span { color: var(--text-dim); }
   @media (max-width: 520px) {
     .scanner-hero { margin: 0; padding: 0; }
-    .scanner-hero-title { font-size: 16px; }
-    .scanner-hero-icon { width: 44px; height: 44px; font-size: 22px; }
+    .scan-well { padding: 14px 12px 12px; }
+    .scan-well-cam { width: 42px; height: 42px; }
   }
   #fileInput { display: none; }
   #previewImg { max-width: 100%; border-radius: 2px; margin: 12px 0; display: none; border: 1px solid var(--border); }
@@ -1043,15 +1055,14 @@
   </div>
   <div class="panel-body">
     <div class="scanner-hero scan-area">
-      <div class="scanner-hero-head">
-        <div class="scanner-hero-icon"><svg class="ico" aria-hidden="true"><use href="#i-camera"></use></svg></div>
-        <div>
-          <p class="scanner-hero-sub" data-i18n="scan_sub">Foto vom Item-Tooltip machen – Exile Eye liest die Werte aus und vergleicht. Kein Login nötig.</p>
-        </div>
+      <div class="scan-well">
+        <div class="scan-well-cam"><svg class="ico" aria-hidden="true"><use href="#i-camera"></use></svg></div>
+        <div class="scan-well-k" data-i18n="scan_well_k">Tooltip hier rein</div>
+        <p class="scanner-hero-sub" data-i18n="scan_sub">Foto machen oder Screenshot einfügen. Werte werden gegen dein Gear gehalten.</p>
+        <input type="file" id="fileInput" accept="image/*" capture="environment">
+        <button class="btn primary scanner-hero-btn" onclick="document.getElementById('fileInput').click()"><svg class="ico" aria-hidden="true"><use href="#i-camera"></use></svg><span data-i18n="photo_btn">Foto aufnehmen / Bild wählen</span></button>
+        <button class="btn scanner-paste-btn" onclick="pasteFromClipboard()"><svg class="ico" aria-hidden="true"><use href="#i-clipboard"></use></svg><span data-i18n="paste_btn">Screenshot einfügen</span></button>
       </div>
-      <input type="file" id="fileInput" accept="image/*" capture="environment">
-      <button class="btn primary scanner-hero-btn" onclick="document.getElementById('fileInput').click()"><svg class="ico" aria-hidden="true"><use href="#i-camera"></use></svg><span data-i18n="photo_btn">Foto aufnehmen / Bild wählen</span></button>
-      <button class="btn scanner-paste-btn" onclick="pasteFromClipboard()"><svg class="ico" aria-hidden="true"><use href="#i-clipboard"></use></svg><span data-i18n="paste_btn">Screenshot aus Zwischenablage einfügen</span></button>
       <p class="scanner-paste-hint"><svg class="ico" aria-hidden="true"><use href="#i-lightbulb"></use></svg> <span data-i18n-html="paste_hint">Tipp: Screenshot machen und einfach <b>Strg + V</b> drücken – kein Suchen auf der Festplatte nötig.</span></p>
       <div class="scanner-options">
         <label class="scan-opt-lang">
@@ -1374,7 +1385,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.41";
+const APP_VERSION = "v1.42";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1462,10 +1473,10 @@ const I18N = {
     logout:"Logout",
     ts_tooltip:"Rechnet deine Ausrüstung mit effektiven Werten: (Basiswert + flat-Mods) × (1 + increased%) – so zählt z.B. 85% erhöhte Rüstung auf einer 369er-Basis wie +314 Rüstung. Unique-Effekte, Skill-Synergien und Build-Mechaniken zählen nicht.",
     ts_count0:"0 Slots gewertet", ts_count:"{n} Slots gewertet",
-    panel_scanner:"Scanner", scan_title:"Scanner",
-    scan_sub:"Foto vom Item-Tooltip machen – Exile Eye liest die Werte aus und vergleicht. Kein Login nötig.",
+    panel_scanner:"Scanner", scan_title:"Scanner", scan_well_k:"Tooltip hier rein",
+    scan_sub:"Foto machen oder Screenshot einfügen. Werte werden gegen dein Gear gehalten.",
     photo_btn:"Foto aufnehmen / Bild wählen",
-    paste_btn:"Screenshot aus Zwischenablage einfügen",
+    paste_btn:"Screenshot einfügen",
     paste_hint:"Tipp: Screenshot machen und einfach <b>Strg + V</b> drücken – kein Suchen auf der Festplatte nötig.",
     game_lang_lbl:"Spiel-Sprache:", lang_auto:"Automatisch (DE+EN)", lang_de:"Deutsch", lang_en:"English",
     autocrop_lbl:"Auto-Zuschnitt (findet das Item-Tooltip selbst)",
@@ -1577,10 +1588,10 @@ const I18N = {
     logout:"Logout",
     ts_tooltip:"Scores your gear with effective values: (base + flat mods) × (1 + increased%). E.g. 85% increased Armour on a 369 base counts like +314 Armour. Unique effects, skill synergies and build mechanics are not included.",
     ts_count0:"0 slots scored", ts_count:"{n} slots scored",
-    panel_scanner:"Scanner", scan_title:"Scanner",
-    scan_sub:"Take a photo of the item tooltip – Exile Eye reads the stats and compares. No login needed.",
+    panel_scanner:"Scanner", scan_title:"Scanner", scan_well_k:"Drop a tooltip here",
+    scan_sub:"Take a photo or paste a screenshot. Stats are scored against your gear.",
     photo_btn:"Take photo / choose image",
-    paste_btn:"Paste screenshot from clipboard",
+    paste_btn:"Paste screenshot",
     paste_hint:"Tip: Take a screenshot and just press <b>Ctrl + V</b> – no file searching needed.",
     game_lang_lbl:"Game language:", lang_auto:"Automatic (DE+EN)", lang_de:"German", lang_en:"English",
     autocrop_lbl:"Auto-crop (finds the item tooltip itself)",
