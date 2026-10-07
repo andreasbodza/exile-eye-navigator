@@ -55,7 +55,7 @@
     font-size: 17px; letter-spacing: 1.5px; color: var(--gold);
     text-transform: uppercase; font-weight: 700; line-height: 1.1;
   }
-  .logo span { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; display: block; }
+  .logo h1 + span { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; display: block; }
 
   /* ---------- Buttons ---------- */
   .btn {
@@ -93,7 +93,7 @@
   #banner {
     display: none;
     position: fixed;
-    top: calc(var(--header-h, 60px) + 10px);
+    bottom: 16px;
     right: 16px;
     z-index: 60;
     max-width: min(340px, calc(100vw - 32px));
@@ -102,7 +102,7 @@
     box-shadow: 0 6px 20px rgba(0,0,0,.5);
     animation: toast-in .25s ease-out;
   }
-  @keyframes toast-in { from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes toast-in { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   #banner.error { background: #2a1410; border-color: var(--red);   color: #f0a89e; }
   #installBtn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
   #installBtn:hover { color: var(--text); border-color: var(--gold-soft); }
@@ -175,15 +175,23 @@
   /* ============================================================
      TAB-Navigation (Stufe 2a)
      ============================================================ */
+  .chrome-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
+    margin: 12px 18px 0;
+  }
   .tab-bar {
     display: flex; gap: 3px;
-    margin: 12px 18px 0;
+    margin: 0;
     padding: 3px;
     background: #1a1d24;
     border: 1px solid var(--border);
     border-radius: 2px;
     width: max-content;
-    max-width: calc(100% - 36px);
+    max-width: 100%;
+    flex: 0 1 auto;
   }
   .tab-btn {
     flex: 0 0 auto;
@@ -203,10 +211,14 @@
   .tab-lbl-short { display: none; }
   .tab-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   @media (max-width: 699px) {
-    .tab-bar { width: auto; margin: 10px 12px 0; max-width: none; }
+    .chrome-row { margin: 10px 12px 0; }
+    .tab-bar { width: 100%; max-width: none; flex: 1 1 100%; }
     .tab-btn { flex: 1; padding: 8px 6px; font-size: 12px; }
     .tab-lbl-full { display: none; }
     .tab-lbl-short { display: inline; }
+    #globalBuildBar { flex: 1 1 100%; }
+    #globalBuildBar select { padding: 8px 8px; font-size: 12px; }
+    #globalBuildBar .gb-import { padding: 8px 8px; font-size: 12px; }
   }
   @media (max-width: 560px) {
     header { padding: 10px 12px; gap: 8px; }
@@ -462,26 +474,32 @@
   .slot.build-ok   { border-color: var(--green); }
   .slot.build-miss { border-color: var(--red); }
 
-  /* Globaler Build-Switcher direkt unter den Tabs */
+  /* Globaler Build-Switcher: eine Zeile mit den Tabs, darunter wenn's eng wird */
   #globalBuildBar {
-    align-items: center; gap: 8px;
-    max-width: 560px; margin: 8px auto 4px; padding: 6px 10px;
-    background: var(--panel); border: 1px solid var(--border); border-radius: 2px;
+    align-items: stretch; gap: 8px;
+    flex: 1 1 240px; min-width: 0; margin: 0; padding: 3px 8px;
+    background: #1a1d24; border: 1px solid var(--border); border-radius: 2px;
   }
   #globalBuildBar .gb-label {
-    font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+    font-size: 12px; letter-spacing: .6px; text-transform: uppercase;
     color: var(--gold-soft); font-weight: 700; white-space: nowrap;
+    display: inline-flex; align-items: center; padding: 0 4px;
   }
-  #globalBuildBar select { flex: 1; padding: 6px 8px; font-size: 12px; min-width: 0; }
+  #globalBuildBar select {
+    flex: 1; padding: 8px 10px; font-size: 13px; min-width: 0;
+    border-radius: 2px; align-self: stretch;
+  }
   #globalBuildBar .gb-count {
     font-size: 11px; font-weight: 700; color: #a7f3d0;
     background: rgba(45,212,191,.14); border: 1px solid rgba(45,212,191,.35);
-    border-radius: 2px; padding: 1px 6px; white-space: nowrap;
+    border-radius: 2px; padding: 0 8px; white-space: nowrap;
+    display: inline-flex; align-items: center;
   }
   #globalBuildBar .gb-import {
     background: rgba(45,212,191,.1); border: 1px solid rgba(45,212,191,.4);
-    color: var(--gold); border-radius: 2px; padding: 4px 9px; font-size: 12px;
+    color: var(--gold); border-radius: 2px; padding: 8px 10px; font-size: 13px;
     cursor: pointer; white-space: nowrap; font-weight: 600;
+    display: inline-flex; align-items: center; justify-content: center;
   }
   #globalBuildBar .gb-import:hover { background: rgba(45,212,191,.22); }
   /* Scroll-Fokus: Sektion kurz pulsieren lassen (z.B. Build-Import) */
@@ -664,7 +682,7 @@
     font-size: 19px; letter-spacing: 1px; text-transform: uppercase;
     color: var(--gold); font-weight: 700; margin: 0; border: none; padding: 0;
   }
-  .scanner-hero-sub { font-size: 12.5px; color: var(--text-dim); margin: 3px 0 0; line-height: 1.4; }
+  .scanner-hero-sub { font-size: 14px; color: var(--text-dim); margin: 0; line-height: 1.45; }
   .scanner-hero-btn { width: 100%; font-size: 16px; padding: 15px; box-shadow: 0 0 16px rgba(45,212,191,.28); }
   .scanner-paste-btn { width: 100%; margin-top: 8px; font-size: 13px; padding: 11px; }
   .scanner-paste-hint { font-size: 11px; color: var(--text-dim); margin: 8px 0 0; line-height: 1.4; }
@@ -962,7 +980,7 @@
     </svg>
     <div>
       <h1>Exile Eye Navigator<span id="demoBadge" class="demo-badge">DEMO</span></h1>
-      <span>PoE2 Companion · Item Scanner</span>
+      <span>PoE2 Companion</span>
     </div>
   </div>
   <div id="totalScore">
@@ -980,6 +998,7 @@
   </div>
 </header>
 
+<div class="chrome-row" id="chromeRow">
 <nav class="tab-bar" id="tabBar">
   <button class="tab-btn active" data-tab="scanner">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg>
@@ -1007,6 +1026,7 @@
   <span class="gb-count" id="gbCount" style="display:none"></span>
   <button class="gb-import" id="gbImportBtn" onclick="goImportBuild()" data-i18n-title="gb_import_title" aria-label="Build importieren"><svg class="ico" aria-hidden="true"><use href="#i-download"></use></svg></button>
 </div>
+</div>
 
 <div id="banner"></div>
 
@@ -1015,7 +1035,7 @@
      ============================================================ -->
 <div class="panel" data-panel-id="scanner">
   <div class="panel-head">
-    <h2><svg class="ico" aria-hidden="true"><use href="#i-camera"></use></svg><span data-i18n="panel_scanner">Item-Scanner</span></h2>
+    <h2><svg class="ico" aria-hidden="true"><use href="#i-camera"></use></svg><span data-i18n="panel_scanner">Scanner</span></h2>
     <div class="head-right">
       <span class="status-badge"></span>
       <span class="arrow">▶</span>
@@ -1026,7 +1046,6 @@
       <div class="scanner-hero-head">
         <div class="scanner-hero-icon"><svg class="ico" aria-hidden="true"><use href="#i-camera"></use></svg></div>
         <div>
-          <h2 class="scanner-hero-title" data-i18n="scan_title">Item scannen</h2>
           <p class="scanner-hero-sub" data-i18n="scan_sub">Foto vom Item-Tooltip machen – Exile Eye liest die Werte aus und vergleicht. Kein Login nötig.</p>
         </div>
       </div>
@@ -1355,7 +1374,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.40";
+const APP_VERSION = "v1.41";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1425,7 +1444,7 @@ const I18N = {
     // (kompatible Alt-Keys)
     h_character:"Charakter", h_equipment:"Aktuelle Ausrüstung",
     h_skills:"Skills & Support-Gems", h_weights:"Gewichtung · was ist dir wichtig?",
-    h_trade:"Trade-Einstellungen", h_scan:"Item scannen",
+    h_trade:"Trade-Einstellungen", h_scan:"Scanner",
     tab_scanner:"Scanner", tab_character:"Charakter", tab_build:"Build", tab_settings:"Einstellungen", tab_more:"Mehr",
     skills_gear_title:"Skills & Gems (dein Charakter)", skills_gear_unknown:"Unbekanntes Gem",
     gem_notinbuild:"nicht im Build", gem_notinbuild_hint:"Dieser Skill kommt im aktiven Build nicht vor.",
@@ -1443,7 +1462,7 @@ const I18N = {
     logout:"Logout",
     ts_tooltip:"Rechnet deine Ausrüstung mit effektiven Werten: (Basiswert + flat-Mods) × (1 + increased%) – so zählt z.B. 85% erhöhte Rüstung auf einer 369er-Basis wie +314 Rüstung. Unique-Effekte, Skill-Synergien und Build-Mechaniken zählen nicht.",
     ts_count0:"0 Slots gewertet", ts_count:"{n} Slots gewertet",
-    panel_scanner:"Item-Scanner", scan_title:"Item scannen",
+    panel_scanner:"Scanner", scan_title:"Scanner",
     scan_sub:"Foto vom Item-Tooltip machen – Exile Eye liest die Werte aus und vergleicht. Kein Login nötig.",
     photo_btn:"Foto aufnehmen / Bild wählen",
     paste_btn:"Screenshot aus Zwischenablage einfügen",
@@ -1540,7 +1559,7 @@ const I18N = {
   en: {
     h_character:"Character", h_equipment:"Current Equipment",
     h_skills:"Skills & Support Gems", h_weights:"Weighting · what matters to you?",
-    h_trade:"Trade Settings", h_scan:"Scan item",
+    h_trade:"Trade Settings", h_scan:"Scanner",
     tab_scanner:"Scanner", tab_character:"Character", tab_build:"Build", tab_settings:"Settings", tab_more:"More",
     skills_gear_title:"Skills & Gems (your character)", skills_gear_unknown:"Unknown gem",
     gem_notinbuild:"not in build", gem_notinbuild_hint:"This skill doesn't appear in the active build.",
@@ -1558,7 +1577,7 @@ const I18N = {
     logout:"Logout",
     ts_tooltip:"Scores your gear with effective values: (base + flat mods) × (1 + increased%). E.g. 85% increased Armour on a 369 base counts like +314 Armour. Unique effects, skill synergies and build mechanics are not included.",
     ts_count0:"0 slots scored", ts_count:"{n} slots scored",
-    panel_scanner:"Item Scanner", scan_title:"Scan item",
+    panel_scanner:"Scanner", scan_title:"Scanner",
     scan_sub:"Take a photo of the item tooltip – Exile Eye reads the stats and compares. No login needed.",
     photo_btn:"Take photo / choose image",
     paste_btn:"Paste screenshot from clipboard",

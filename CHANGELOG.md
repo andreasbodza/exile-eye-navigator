@@ -10,6 +10,13 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.41 (07.10.2026, Scanner-Name + Build-Leiste)
+- Nur noch **Scanner** als Name (Tab, Panel, kein zweites „Item scannen“ / „Item Scanner“).
+- Build-Leiste sitzt in einer Zeile mit den Tabs, gleiche Höhe. Wird der Platz knapp, rutscht sie darunter.
+- Status-Banner nach unten, damit er Tabs/Build-Leiste nicht überdeckt.
+
+---
+
 ## v1.40 (07.10.2026, Segment-Tabs)
 - Tab-Leiste ist jetzt eine eckige Segment-Leiste (2px, wie Buttons/Slots), kein Unterstrich mehr.
 - Handy: volle Breite, viertes Label **Mehr**. Browser ab ~700px: kompakt links, Label **Einstellungen**.
