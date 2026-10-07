@@ -118,8 +118,8 @@
 
   /* ---------- Login Karte ---------- */
   .login-card {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 2px; padding: 28px 22px; text-align: center; margin: 30px 18px;
+    background: transparent; border: none;
+    padding: 22px 8px; text-align: center; margin: 0;
   }
   .login-card p { color: var(--text-dim); margin: 12px 0 22px; font-size: 14px; line-height: 1.5; }
 
@@ -142,7 +142,8 @@
     display: none;
   }
   .panel.active { display: block; }
-  .panel-head {
+  .panel-head { display: none; } /* Tabs sagen schon, wo man ist */
+  .panel-head-legacy {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 16px;
     cursor: default;
@@ -159,14 +160,13 @@
   .panel.open .panel-head .arrow { transform: rotate(90deg); }
   .panel-body {
     display: none;
-    padding: 0 16px 16px;
-    border-top: 1px solid var(--border);
+    padding: 16px;
   }
   .panel.open .panel-body { display: block; }
   .panel-body .section { padding: 12px 0 0; }
   .panel-body .section:first-child { padding-top: 4px; }
   .panel-body .build-import { margin-top: 12px; }
-  .panel-body > .login-card { margin: 12px 0 4px; }
+  .panel-body > .login-card { margin: 0; }
   .panel-head .status-badge {
     font-size: 11px; color: var(--green); margin-right: 10px;
   }
@@ -198,6 +198,10 @@
   @media (max-width: 560px) {
     .tab-bar { margin: 10px 12px 0; }
     .tab-btn { padding: 8px 9px; font-size: 12px; gap: 5px; }
+    header { padding: 10px 12px; gap: 8px; }
+    #loginBtn { white-space: nowrap; padding: 7px 9px; font-size: 11px; }
+    .logo h1 { font-size: 15px; }
+    .panel { margin: 10px 12px 0; }
   }
 
   .demo-badge {
@@ -628,14 +632,11 @@
   .scan-area { text-align: center; }
 
   .scanner-hero {
-    margin: 16px 18px 8px;
-    background:
-      radial-gradient(circle at 50% 0%, rgba(45,212,191,.10), transparent 60%),
-      linear-gradient(180deg, #1f1810, #181b21);
-    border: 2px solid var(--gold-soft);
-    border-radius: 2px;
-    padding: 20px 18px;
-    box-shadow: 0 0 24px rgba(45,212,191,.18), inset 0 0 30px rgba(0,0,0,.5);
+    margin: 0;
+    background: transparent;
+    border: none;
+    padding: 4px 0 0;
+    box-shadow: none;
     position: relative;
   }
   .scanner-hero-head {
@@ -660,7 +661,7 @@
   .scan-opt-lang, .scan-opt-crop { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer; }
   .scan-opt-lang span { color: var(--text-dim); }
   @media (max-width: 520px) {
-    .scanner-hero { margin: 12px 12px 6px; padding: 16px 14px; }
+    .scanner-hero { margin: 0; padding: 0; }
     .scanner-hero-title { font-size: 16px; }
     .scanner-hero-icon { width: 44px; height: 44px; font-size: 22px; }
   }
@@ -1342,7 +1343,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.38";
+const APP_VERSION = "v1.39";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -3637,6 +3638,7 @@ function installApp() {
 applyLang();
 // Globale Build-Leiste sofort rendern (auch ausgeloggt sichtbar: CTA oder Switcher)
 if (typeof updateActiveBuildBar === "function") updateActiveBuildBar();
+loadWeights();
 init();
 loadScanHistory();
 </script>

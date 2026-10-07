@@ -10,6 +10,13 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.39 (06.10.2026, Rahmen + Slider-Bug)
+- Doppelte Kästen weg: Panel-Titel (Tabs reichen), Scanner-Hero und Login-Card ohne Extra-Rahmen.
+- Slider erscheinen nicht mehr erst beim Sprachwechsel (loadWeights beim Start).
+- Header-Login auf schmalem Screen ohne Umbruch.
+
+---
+
 ## v1.38 (06.10.2026, scharfe Kanten + Build-Leiste)
 - Globale Build-Leiste nur nach Login oder Demo, nicht mehr über der Welcome-Card.
 - Panes/Buttons/Inputs: `border-radius` 2px (Feedback „Avoid rounded rectangles“). Kreise (Gem-Icons, Dots) bleiben rund.
