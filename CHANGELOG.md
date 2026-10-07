@@ -10,6 +10,13 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.44 (07.10.2026, Presets + Advanced)
+- Gewichtung: Preset das zu den Slidern passt, ist sichtbar aktiv (teal).
+- Die 14 Slider stecken hinter **Erweitert**.
+- Volle Slots ohne Score zeigen „keine gewichteten Stats“.
+
+---
+
 ## v1.43 (07.10.2026, i18n + Footer-Feedback)
 - Sprachmix: Install-Button, Gear-Toast, Gem-Tags (Nahkampf/Melee …) folgen DE/EN.
 - Großer Bug-Button weg, **Feedback** als Textlink im Footer.

@@ -638,6 +638,10 @@
     background: rgba(45,212,191,.14); border: 1px solid rgba(45,212,191,.35);
     border-radius: 2px; padding: 1px 5px;
   }
+  .slot .item-noscore {
+    margin-top: auto; align-self: flex-start;
+    font-size: 9px; color: #6b7280; letter-spacing: .2px; line-height: 1.2;
+  }
   .slot.filled { border-color: var(--gold-soft); box-shadow: inset 0 0 12px rgba(0,0,0,.6), 0 0 4px rgba(45,212,191,.2); }
   /* Schmale Handys: Item-ART statt Text (wie im Game) - nur wenn ein Icon
      vorhanden ist (Demo ohne Icons zeigt weiter Namen) */
@@ -837,7 +841,17 @@
     font-size: 12px; cursor: pointer; transition: all .15s; min-width: 90px;
   }
   .preset-btn:hover { border-color: var(--gold-soft); }
-  .preset-btn.active { background: var(--gold); color: #0d1110; border-color: var(--gold); font-weight: 600; }
+  .preset-btn.active { background: var(--gold); color: #0d1110; border-color: var(--gold); font-weight: 700; }
+  .weight-adv-toggle {
+    width: 100%; text-align: left; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 2px;
+    color: var(--text); padding: 10px 12px; font-size: 13px; font-weight: 650;
+    cursor: pointer; font-family: inherit;
+  }
+  .weight-adv-toggle:hover { border-color: var(--gold-soft); }
+  .weight-adv-toggle[aria-expanded="true"] { border-color: var(--gold-soft); }
+  .weight-adv-arrow { display: inline-block; width: 1em; color: var(--text-dim); }
+  #weightSliders { margin-top: 10px; }
 
   .weight-group { margin-bottom: 14px; }
   .weight-group-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
@@ -1305,8 +1319,10 @@
         <button class="preset-btn" data-preset="es" data-i18n="preset_es">ES-Build</button>
         <button class="preset-btn" data-preset="resi" data-i18n="preset_resi">Resi-Cap zuerst</button>
       </div>
-
-      <div id="weightSliders"></div>
+      <button type="button" class="weight-adv-toggle" id="weightAdvToggle" aria-expanded="false">
+        <span class="weight-adv-arrow">▸</span> <span data-i18n="weights_advanced">Erweitert</span>
+      </button>
+      <div id="weightSliders" hidden></div>
 
 
 
@@ -1386,7 +1402,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.43";
+const APP_VERSION = "v1.44";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1515,6 +1531,7 @@ const I18N = {
     rescap_title:"Resistenzen (aus deinem Gear)",
     rescap_note:"Nur Werte aus deinem <b>getragenen Gear</b>. Passivbaum, Ascendancy &amp; Liga-Strafe sind <b>nicht</b> enthalten.",
     preset_balanced:"Ausgewogen", preset_life:"Life-Build", preset_es:"ES-Build", preset_resi:"Resi-Cap zuerst",
+    weights_advanced:"Erweitert", score_none:"keine gewichteten Stats",
     active_build_remove:"✕ Aktiven Build entfernen",
     ab_delete_title:"Aktiven Build endgültig aus der Liste löschen", bn_no_active_build:"Kein aktiver Build zum Löschen.",
     import_file_btn:".build-Datei auswählen",
@@ -1634,6 +1651,7 @@ const I18N = {
     rescap_title:"Resistances (from your gear)",
     rescap_note:"Values from your <b>equipped gear</b> only. Passive tree, ascendancy &amp; league penalty are <b>not</b> included.",
     preset_balanced:"Balanced", preset_life:"Life Build", preset_es:"ES Build", preset_resi:"Resi-Cap first",
+    weights_advanced:"Advanced", score_none:"no weighted stats",
     active_build_remove:"✕ Remove active build",
     ab_delete_title:"Permanently delete the active build from the list", bn_no_active_build:"No active build to delete.",
     import_file_btn:"Choose .build file",
@@ -1756,13 +1774,8 @@ function toggleLang() {
     // JS-erzeugte Option (Charakter-Dropdown-Platzhalter)
     const cs = document.getElementById("charSelect");
     if (cs) { const ph = cs.querySelector('option[value=""]'); if (ph) ph.textContent = t("char_choose"); }
-    // Stat-Score-Zeile
-    const box = document.getElementById("totalScore");
-    if (box && box.style.display !== "none" && typeof equippedItems !== "undefined") {
-      let total = 0, counted = 0;
-      for (const k in equippedItems) { const sc = equippedItems[k]._score || 0; if (sc > 0) { total += sc; counted++; } }
-      if (counted) updateTotalScore(total, counted);
-    }
+    if (typeof syncPresetButtons === "function") syncPresetButtons();
+    if (typeof refreshItemScores === "function") refreshItemScores();
   } catch (e) { /* ignorieren */ }
 }
 applyLang();
@@ -2218,7 +2231,7 @@ function renderGear(items) {
     const n = slot.querySelector(".item-name");
     n.textContent = t("empty_slot");
     n.className = "item-name empty";
-    slot.querySelectorAll(".item-score, .item-meta, .item-img, .item-gems, .tap-hint").forEach(el => el.remove());
+    slot.querySelectorAll(".item-score, .item-noscore, .item-meta, .item-img, .item-gems, .tap-hint").forEach(el => el.remove());
     const sname = slot.dataset.slot;
     slot.onclick = () => openTrade(sname);
     slot.style.cursor = "pointer";
@@ -2259,13 +2272,7 @@ function renderGear(items) {
     slotEl.classList.add("rar-" + (it.rarity ?? 0));
     const sc = scoreFromStats(it.effective_stats || it.parsed_stats || {});
     it._score = sc;
-    if (sc > 0) {
-      const s = document.createElement("span");
-      s.className = "item-score";
-      s.textContent = t("score_prefix") + sc;
-      slotEl.appendChild(s);
-      _totalScore += sc; _countedScore++;
-    }
+    if (setSlotScoreBadge(slotEl, sc)) { _totalScore += sc; _countedScore++; }
     slotEl.onclick = () => showItem(it.slot);
     stored[it.slot] = { name: nameEl.textContent, score: sc };
   });
@@ -2801,6 +2808,21 @@ function scoreFromStats(stats) {
 // Berechnet alle Item-Scores neu (z.B. nach Slider-Änderung) und aktualisiert
 // nur die Score-Badges im HUD + die Gesamtscore-Box - OHNE renderGear() komplett
 // neu laufen zu lassen (das würde Bilder/Click-Handler unnötig neu aufbauen).
+function setSlotScoreBadge(slotEl, sc) {
+  slotEl.querySelectorAll(".item-score, .item-noscore").forEach(el => el.remove());
+  if (sc > 0) {
+    const s = document.createElement("span");
+    s.className = "item-score";
+    s.textContent = t("score_prefix") + sc;
+    slotEl.appendChild(s);
+    return true;
+  }
+  const s = document.createElement("span");
+  s.className = "item-noscore";
+  s.textContent = t("score_none");
+  slotEl.appendChild(s);
+  return false;
+}
 function refreshItemScores() {
   let total = 0, counted = 0;
   for (const slotKey in equippedItems) {
@@ -2809,18 +2831,7 @@ function refreshItemScores() {
     it._score = sc;
     const slotEl = document.querySelector(`.slot[data-slot="${slotKey}"]`);
     if (!slotEl) continue;
-    let badge = slotEl.querySelector(".item-score");
-    if (sc > 0) {
-      if (!badge) {
-        badge = document.createElement("span");
-        badge.className = "item-score";
-        slotEl.appendChild(badge);
-      }
-      badge.textContent = t("score_prefix") + sc;
-      total += sc; counted++;
-    } else if (badge) {
-      badge.remove();
-    }
+    if (setSlotScoreBadge(slotEl, sc)) { total += sc; counted++; }
   }
   updateTotalScore(total, counted);
 }
@@ -2910,18 +2921,40 @@ function applyPreset(name) {
   currentWeights = { ...PRESETS[name] };
   buildSliders();
   saveWeights();
-  document.querySelectorAll(".preset-btn").forEach(b => b.classList.toggle("active", b.dataset.preset === name));
+  syncPresetButtons();
   refreshItemScores();
+}
+function weightsEq(a, b) {
+  return STAT_KEYS.every(k => Math.abs((a[k] || 0) - (b[k] || 0)) < 0.001);
+}
+function syncPresetButtons() {
+  let match = null;
+  for (const name of Object.keys(PRESETS)) {
+    if (weightsEq(currentWeights, PRESETS[name])) { match = name; break; }
+  }
+  document.querySelectorAll(".preset-btn").forEach(b => b.classList.toggle("active", b.dataset.preset === match));
 }
 function clearActivePreset() { document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active")); }
 function saveWeights() { localStorage.setItem(WEIGHT_STORAGE, JSON.stringify(currentWeights)); }
 function loadWeights() {
   const saved = localStorage.getItem(WEIGHT_STORAGE);
   if (saved) { try { currentWeights = JSON.parse(saved); } catch { currentWeights = { ...PRESETS.balanced }; } }
-  else { currentWeights = { ...PRESETS.balanced }; document.querySelector('.preset-btn[data-preset="balanced"]')?.classList.add("active"); }
+  else { currentWeights = { ...PRESETS.balanced }; }
+  syncPresetButtons();
   buildSliders();
 }
 document.querySelectorAll(".preset-btn").forEach(b => { b.addEventListener("click", () => applyPreset(b.dataset.preset)); });
+const weightAdvToggle = document.getElementById("weightAdvToggle");
+const weightSlidersEl = document.getElementById("weightSliders");
+if (weightAdvToggle && weightSlidersEl) {
+  weightAdvToggle.addEventListener("click", () => {
+    const open = weightSlidersEl.hidden;
+    weightSlidersEl.hidden = !open;
+    weightAdvToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    const arrow = weightAdvToggle.querySelector(".weight-adv-arrow");
+    if (arrow) arrow.textContent = open ? "▾" : "▸";
+  });
+}
 
 document.getElementById("buildFileInput").addEventListener("change", (e) => {
   const file = e.target.files[0];
