@@ -176,28 +176,39 @@
      TAB-Navigation (Stufe 2a)
      ============================================================ */
   .tab-bar {
-    display: flex; gap: 4px;
-    margin: 14px 18px 0;
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
+    display: flex; gap: 3px;
+    margin: 12px 18px 0;
+    padding: 3px;
+    background: #1a1d24;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    width: max-content;
+    max-width: calc(100% - 36px);
   }
-  .tab-btn { flex-shrink: 0; }
   .tab-btn {
-    display: inline-flex; align-items: center; gap: 7px;
-    background: none; border: none; border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    color: var(--text-dim); font-size: 13px; font-weight: 600;
-    padding: 9px 14px; cursor: pointer; letter-spacing: .3px;
+    flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent; border: none;
+    color: var(--text-dim); font-size: 13px; font-weight: 650;
+    padding: 8px 16px; cursor: pointer; letter-spacing: .3px;
     font-family: inherit;
+    border-radius: 2px;
+    user-select: none; -webkit-user-select: none;
+    transition: background .15s, color .15s;
   }
   .tab-btn:hover { color: var(--text); }
-  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
-  .tab-btn svg { flex: 0 0 auto; }
+  .tab-btn.active { color: #0d1110; background: var(--gold); }
+  .tab-btn.active:hover { background: #5eead4; color: #0d1110; }
+  .tab-btn svg { display: none; }
+  .tab-lbl-short { display: none; }
+  .tab-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  @media (max-width: 699px) {
+    .tab-bar { width: auto; margin: 10px 12px 0; max-width: none; }
+    .tab-btn { flex: 1; padding: 8px 6px; font-size: 12px; }
+    .tab-lbl-full { display: none; }
+    .tab-lbl-short { display: inline; }
+  }
   @media (max-width: 560px) {
-    .tab-bar { margin: 10px 12px 0; }
-    .tab-btn { padding: 8px 9px; font-size: 12px; gap: 5px; }
     header { padding: 10px 12px; gap: 8px; }
     #loginBtn { white-space: nowrap; padding: 7px 9px; font-size: 11px; }
     .logo h1 { font-size: 15px; }
@@ -984,7 +995,8 @@
   </button>
   <button class="tab-btn" data-tab="settings">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h0a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-    <span data-i18n="tab_settings">Einstellungen</span>
+    <span class="tab-lbl-full" data-i18n="tab_settings">Einstellungen</span>
+    <span class="tab-lbl-short" data-i18n="tab_more">Mehr</span>
   </button>
 </nav>
 
@@ -1343,7 +1355,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.39";
+const APP_VERSION = "v1.40";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1414,7 +1426,7 @@ const I18N = {
     h_character:"Charakter", h_equipment:"Aktuelle Ausrüstung",
     h_skills:"Skills & Support-Gems", h_weights:"Gewichtung · was ist dir wichtig?",
     h_trade:"Trade-Einstellungen", h_scan:"Item scannen",
-    tab_scanner:"Scanner", tab_character:"Charakter", tab_build:"Build", tab_settings:"Einstellungen",
+    tab_scanner:"Scanner", tab_character:"Charakter", tab_build:"Build", tab_settings:"Einstellungen", tab_more:"Mehr",
     skills_gear_title:"Skills & Gems (dein Charakter)", skills_gear_unknown:"Unbekanntes Gem",
     gem_notinbuild:"nicht im Build", gem_notinbuild_hint:"Dieser Skill kommt im aktiven Build nicht vor.",
     skills_legend_ok:"✓ im Build und gesockelt",
@@ -1529,7 +1541,7 @@ const I18N = {
     h_character:"Character", h_equipment:"Current Equipment",
     h_skills:"Skills & Support Gems", h_weights:"Weighting · what matters to you?",
     h_trade:"Trade Settings", h_scan:"Scan item",
-    tab_scanner:"Scanner", tab_character:"Character", tab_build:"Build", tab_settings:"Settings",
+    tab_scanner:"Scanner", tab_character:"Character", tab_build:"Build", tab_settings:"Settings", tab_more:"More",
     skills_gear_title:"Skills & Gems (your character)", skills_gear_unknown:"Unknown gem",
     gem_notinbuild:"not in build", gem_notinbuild_hint:"This skill doesn't appear in the active build.",
     skills_legend_ok:"✓ in build and socketed",

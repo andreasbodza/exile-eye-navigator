@@ -10,6 +10,13 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.40 (07.10.2026, Segment-Tabs)
+- Tab-Leiste ist jetzt eine eckige Segment-Leiste (2px, wie Buttons/Slots), kein Unterstrich mehr.
+- Handy: volle Breite, viertes Label **Mehr**. Browser ab ~700px: kompakt links, Label **Einstellungen**.
+- Tab-Icons ausgeblendet, damit die vier Segmente gleichmäßig sitzen.
+
+---
+
 ## v1.39 (06.10.2026, Rahmen + Slider-Bug)
 - Doppelte Kästen weg: Panel-Titel (Tabs reichen), Scanner-Hero und Login-Card ohne Extra-Rahmen.
 - Slider erscheinen nicht mehr erst beim Sprachwechsel (loadWeights beim Start).
