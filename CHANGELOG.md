@@ -10,6 +10,16 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.45 (07.10.2026, Sicherheit + Kleinkram)
+- Maxroll-Import: nur noch `https://maxroll.gg` / `www.maxroll.gg`, Redirects host-geprüft (kein SSRF).
+- Uploads max 8 MB, Bilder auf 2500px, PoB-zlib auf 5 MB.
+- OAuth-Callback schreibt keine Fehlerdetails mehr in die URL.
+- Cache-Key hasht das Token, Gem-Info nur noch mit gültigem Namen.
+- Security-Header, Footer-Version, Theme-Color, GGG/poe2db User-Agent 1.45.
+- icon-512 verkleinert, tote Parser-Funktion weg, Gunicorn gthread.
+
+---
+
 ## v1.44 (07.10.2026, Presets + Advanced)
 - Gewichtung: Preset das zu den Slidern passt, ist sichtbar aktiv (teal).
 - Die 14 Slider stecken hinter **Erweitert**.

@@ -53,6 +53,7 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_SECURE=_is_prod,   # nur in Produktion (HTTPS) erzwingen
+    MAX_CONTENT_LENGTH=8 * 1024 * 1024,  # Uploads (OCR) max 8 MB
 )
 
 # Secret Key kommt aus der .env - NICHT mehr os.urandom (sonst fliegen
@@ -65,6 +66,17 @@ if not app.secret_key:
         "print(secrets.token_hex(32))\"' erzeugten Hex-String ein."
     )
 
+@app.after_request
+def _security_headers(resp):
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("X-Frame-Options", "DENY")
+    resp.headers.setdefault("Referrer-Policy", "same-origin")
+    return resp
+
+@app.errorhandler(413)
+def _too_large(_e):
+    return jsonify({"error": "datei_zu_gross"}), 413
+
 # ------------------------------------------------------------
 #  Konfiguration (alles aus der .env)
 # ------------------------------------------------------------
@@ -72,7 +84,7 @@ CLIENT_ID    = os.getenv("POE_CLIENT_ID", "exileeyenavigator")
 REDIRECT_URI = os.getenv("POE_REDIRECT_URI", "http://localhost:8000/callback")
 REALM        = os.getenv("POE_REALM", "poe2")   # poe2 fuer Path of Exile 2!
 SCOPES       = "account:profile account:characters"
-APP_VERSION  = "1.0.0"
+APP_VERSION  = "1.45"
 CONTACT      = os.getenv("POE_CONTACT", "deine-mail@example.com")
 
 # WICHTIG: GGG schreibt diesen User-Agent vor:
@@ -238,7 +250,7 @@ def gem_name_from_icon(icon_url):
 GEM_INFO_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gem_cache.json")
 GEM_INFO_TTL_HIT  = 7 * 24 * 3600   # Treffer 7 Tage cachen
 GEM_INFO_TTL_MISS = 24 * 3600       # 404s 1 Tag cachen
-_GEM_UA = "ExileEyeNavigator/1.37 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
+_GEM_UA = "ExileEyeNavigator/1.45 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
 _gem_cache = None
 
 
@@ -406,6 +418,8 @@ def api_gem_info():
     name = (request.args.get("name") or "").strip()
     if not name:
         return jsonify({"found": False, "error": "missing name"}), 400
+    if len(name) > 80 or not re.fullmatch(r"[A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9 '\-]{1,78}", name):
+        return jsonify({"found": False, "error": "bad_name"}), 400
     return jsonify(gem_info_lookup(name))
 
 
@@ -540,7 +554,8 @@ def callback():
     try:
         resp = requests.post(TOKEN_URL, data=data, headers=headers, timeout=20)
     except requests.RequestException as e:
-        return redirect(url_for("index") + f"?error=token_request_failed&detail={e}")
+        print(f"[CALLBACK] token request failed: {e}")
+        return redirect(url_for("index") + "?error=token_request_failed")
 
     if resp.status_code != 200:
         print(f"[CALLBACK FEHLER] {resp.status_code}: {resp.text[:300]}")
@@ -599,7 +614,7 @@ def api_get(path, use_cache=True):
         return None, 401, "not_logged_in"
 
     # pro Account + Pfad cachen (jeder Nutzer hat eigene Daten)
-    cache_key = f"{token[:12]}:{path}"
+    cache_key = f"{hashlib.sha256(token.encode()).hexdigest()[:16]}:{path}"
     if use_cache:
         cached = _cache_get(cache_key)
         if cached is not None:
@@ -1120,6 +1135,7 @@ def api_analyze():
         img = Image.open(file.stream)
         # EXIF-Rotation vom Handy korrigieren (sonst steht das Bild quer)
         img = ImageOps.exif_transpose(img)
+        img.thumbnail((2500, 2500))
     except Exception as e:
         return jsonify({
             "error": "bild_unlesbar",
@@ -1211,8 +1227,6 @@ def guess_slot(text):
 # ------------------------------------------------------------
 #  Stat-Parsing + Score-Berechnung
 # ------------------------------------------------------------
-import re
-
 # Gewichte fuer den Score - hier kannst du spaeter tunen
 STAT_WEIGHTS = {
     "life":            1.0,
@@ -1265,24 +1279,6 @@ def parse_item_stats(text):
     """Zieht numerische Stats aus Item-/OCR-Text (DE + EN).
     Nutzt das umfassende Woerterbuch aus stats_dict.py."""
     return dict_parse_stats(text)
-
-
-def _unused_old_parse(text):
-    """(alt, nicht mehr genutzt - durch stats_dict ersetzt)"""
-    text = clean_item_text(text)
-    stats = {}
-    for key, pattern in STAT_PATTERNS.items():
-        total = 0.0
-        found = False
-        for m in re.finditer(pattern, text, re.IGNORECASE):
-            try:
-                total += float(m.group(1))
-                found = True
-            except (ValueError, IndexError):
-                pass
-        if found:
-            stats[key] = round(total, 1)
-    return stats
 
 
 def compute_score(stats, weights=None):
@@ -1383,8 +1379,11 @@ def decode_pob_code(code):
     if missing:
         code += "=" * (4 - missing)
     raw = base64.urlsafe_b64decode(code)
-    xml = zlib.decompress(raw).decode("utf-8", errors="ignore")
-    return xml
+    dec = zlib.decompressobj()
+    xml = dec.decompress(raw, 5_000_000)
+    if dec.unconsumed_tail:
+        raise ValueError("pob_too_large")
+    return xml.decode("utf-8", errors="ignore")
 
 
 def fetch_pobbin(url):
@@ -1434,18 +1433,55 @@ def extract_build_info(xml):
     return info
 
 
+_MAXROLL_HOSTS = {"maxroll.gg", "www.maxroll.gg"}
+
+def _https_host_ok(url, allowed):
+    try:
+        p = urllib.parse.urlparse((url or "").strip())
+    except Exception:
+        return False
+    if p.scheme != "https" or not p.hostname:
+        return False
+    return p.hostname.lower().rstrip(".") in allowed
+
+def _extract_maxroll_url(raw):
+    s = (raw or "").strip()
+    if _https_host_ok(s, _MAXROLL_HOSTS):
+        return s
+    m = re.search(r"https://(?:www\.)?maxroll\.gg/[^\s\"'<>]+", s, re.I)
+    if m and _https_host_ok(m.group(0), _MAXROLL_HOSTS):
+        return m.group(0)
+    return None
+
+def _fetch_https_hosts(url, allowed, headers, timeout=20, max_hops=4):
+    """GET, Redirects nur wenn jeder Hop https + erlaubter Host ist."""
+    current = url
+    for _ in range(max_hops):
+        if not _https_host_ok(current, allowed):
+            return None
+        try:
+            r = requests.get(current, headers=headers, timeout=timeout,
+                             allow_redirects=False)
+        except requests.RequestException:
+            return None
+        if r.status_code in (301, 302, 303, 307, 308):
+            loc = r.headers.get("Location") or ""
+            current = urllib.parse.urljoin(current, loc)
+            continue
+        if r.status_code == 200:
+            return r.text
+        return None
+    return None
+
 def fetch_maxroll(url):
     """Holt den HTML/JSON-Inhalt einer Maxroll-Build-Seite.
     Maxroll ist (anders als Mobalytics) nicht hart Cloudflare-geblockt."""
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                              "AppleWebKit/537.36 (KHTML, like Gecko) "
                              "Chrome/131.0.0.0 Safari/537.36"}
-    try:
-        r = requests.get(url, headers=headers, timeout=20)
-    except requests.RequestException:
-        return None
-    if r.status_code == 200 and "just a moment" not in r.text.lower()[:2000]:
-        return r.text
+    html = _fetch_https_hosts(url, _MAXROLL_HOSTS, headers)
+    if html and "just a moment" not in html.lower()[:2000]:
+        return html
     return None
 
 
@@ -1494,9 +1530,9 @@ def api_import_build():
             info = extract_build_info(text_for_stats)
 
         # --- 3: Maxroll-Link ---
-        elif "maxroll.gg" in raw:
+        elif _extract_maxroll_url(raw):
             source = "maxroll"
-            html = fetch_maxroll(raw)
+            html = fetch_maxroll(_extract_maxroll_url(raw))
             if not html:
                 return jsonify({"error": "maxroll_fehlgeschlagen",
                                 "detail": "Seite blockiert oder leer. Tipp: "

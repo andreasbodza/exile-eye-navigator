@@ -1392,7 +1392,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.18</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.45</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_impressum">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_privacy">Datenschutz</a> ·
@@ -1402,7 +1402,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.44";
+const APP_VERSION = "v1.45";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1808,7 +1808,7 @@ function showBanner(msg, type = "error") {
 (function checkUrlError() {
   const p = new URLSearchParams(location.search);
   if (p.has("error")) {
-    showBanner(t("bn_login_error") + p.get("error") + (p.get("detail") ? " (" + p.get("detail") + ")" : ""));
+    showBanner(t("bn_login_error") + p.get("error"));
     history.replaceState({}, "", location.pathname);
   }
 })();

@@ -34,4 +34,4 @@ EXPOSE 8000
 
 # Mit gunicorn starten (produktionstauglicher als app.run)
 # 2 Worker + Timeout 60s (OCR kann etwas dauern)
-CMD gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 60 app:app
+CMD gunicorn --bind 0.0.0.0:$PORT --worker-class gthread --workers 2 --threads 4 --timeout 60 app:app
