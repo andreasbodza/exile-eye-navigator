@@ -10,6 +10,13 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.47 (09.10.2026, Rate-Limit IP + Error-Set)
+- Gem-Info-Limit nutzt die echte Client-IP (ProxyFix), nicht den spoofbaren X-Forwarded-For-Anfang.
+- Login-Error-Whitelist ist ein Set, nicht ein Objekt.
+- Gem-Cache wird atomar geschrieben (tmp + replace).
+
+---
+
 ## v1.46 (09.10.2026, OCR-Crop + Login-Banner + Cache-Lock)
 - Thumbnail erst nach Auto-Crop (4K-Screenshots bleiben scharf genug).
 - Login-`?error=` nur noch bekannte Codes, kein freier Banner-Text.

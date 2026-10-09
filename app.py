@@ -27,6 +27,7 @@ from flask import (
     Flask, request, redirect, session,
     jsonify, send_from_directory, url_for
 )
+from werkzeug.middleware.proxy_fix import ProxyFix
 from dotenv import load_dotenv
 import zlib
 import re
@@ -45,6 +46,8 @@ from stats_dict import (
 load_dotenv()
 
 app = Flask(__name__)
+# Railway sitzt als 1 Proxy davor: echte Client-IP in request.remote_addr
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
 
 # --- Session-Cookie-Sicherheit (wichtig fuer gehostete HTTPS-Version) ---
 # In Produktion (HTTPS) sollten Cookies nur ueber HTTPS gehen.
@@ -85,7 +88,7 @@ CLIENT_ID    = os.getenv("POE_CLIENT_ID", "exileeyenavigator")
 REDIRECT_URI = os.getenv("POE_REDIRECT_URI", "http://localhost:8000/callback")
 REALM        = os.getenv("POE_REALM", "poe2")   # poe2 fuer Path of Exile 2!
 SCOPES       = "account:profile account:characters"
-APP_VERSION  = "1.46"
+APP_VERSION  = "1.47"
 CONTACT      = os.getenv("POE_CONTACT", "deine-mail@example.com")
 
 # WICHTIG: GGG schreibt diesen User-Agent vor:
@@ -251,7 +254,7 @@ def gem_name_from_icon(icon_url):
 GEM_INFO_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gem_cache.json")
 GEM_INFO_TTL_HIT  = 7 * 24 * 3600   # Treffer 7 Tage cachen
 GEM_INFO_TTL_MISS = 24 * 3600       # 404s 1 Tag cachen
-_GEM_UA = "ExileEyeNavigator/1.46 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
+_GEM_UA = "ExileEyeNavigator/1.47 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
 _gem_cache = None
 _gem_lock = threading.Lock()
 _gem_hits = {}  # ip -> [timestamps]
@@ -270,21 +273,6 @@ def _load_gem_cache():
         return _gem_cache
 
 
-def _save_gem_cache():
-    with _gem_lock:
-        if _gem_cache is None:
-            return
-        try:
-            blob = json.dumps(_gem_cache, ensure_ascii=False)
-        except (TypeError, ValueError, RuntimeError):
-            return
-    try:
-        with open(GEM_INFO_CACHE_FILE, "w", encoding="utf-8") as f:
-            f.write(blob)
-    except OSError:
-        pass
-
-
 def _gem_cache_store(key, entry):
     global _gem_cache
     with _gem_lock:
@@ -301,9 +289,11 @@ def _gem_cache_store(key, entry):
             blob = json.dumps(_gem_cache, ensure_ascii=False)
         except (TypeError, ValueError, RuntimeError):
             return
+    tmp = GEM_INFO_CACHE_FILE + ".tmp"
     try:
-        with open(GEM_INFO_CACHE_FILE, "w", encoding="utf-8") as f:
+        with open(tmp, "w", encoding="utf-8") as f:
             f.write(blob)
+        os.replace(tmp, GEM_INFO_CACHE_FILE)
     except OSError:
         pass
 
@@ -467,8 +457,8 @@ def api_gem_info():
         return jsonify({"found": False, "error": "missing name"}), 400
     if len(name) > 80 or not re.fullmatch(r"[A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9 '\-]{1,78}", name):
         return jsonify({"found": False, "error": "bad_name"}), 400
-    ip = (request.headers.get("X-Forwarded-For") or request.remote_addr or "").split(",")[0].strip()
-    if not _gem_rate_ok(ip or "unknown"):
+    ip = request.remote_addr or "unknown"
+    if not _gem_rate_ok(ip):
         return jsonify({"found": False, "error": "rate_limited"}), 429
     return jsonify(gem_info_lookup(name))
 
