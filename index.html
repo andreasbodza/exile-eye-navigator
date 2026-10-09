@@ -1392,7 +1392,7 @@
 
 <p class="disclaimer">This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
 <footer>
-  Exile Eye Navigator · <span id="appVersion">v1.45</span> · Made by Flatcap 🧢<br>
+  Exile Eye Navigator · <span id="appVersion">v1.46</span> · Made by Flatcap 🧢<br>
   <span style="display:inline-block;margin-top:8px">
     <a href="/impressum" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_impressum">Impressum</a> ·
     <a href="/datenschutz" style="color:var(--gold-soft);margin:0 6px" data-i18n="legal_privacy">Datenschutz</a> ·
@@ -1402,7 +1402,7 @@
 </footer>
 
 <script>
-const APP_VERSION = "v1.45";
+const APP_VERSION = "v1.46";
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
   if (v) v.textContent = APP_VERSION;
@@ -1807,10 +1807,19 @@ function showBanner(msg, type = "error") {
 }
 (function checkUrlError() {
   const p = new URLSearchParams(location.search);
-  if (p.has("error")) {
-    showBanner(t("bn_login_error") + p.get("error"));
-    history.replaceState({}, "", location.pathname);
+  if (!p.has("error")) return;
+  const allowed = {
+    token_request_failed:1, state_mismatch:1, missing_code_or_verifier:1,
+    access_denied:1, invalid_request:1, unauthorized_client:1,
+    unsupported_response_type:1, invalid_scope:1, server_error:1,
+    temporarily_unavailable:1, login_failed:1
+  };
+  let code = (p.get("error") || "").toLowerCase();
+  if (!/^[a-z0-9_]{1,40}$/.test(code) || (!allowed[code] && !/^token_\d{3}$/.test(code))) {
+    code = "login_failed";
   }
+  showBanner(t("bn_login_error") + code);
+  history.replaceState({}, "", location.pathname);
 })();
 
 function hideDemoBadge() {

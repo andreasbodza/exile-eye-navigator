@@ -10,6 +10,13 @@ Fehlt einer der beiden Bumps, sehen Nutzer evtl. weiter eine alte Version (Servi
 
 ---
 
+## v1.46 (09.10.2026, OCR-Crop + Login-Banner + Cache-Lock)
+- Thumbnail erst nach Auto-Crop (4K-Screenshots bleiben scharf genug).
+- Login-`?error=` nur noch bekannte Codes, kein freier Banner-Text.
+- Gem-Cache mit Lock (gthread), Gem-Info 20/min pro IP.
+
+---
+
 ## v1.45 (07.10.2026, Sicherheit + Kleinkram)
 - Maxroll-Import: nur noch `https://maxroll.gg` / `www.maxroll.gg`, Redirects host-geprüft (kein SSRF).
 - Uploads max 8 MB, Bilder auf 2500px, PoB-zlib auf 5 MB.

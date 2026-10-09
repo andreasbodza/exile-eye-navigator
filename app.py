@@ -19,6 +19,7 @@ import time
 import base64
 import hashlib
 import secrets
+import threading
 import urllib.parse
 
 import requests
@@ -84,7 +85,7 @@ CLIENT_ID    = os.getenv("POE_CLIENT_ID", "exileeyenavigator")
 REDIRECT_URI = os.getenv("POE_REDIRECT_URI", "http://localhost:8000/callback")
 REALM        = os.getenv("POE_REALM", "poe2")   # poe2 fuer Path of Exile 2!
 SCOPES       = "account:profile account:characters"
-APP_VERSION  = "1.45"
+APP_VERSION  = "1.46"
 CONTACT      = os.getenv("POE_CONTACT", "deine-mail@example.com")
 
 # WICHTIG: GGG schreibt diesen User-Agent vor:
@@ -250,26 +251,76 @@ def gem_name_from_icon(icon_url):
 GEM_INFO_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gem_cache.json")
 GEM_INFO_TTL_HIT  = 7 * 24 * 3600   # Treffer 7 Tage cachen
 GEM_INFO_TTL_MISS = 24 * 3600       # 404s 1 Tag cachen
-_GEM_UA = "ExileEyeNavigator/1.45 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
+_GEM_UA = "ExileEyeNavigator/1.46 (+https://exile-eye-navigator.up.railway.app; contact: andreas.bodza@gmail.com)"
 _gem_cache = None
+_gem_lock = threading.Lock()
+_gem_hits = {}  # ip -> [timestamps]
+_GEM_RATE = 20
+_GEM_WIN = 60.0
 
 
 def _load_gem_cache():
     global _gem_cache
-    if _gem_cache is None:
-        try:
-            _gem_cache = json.load(open(GEM_INFO_CACHE_FILE, encoding="utf-8"))
-        except (OSError, ValueError):
-            _gem_cache = {}
-    return _gem_cache
+    with _gem_lock:
+        if _gem_cache is None:
+            try:
+                _gem_cache = json.load(open(GEM_INFO_CACHE_FILE, encoding="utf-8"))
+            except (OSError, ValueError):
+                _gem_cache = {}
+        return _gem_cache
 
 
 def _save_gem_cache():
+    with _gem_lock:
+        if _gem_cache is None:
+            return
+        try:
+            blob = json.dumps(_gem_cache, ensure_ascii=False)
+        except (TypeError, ValueError, RuntimeError):
+            return
     try:
         with open(GEM_INFO_CACHE_FILE, "w", encoding="utf-8") as f:
-            json.dump(_gem_cache, f, ensure_ascii=False)
+            f.write(blob)
     except OSError:
         pass
+
+
+def _gem_cache_store(key, entry):
+    global _gem_cache
+    with _gem_lock:
+        if _gem_cache is None:
+            try:
+                _gem_cache = json.load(open(GEM_INFO_CACHE_FILE, encoding="utf-8"))
+            except (OSError, ValueError):
+                _gem_cache = {}
+        _gem_cache[key] = entry
+        if len(_gem_cache) > 2000:
+            for k in sorted(_gem_cache, key=lambda k: _gem_cache[k].get("ts", 0))[:400]:
+                _gem_cache.pop(k, None)
+        try:
+            blob = json.dumps(_gem_cache, ensure_ascii=False)
+        except (TypeError, ValueError, RuntimeError):
+            return
+    try:
+        with open(GEM_INFO_CACHE_FILE, "w", encoding="utf-8") as f:
+            f.write(blob)
+    except OSError:
+        pass
+
+
+def _gem_rate_ok(ip):
+    now = time.time()
+    with _gem_lock:
+        hits = [ts for ts in _gem_hits.get(ip, []) if now - ts < _GEM_WIN]
+        if len(hits) >= _GEM_RATE:
+            _gem_hits[ip] = hits
+            return False
+        hits.append(now)
+        _gem_hits[ip] = hits
+        if len(_gem_hits) > 4000:
+            for k in list(_gem_hits.keys())[:800]:
+                _gem_hits.pop(k, None)
+        return True
 
 
 _GEM_TIER_WORDS = {"one": "I", "two": "II", "three": "III",
@@ -404,11 +455,7 @@ def gem_info_lookup(name):
             }
             break
         time.sleep(0.2)
-    cache[key] = {"ts": now, "found": result["found"], "data": result}
-    if len(cache) > 2000:   # Cache nicht unendlich wachsen lassen
-        for k in sorted(cache, key=lambda k: cache[k].get("ts", 0))[:400]:
-            cache.pop(k, None)
-    _save_gem_cache()
+    _gem_cache_store(key, {"ts": now, "found": result["found"], "data": result})
     return result
 
 
@@ -420,6 +467,9 @@ def api_gem_info():
         return jsonify({"found": False, "error": "missing name"}), 400
     if len(name) > 80 or not re.fullmatch(r"[A-Za-zÀ-ÿ0-9][A-Za-zÀ-ÿ0-9 '\-]{1,78}", name):
         return jsonify({"found": False, "error": "bad_name"}), 400
+    ip = (request.headers.get("X-Forwarded-For") or request.remote_addr or "").split(",")[0].strip()
+    if not _gem_rate_ok(ip or "unknown"):
+        return jsonify({"found": False, "error": "rate_limited"}), 429
     return jsonify(gem_info_lookup(name))
 
 
@@ -523,7 +573,10 @@ def login():
 def callback():
     # Fehler von GGG direkt anzeigen
     if "error" in request.args:
-        return redirect(url_for("index") + f"?error={request.args.get('error')}")
+        err = (request.args.get("error") or "")
+        if not re.fullmatch(r"[a-z0-9_]{1,40}", err):
+            err = "access_denied"
+        return redirect(url_for("index") + "?error=" + urllib.parse.quote(err, safe=""))
 
     code = request.args.get("code")
     state = request.args.get("state")
@@ -1135,7 +1188,7 @@ def api_analyze():
         img = Image.open(file.stream)
         # EXIF-Rotation vom Handy korrigieren (sonst steht das Bild quer)
         img = ImageOps.exif_transpose(img)
-        img.thumbnail((2500, 2500))
+        img.thumbnail((4096, 4096))  # RAM-Schutz, Text noch lesbar fuer Crop
     except Exception as e:
         return jsonify({
             "error": "bild_unlesbar",
@@ -1151,6 +1204,7 @@ def api_analyze():
     cropped_flag = False
     if autocrop:
         img, cropped_flag = auto_crop_tooltip(img)
+    img.thumbnail((2500, 2500))
 
     # OCR-Sprache je nach Spiel-Sprache: "de", "en" oder "auto" (=beide)
     game_lang = request.form.get("game_lang", "auto")
